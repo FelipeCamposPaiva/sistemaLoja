@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @Log4j2
-public class EorSpringApplication {
+public class LojasSpringApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EorSpringApplication.class, args);
+		SpringApplication.run(LojasSpringApplication.class, args);
 	}
 //
 //        @Bean
