@@ -88,7 +88,7 @@ public class CadProdutos implements Serializable {
     }
 
     public CadProdutos(long codigo, String codProdManual, String descricao, String un, double preco, String grupoDeMaterias, String grupoDeQuimico, long estoqueMinimo, long ml,
-            double precoDeVenda, double porcentagem, String referencia, String fabricante, double precoAprazo, long estoqueProduto, boolean foraDeUso, double icms, double ipi,long garantia, String fornecedorProduto,
+            double precoDeVenda, double porcentagem, String referencia, String fabricante, double precoAprazo, long estoqueProduto, boolean foraDeUso, double icms, double ipi, long garantia, String fornecedorProduto,
             String setor, Blob fotoProduto, String obs, Timestamp dataCadastro, Timestamp dataValidade, boolean grade, boolean sel, boolean verificactrlest, Timestamp atualizadoEm, boolean tblPrecos) {
 
         this.codigo = codigo;

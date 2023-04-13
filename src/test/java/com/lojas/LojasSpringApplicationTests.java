@@ -2,7 +2,7 @@ package com.lojas;
 
 import com.lojas.modelo.CadProdutos;
 import com.lojas.modelo.CadProdutosRepositorio;
-import com.lojas.modelo.LeitorTabela;
+import com.lojas.modelo.auxiliar.LeitorTabela;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,10 @@ class LojasSpringApplicationTests {
 
     @Test
     void contextLoads() {
-//        new LeitorTabela();
-
-//        for (CadProdutos cp : LeitorTabela.lista) {
-//            cadProdutosRepositorio.save(cp);
-//        }
+        new LeitorTabela();
+        for (CadProdutos cp : LeitorTabela.lista) {
+            cadProdutosRepositorio.save(cp);
+        }
     }
 
 }

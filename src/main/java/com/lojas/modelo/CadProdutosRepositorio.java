@@ -32,7 +32,7 @@ public class CadProdutosRepositorio implements CrudRepository< CadProdutos, Stri
                     + " precoDeVenda, porcentagem, referencia, fabricante, precoAprazo, estoqueProduto, foraDeUso, icms, ipi, garantia, fornecedorProduto,"
                     + " setor, fotoProduto, obs, dataCadastro, dataValidade, grade, sel, verificactrlest, atualizadoEm, tblPrecos) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     entity.getCodigo(), entity.getCodProdManual(), entity.getDescricao(), entity.getUn(), entity.getPreco(), entity.getGrupoDeMaterias(), entity.getGrupoDeQuimico(), entity.getEstoqueMinimo(), entity.getMl(),
-                    entity.getPrecoDeVenda(), entity.getPorcentagem(), entity.getReferencia(), entity.getFabricante(), entity.getPrecoAprazo(), entity.getEstoqueProduto(), entity.isForaDeUso(), entity.getIcms(),entity.getIpi(), entity.getGarantia(), entity.getFornecedorProduto(),
+                    entity.getPrecoDeVenda(), entity.getPorcentagem(), entity.getReferencia(), entity.getFabricante(), entity.getPrecoAprazo(), entity.getEstoqueProduto(), entity.isForaDeUso(), entity.getIcms(), entity.getIpi(), entity.getGarantia(), entity.getFornecedorProduto(),
                     entity.getSetor(), entity.getFotoProduto(), entity.getObs(), entity.getDataCadastro(), entity.getDataValidade(), entity.isGrade(), entity.isSel(), entity.isVerificactrlest(), entity.getAtualizadoEm(), entity.isTblPrecos());
         } catch (DataIntegrityViolationException e) {
             try {
@@ -70,7 +70,7 @@ public class CadProdutosRepositorio implements CrudRepository< CadProdutos, Stri
                         + "tblPrecos = ? "
                         + "where codigo = ? ",
                         entity.getCodProdManual(), entity.getDescricao(), entity.getUn(), entity.getPreco(), entity.getGrupoDeMaterias(), entity.getGrupoDeQuimico(), entity.getEstoqueMinimo(), entity.getMl(),
-                        entity.getPrecoDeVenda(), entity.getPorcentagem(), entity.getReferencia(), entity.getFabricante(), entity.getPrecoAprazo(), entity.getEstoqueProduto(), entity.isForaDeUso(), entity.getIcms(),entity.getIpi(), entity.getGarantia(), entity.getFornecedorProduto(),
+                        entity.getPrecoDeVenda(), entity.getPorcentagem(), entity.getReferencia(), entity.getFabricante(), entity.getPrecoAprazo(), entity.getEstoqueProduto(), entity.isForaDeUso(), entity.getIcms(), entity.getIpi(), entity.getGarantia(), entity.getFornecedorProduto(),
                         entity.getSetor(), entity.getFotoProduto(), entity.getObs(), entity.getDataCadastro(), entity.getDataValidade(), entity.isGrade(), entity.isSel(), entity.isVerificactrlest(), entity.getAtualizadoEm(), entity.isTblPrecos(), entity.getCodigo());
             } catch (Exception ee) {
                 log.error("Erro em inserir e atualizar " + entity.getCodigo());
@@ -86,9 +86,10 @@ public class CadProdutosRepositorio implements CrudRepository< CadProdutos, Stri
     }
 
     @Override
-    public Optional<CadProdutos> findById(String id
-    ) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Optional<CadProdutos> findById(String codigo) {
+        CadProdutos cp = jdbc.queryForObject("select * from cad_produtos where (codigo like ?) ", this::mapeiaLinha, "%" + codigo.trim() + "%");
+        Optional<CadProdutos> oCp = Optional.of(cp);
+        return oCp;
     }
 
     @Override
