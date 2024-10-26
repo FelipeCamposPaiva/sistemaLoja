@@ -4,7 +4,6 @@ package com.lojas.controle;
 import com.lojas.modelo.Vendas;
 import com.lojas.modelo.repositorio.IVendas;
 import java.util.List;
-import javax.servlet.ServletContext;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
