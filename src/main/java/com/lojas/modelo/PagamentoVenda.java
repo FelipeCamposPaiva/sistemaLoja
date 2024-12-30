@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import lombok.Getter;
@@ -13,6 +11,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Setter
 @Getter
+@Table(name = "pagamento_venda")
+
 public class PagamentoVenda implements Serializable {
     @Column(name = "id")
     @Id
@@ -37,16 +37,16 @@ public class PagamentoVenda implements Serializable {
     private String nome;
 
     @Column(name = "taxa")
-    private String taxa;
+    private Float taxa;
 
     @Column(name = "parcelas")
-    private String parcelas;
+    private Float parcelas;
 
     @Column(name = "valor_dinheiro")
     private double valorDinheiro;
 
     @Column(name = "troco")
-    private String troco;
+    private Float troco;
 
     @Column(name = "valor")
     private double valor;
@@ -55,19 +55,19 @@ public class PagamentoVenda implements Serializable {
     private Timestamp datahora;
 
     @Column(name = "requisicao_mp")
-    private boolean requisicaoMp;
+    private Float requisicaoMp;
 
     @Column(name = "status_mp")
-    private String statusMp;
+    private Float statusMp;
 
     @Column(name = "pagamento_mp")
-    private String pagamentoMp;
+    private Float pagamentoMp;
 
     @Column(name = "reembolso_mp")
-    private String reembolsoMp;
+    private Float reembolsoMp;
 
     @Column(name = "ativo")
-    private boolean ativo;
+    private Float ativo;
 
     @Column(name = "pagamento_venda_id")
     private Long pagamentoVendaId;
@@ -76,10 +76,10 @@ public class PagamentoVenda implements Serializable {
     private String valesCodigo;
 
     @Column(name = "carne")
-    private String carne;
+    private Float carne;
 
     @Column(name = "parcelavel")
-    private String parcelavel;
+    private Float parcelavel;
 
     @Column(name = "forma_pagamentos_nome")
     private String formaPagamentosNome;
@@ -88,10 +88,10 @@ public class PagamentoVenda implements Serializable {
     private Timestamp dataAberturaCaixa;
 
     @Column(name = "usuarios_caixa")
-    private String usuariosCaixa;
+    private Float usuariosCaixa;
 
     @Column(name = "vale")
-    private String vale;
+    private Float vale;
 
     @Column(name = "vendas_codigo")
     private String vendasCodigo;
@@ -100,15 +100,15 @@ public class PagamentoVenda implements Serializable {
     private Long contasCaixaGerencialId;
 
     @Column(name = "numero_os")
-    private String numeroOs;
+    private Float numeroOs;
 
     @Column(name = "is_mercadopago_credito")
-    private boolean isMercadopagoCredito;
+    private Float isMercadopagoCredito;
 
     @Column(name = "is_mercadopago_debito")
-    private boolean isMercadopagoDebito;
+    private Float isMercadopagoDebito;
 
     @Column(name = "is_mercadopago_pix")
-    private boolean isMercadopagoPix;
+    private Float isMercadopagoPix;
 
 }

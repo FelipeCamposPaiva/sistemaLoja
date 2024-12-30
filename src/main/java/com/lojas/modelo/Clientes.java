@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import lombok.Getter;
@@ -40,7 +38,7 @@ public class Clientes implements Serializable {
     private Timestamp dataEmissao;
 
     @Column(name = "emissor")
-    private boolean emissor;
+    private String emissor;
 
     @Column(name = "celular")
     private String celular;

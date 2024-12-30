@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gerenciamento de Clientes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="clientes.css">
+        <link rel="stylesheet" href="../styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>Clientes</h1>
+            <p>Gerencie os dados dos clientes cadastrados</p>
+        </header>
+        <main>
+            <section class="search-actions">
+                <input id="inputId" type="text" placeholder="Digite o ID (opcional)">
+                <button onclick="fetchClientes()">Buscar Cliente</button>
+                <button onclick="listarClientes()">Listar Todos</button>
+            </section>
+            <section class="results" id="results">
+                <p>Nenhum dado para exibir.</p>
+            </section>
+        </main>
+        <script>
+            async function fetchClientes() {
+                const id = document.getElementById("inputId").value.trim();
+                const url = id ? `http://localhost:8383/Lojas/clientes/${id}` : `http://localhost:8383/Lojas/clientes`;
+                const results = document.getElementById("results");
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        results.innerHTML = generateTable(data);
+                    } else {
+                        results.innerHTML = generateTable([data]);
+                    }
+                } catch (error) {
+                    results.innerHTML = `<p style="color:red;">Erro ao buscar dados: ${error.message}</p>`;
+                }
+            }
+
+            function listarClientes() {
+                fetchClientes();
+            }
+
+            function generateTable(data) {
+                if (data.length === 0) {
+                    return '<p>Nenhum cliente encontrado.</p>';
+                }
+
+                let table = '<table><thead><tr>';
+                Object.keys(data[0]).forEach(key => {
+                    table += `<th>${key}</th>`;
+                });
+                table += '</tr></thead><tbody>';
+
+                data.forEach(item => {
+                    table += '<tr>';
+                    Object.values(item).forEach(value => {
+                        table += `<td>${value !== null ? value : ''}</td>`;
+                    });
+                    table += '</tr>';
+                });
+
+                table += '</tbody></table>';
+                return table;
+            }
+        </script>
+    </body>
+</html>

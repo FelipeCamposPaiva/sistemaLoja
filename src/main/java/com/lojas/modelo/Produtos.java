@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import lombok.Getter;
@@ -25,25 +23,25 @@ public class Produtos implements Serializable {
     private String descricao;
 
     @Column(name = "unid")
-    private Long unid;
+    private String unid;
 
     @Column(name = "preco_compra")
-    private double precoCompra;
+    private float precoCompra;
 
     @Column(name = "margem_lucro")
-    private String margemLucro;
+    private float margemLucro;
 
     @Column(name = "preco_venda")
-    private double precoVenda;
+    private float precoVenda;
 
     @Column(name = "preco_venda_2")
-    private double precoVenda2;
+    private float precoVenda2;
 
     @Column(name = "estoque")
-    private String estoque;
+    private float estoque;
 
     @Column(name = "estoque_minimo")
-    private String estoqueMinimo;
+    private float estoqueMinimo;
 
     @Column(name = "grupo")
     private String grupo;
@@ -55,7 +53,7 @@ public class Produtos implements Serializable {
     private String marca;
 
     @Column(name = "comissao")
-    private boolean comissao;
+    private float comissao;
 
     @Column(name = "data_validade")
     private Timestamp dataValidade;
@@ -64,7 +62,7 @@ public class Produtos implements Serializable {
     private String observacoes;
 
     @Column(name = "controle_estoque")
-    private String controleEstoque;
+    private float controleEstoque;
 
     @Column(name = "localizacao")
     private String localizacao;

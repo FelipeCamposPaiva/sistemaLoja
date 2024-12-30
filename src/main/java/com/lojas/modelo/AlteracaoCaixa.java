@@ -1,10 +1,6 @@
 package com.lojas.modelo;
 
-
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +10,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Setter
 @Getter
+@Table(name = "alteracao_caixa")
+
 public class AlteracaoCaixa implements Serializable {
     @Column(name = "id")
     @Id
@@ -26,37 +24,37 @@ public class AlteracaoCaixa implements Serializable {
     private Long contasCaixaGerencialId;
 
     @Column(name = "nome")
-    private String nome;
+    private Float nome;
 
     @Column(name = "dinheiro")
-    private String dinheiro;
+    private Float dinheiro;
 
     @Column(name = "carne")
     private String carne;
 
     @Column(name = "vale")
-    private String vale;
+    private Float vale;
 
     @Column(name = "imagem")
     private String imagem;
 
     @Column(name = "parcelavel")
-    private String parcelavel;
+    private Float parcelavel;
 
     @Column(name = "taxa")
-    private String taxa;
+    private Float taxa;
 
     @Column(name = "compra")
-    private String compra;
+    private Float compra;
 
     @Column(name = "venda")
-    private String venda;
+    private Float venda;
 
     @Column(name = "conta")
     private String conta;
 
     @Column(name = "catalogo")
-    private String catalogo;
+    private Float catalogo;
 
     @Column(name = "paga_taxa")
     private String pagaTaxa;
@@ -65,22 +63,22 @@ public class AlteracaoCaixa implements Serializable {
     private String pix;
 
     @Column(name = "codigo_pix")
-    private String codigoPix;
+    private Float codigoPix;
 
     @Column(name = "tipo_chave")
     private String tipoChave;
 
     @Column(name = "is_mercadopago_credito")
-    private boolean isMercadopagoCredito;
+    private Float isMercadopagoCredito;
 
     @Column(name = "is_mercadopago_debito")
-    private boolean isMercadopagoDebito;
+    private Float isMercadopagoDebito;
 
     @Column(name = "is_mercadopago_pix")
-    private boolean isMercadopagoPix;
+    private Float isMercadopagoPix;
 
     @Column(name = "ativo")
-    private boolean ativo;
+    private Float ativo;
 
     @Column(name = "contas_caixa_gerencial_nome")
     private String contasCaixaGerencialNome;

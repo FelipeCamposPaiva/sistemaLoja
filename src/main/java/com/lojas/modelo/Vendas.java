@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import lombok.Getter;

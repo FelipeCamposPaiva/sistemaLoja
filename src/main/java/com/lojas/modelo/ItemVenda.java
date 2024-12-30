@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +10,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Setter
 @Getter
+@Table(name = "item_venda")
+
 public class ItemVenda implements Serializable {
     @Column(name = "id")
     @Id
@@ -30,7 +30,7 @@ public class ItemVenda implements Serializable {
     private Long usuariosId;
 
     @Column(name = "quantidade")
-    private String quantidade;
+    private Float quantidade;
 
     @Column(name = "valor_compra")
     private double valorCompra;
@@ -42,7 +42,7 @@ public class ItemVenda implements Serializable {
     private double valorPago;
 
     @Column(name = "valor_comissao")
-    private boolean valorComissao;
+    private Float valorComissao;
 
     @Column(name = "devolvido")
     private String devolvido;
@@ -57,10 +57,10 @@ public class ItemVenda implements Serializable {
     private String unidade;
 
     @Column(name = "estoque_atual")
-    private String estoqueAtual;
+    private Float estoqueAtual;
 
     @Column(name = "is_composto")
-    private boolean isComposto;
+    private String isComposto;
 
     @Column(name = "pai_nome")
     private String paiNome;

@@ -1,8 +1,6 @@
 package com.lojas.modelo;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import lombok.Getter;
@@ -19,13 +17,13 @@ public class Caixas implements Serializable {
     private long id;
 
     @Column(name = "usuarios_id")
-    private long usuariosId;
+    private Long usuariosId;
 
     @Column(name = "empresas_id")
-    private long empresasId;
+    private Long empresasId;
 
     @Column(name = "usuarios_id_fechamento")
-    private String usuariosIdFechamento;
+    private Long usuariosIdFechamento;
 
     @Column(name = "data_abertura")
     private Timestamp dataAbertura;
@@ -34,25 +32,25 @@ public class Caixas implements Serializable {
     private Timestamp dataFechamento;
 
     @Column(name = "valor_abertura")
-    private double valorAbertura;
+    private Double valorAbertura;
 
     @Column(name = "valor_fechamento")
-    private double valorFechamento;
+    private Double valorFechamento;
 
     @Column(name = "inconsistencia")
-    private boolean inconsistencia;
+    private Float inconsistencia;
 
     @Column(name = "abertura_conta_caixa_gerencial_id")
-    private long aberturaContaCaixaGerencialId;
+    private Float aberturaContaCaixaGerencialId;
 
     @Column(name = "fechamento_conta_caixa_gerencial_id")
-    private long fechamentoContaCaixaGerencialId;
+    private Float fechamentoContaCaixaGerencialId;
 
     @Column(name = "movimentado")
-    private String movimentado;
+    private Long movimentado;
 
     @Column(name = "ativo")
-    private boolean ativo;
+    private Long ativo;
 
     @Column(name = "usuarios_nome")
     private String usuariosNome;
