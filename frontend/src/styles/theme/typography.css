@@ -1,0 +1,47 @@
+h1{
+    font-size:34px;
+    font-weight:700;
+}
+
+h2{
+    font-size:28px;
+    font-weight:700;
+}
+
+h3{
+    font-size:22px;
+    font-weight:600;
+}
+
+h4{
+    font-size:18px;
+    font-weight:600;
+}
+
+p{
+    line-height:1.6;
+}
+
+small{
+    color:var(--text-secondary);
+}
+
+.text-center{
+    text-align:center;
+}
+
+.text-right{
+    text-align:right;
+}
+
+.text-left{
+    text-align:left;
+}
+
+.fw-bold{
+    font-weight:700;
+}
+
+.fw-semibold{
+    font-weight:600;
+}

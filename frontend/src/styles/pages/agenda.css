@@ -1,0 +1,64 @@
+.agenda-page{
+    width:100%;
+}
+
+.agenda-topo{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.agenda-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.navegacao,
+.visualizacao{
+    display:flex;
+    gap:10px;
+}
+
+.agenda-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+}
+
+.cabecalho-dia{
+    background:var(--card);
+    padding:15px;
+    text-align:center;
+    font-weight:600;
+}
+
+.dia{
+    min-height:150px;
+    padding:10px;
+    border-top:1px solid var(--border);
+    border-right:1px solid var(--border);
+}
+
+.numero-dia{
+    float:right;
+    font-size:14px;
+}
+
+.evento{
+    margin-top:30px;
+}
+
+@media(max-width:1200px){
+
+    .agenda-grid{
+
+        min-width:1200px;
+
+    }
+
+}

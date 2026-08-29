@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="ERP">
+  <rect width="320" height="200" rx="20" fill="#fff3f8"/>
+  <rect x="28" y="36" width="120" height="128" rx="12" fill="#ff2f92"/>
+  <rect x="164" y="36" width="128" height="56" rx="12" fill="#ffd32a"/>
+  <rect x="164" y="108" width="128" height="56" rx="12" fill="#57e3b4"/>
+</svg>

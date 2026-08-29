@@ -1,0 +1,119 @@
+/*==================================================
+  FOOTER
+==================================================*/
+
+.erp-footer{
+
+    height:48px;
+
+    background:#ffffff;
+
+    border-top:1px solid #e5e7eb;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 22px;
+
+    font-size:13px;
+
+    color:#64748b;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+}
+
+/*==================================================
+  COLUNAS
+==================================================*/
+
+.footer-left,
+
+.footer-center,
+
+.footer-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.footer-left strong{
+
+    color:#1e293b;
+
+}
+
+.footer-right strong{
+
+    color:#1e293b;
+
+}
+
+/*==================================================
+  STATUS
+==================================================*/
+
+.footer-status{
+
+    font-weight:600;
+
+}
+
+.footer-status.online{
+
+    color:#16a34a;
+
+}
+
+/*==================================================
+  RESPONSIVO
+==================================================*/
+
+@media(max-width:992px){
+
+    .erp-footer{
+
+        height:auto;
+
+        padding:12px;
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .footer-left,
+
+    .footer-center,
+
+    .footer-right{
+
+        width:100%;
+
+        justify-content:flex-start;
+
+        flex-wrap:wrap;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .erp-footer{
+
+        font-size:12px;
+
+    }
+
+}

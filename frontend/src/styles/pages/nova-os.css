@@ -1,0 +1,31 @@
+.nova-os-page{
+    width:100%;
+    max-width:1400px;
+}
+
+.nova-os-form{
+    width:100%;
+}
+
+.nova-os-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.nova-os-acoes{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:25px;
+}
+
+@media(max-width:900px){
+
+    .nova-os-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}

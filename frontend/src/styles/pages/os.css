@@ -1,0 +1,38 @@
+.os-page{
+    width:100%;
+}
+
+.os-topo{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.os-filtros{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.os-acoes{
+    display:flex;
+    gap:10px;
+}
+
+.status-os{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+
+@media(max-width:768px){
+
+    .os-topo{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+}

@@ -1,0 +1,446 @@
+-- ERP Tem de Tudo — schema de referência (núcleo operacional)
+-- Extraído do MySQL 8.0.45 / temdetudo_db em 2026-08-29
+-- CREATE TABLE IF NOT EXISTS: seguro em banco já existente.
+-- Sem senhas. Após criar o DB vazio, aplicar V20260829__indexes_views.sql
+-- Documentação EER: docs/eer/schema-eer.md
+
+CREATE DATABASE IF NOT EXISTS temdetudo_db
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE temdetudo_db;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(150) NOT NULL,
+  usuario VARCHAR(50) DEFAULT NULL,
+  email VARCHAR(150) NOT NULL,
+  senha VARCHAR(255) NOT NULL,
+  perfil ENUM('ADMIN','GERENTE','FUNCIONARIO') DEFAULT 'FUNCIONARIO',
+  ativo TINYINT(1) DEFAULT 1,
+  ultimo_login DATETIME DEFAULT NULL,
+  tentativas_login INT NOT NULL DEFAULT 0,
+  bloqueado TINYINT(1) NOT NULL DEFAULT 0,
+  criado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY email (email),
+  UNIQUE KEY usuario (usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS perfis (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(100) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS categorias (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(100) DEFAULT NULL,
+  descricao VARCHAR(255) DEFAULT NULL,
+  ativo TINYINT(1) DEFAULT 1,
+  criado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS marcas (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(100) DEFAULT NULL,
+  fabricante VARCHAR(255) DEFAULT NULL,
+  descricao TEXT,
+  logo VARCHAR(255) DEFAULT NULL,
+  site VARCHAR(255) DEFAULT NULL,
+  email VARCHAR(150) DEFAULT NULL,
+  telefone VARCHAR(30) DEFAULT NULL,
+  ativo TINYINT(1) DEFAULT 1,
+  criado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS locais (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(100) NOT NULL,
+  sigla VARCHAR(10) NOT NULL,
+  tipo ENUM('LOJA','DEPOSITO','PRODUCAO') NOT NULL,
+  ativo TINYINT DEFAULT 1,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS localizacoes (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  codigo VARCHAR(50) DEFAULT NULL,
+  descricao VARCHAR(255) DEFAULT NULL,
+  local_id BIGINT DEFAULT NULL,
+  ativo TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS clientes (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(150) DEFAULT NULL,
+  cpf_cnpj VARCHAR(20) DEFAULT NULL,
+  telefone VARCHAR(20) DEFAULT NULL,
+  email VARCHAR(150) DEFAULT NULL,
+  endereco TEXT,
+  data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+  tipo ENUM('FISICA','JURIDICA') DEFAULT 'FISICA',
+  nome_fantasia VARCHAR(255) DEFAULT NULL,
+  cidade VARCHAR(100) DEFAULT NULL,
+  estado VARCHAR(2) DEFAULT NULL,
+  cep VARCHAR(10) DEFAULT NULL,
+  limite_credito DECIMAL(10,2) DEFAULT 0.00,
+  observacoes TEXT,
+  ativo TINYINT DEFAULT 1,
+  tiny_id INT DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS fornecedores (
+  id INT NOT NULL AUTO_INCREMENT,
+  razao_social VARCHAR(255) DEFAULT NULL,
+  nome_fantasia VARCHAR(255) DEFAULT NULL,
+  cnpj VARCHAR(20) DEFAULT NULL,
+  inscricao_estadual VARCHAR(30) DEFAULT NULL,
+  telefone VARCHAR(20) DEFAULT NULL,
+  whatsapp VARCHAR(20) DEFAULT NULL,
+  email VARCHAR(150) DEFAULT NULL,
+  contato VARCHAR(150) DEFAULT NULL,
+  observacoes TEXT,
+  ativo TINYINT DEFAULT 1,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS contatos (
+  id INT NOT NULL AUTO_INCREMENT,
+  tipo VARCHAR(30) DEFAULT NULL,
+  nome VARCHAR(150) DEFAULT NULL,
+  fantasia VARCHAR(150) DEFAULT NULL,
+  cpf_cnpj VARCHAR(20) DEFAULT NULL,
+  telefone VARCHAR(30) DEFAULT NULL,
+  email VARCHAR(150) DEFAULT NULL,
+  cidade VARCHAR(100) DEFAULT NULL,
+  criado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS produtos (
+  id INT NOT NULL AUTO_INCREMENT,
+  sku VARCHAR(50) DEFAULT NULL,
+  codigo_barras VARCHAR(50) DEFAULT NULL,
+  nome VARCHAR(255) DEFAULT NULL,
+  categoria VARCHAR(100) DEFAULT NULL,
+  unidade VARCHAR(10) DEFAULT NULL,
+  custo DECIMAL(10,2) DEFAULT NULL,
+  preco DECIMAL(10,2) DEFAULT NULL,
+  estoque DECIMAL(10,2) DEFAULT 0.00,
+  criado_em TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  local_id INT DEFAULT NULL,
+  marca_id INT DEFAULT NULL,
+  estoque_minimo DECIMAL(10,2) DEFAULT 0.00,
+  peso DECIMAL(10,3) DEFAULT NULL,
+  ativo TINYINT DEFAULT 1,
+  observacoes TEXT,
+  estoque_maximo DECIMAL(15,3) DEFAULT NULL,
+  localizacao VARCHAR(100) DEFAULT NULL,
+  fornecedor_id BIGINT DEFAULT NULL,
+  custo_compra DECIMAL(15,2) DEFAULT NULL,
+  custo_medio DECIMAL(15,2) DEFAULT NULL,
+  preco_atacado DECIMAL(15,2) DEFAULT NULL,
+  ncm VARCHAR(20) DEFAULT NULL,
+  cest VARCHAR(20) DEFAULT NULL,
+  produto_producao TINYINT(1) DEFAULT 0,
+  consome_estoque TINYINT(1) DEFAULT 1,
+  imagem VARCHAR(500) DEFAULT NULL,
+  descricao TEXT,
+  tipo_produto VARCHAR(50) DEFAULT NULL,
+  controla_lote TINYINT(1) DEFAULT 0,
+  controla_validade TINYINT(1) DEFAULT 0,
+  dias_validade INT DEFAULT NULL,
+  fabricante VARCHAR(255) DEFAULT NULL,
+  referencia_fabricante VARCHAR(100) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS estoque (
+  id INT NOT NULL AUTO_INCREMENT,
+  produto_id INT NOT NULL,
+  local_id INT NOT NULL,
+  quantidade DECIMAL(10,2) DEFAULT 0.00,
+  PRIMARY KEY (id),
+  KEY produto_id (produto_id),
+  KEY local_id (local_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS estoque_movimentacao (
+  id INT NOT NULL AUTO_INCREMENT,
+  produto_id INT NOT NULL,
+  local_origem INT DEFAULT NULL,
+  local_destino INT DEFAULT NULL,
+  tipo ENUM('ENTRADA','SAIDA','TRANSFERENCIA','PRODUCAO','PERDA') DEFAULT NULL,
+  quantidade DECIMAL(10,2) DEFAULT NULL,
+  observacao TEXT,
+  usuario_id INT DEFAULT NULL,
+  data_movimento DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS inventarios (
+  id INT NOT NULL AUTO_INCREMENT,
+  local_id INT DEFAULT NULL,
+  data_inventario DATETIME DEFAULT NULL,
+  usuario_id INT DEFAULT NULL,
+  observacao TEXT,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS inventario_itens (
+  id INT NOT NULL AUTO_INCREMENT,
+  inventario_id INT DEFAULT NULL,
+  produto_id INT DEFAULT NULL,
+  quantidade_sistema DECIMAL(10,2) DEFAULT NULL,
+  quantidade_contada DECIMAL(10,2) DEFAULT NULL,
+  diferenca DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ordens_compra (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  fornecedor_id BIGINT DEFAULT NULL,
+  data_emissao DATETIME DEFAULT NULL,
+  previsao_entrega DATETIME DEFAULT NULL,
+  status VARCHAR(30) DEFAULT NULL,
+  observacao TEXT,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ordem_compra_itens (
+  id INT NOT NULL AUTO_INCREMENT,
+  ordem_id INT DEFAULT NULL,
+  produto_id INT DEFAULT NULL,
+  quantidade DECIMAL(10,2) DEFAULT NULL,
+  valor_unitario DECIMAL(10,2) DEFAULT NULL,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS notas_entrada (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  numero_nf VARCHAR(50) DEFAULT NULL,
+  fornecedor_id BIGINT DEFAULT NULL,
+  ordem_compra_id BIGINT DEFAULT NULL,
+  data_emissao DATETIME DEFAULT NULL,
+  data_entrada DATETIME DEFAULT NULL,
+  valor_produtos DECIMAL(10,2) DEFAULT NULL,
+  valor_frete DECIMAL(10,2) DEFAULT NULL,
+  valor_desconto DECIMAL(10,2) DEFAULT NULL,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  observacao TEXT,
+  status VARCHAR(20) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS notas_entrada_itens (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  nota_entrada_id BIGINT NOT NULL,
+  produto_id BIGINT NOT NULL,
+  quantidade DECIMAL(15,3) DEFAULT NULL,
+  valor_unitario DECIMAL(15,2) DEFAULT NULL,
+  valor_total DECIMAL(15,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS caixa (
+  id INT NOT NULL AUTO_INCREMENT,
+  tipo VARCHAR(20) DEFAULT NULL,
+  descricao TEXT,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  origem VARCHAR(50) DEFAULT NULL,
+  referencia_id BIGINT DEFAULT NULL,
+  data_movimento DATETIME DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS contas_pagar (
+  id INT NOT NULL AUTO_INCREMENT,
+  fornecedor_id INT DEFAULT NULL,
+  nota_entrada_id BIGINT DEFAULT NULL,
+  observacao TEXT,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  vencimento DATE DEFAULT NULL,
+  data_pagamento DATE DEFAULT NULL,
+  status VARCHAR(30) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_fornecedor (fornecedor_id),
+  KEY idx_nota (nota_entrada_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS contas_receber (
+  id INT NOT NULL AUTO_INCREMENT,
+  cliente_id INT DEFAULT NULL,
+  descricao TEXT,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  vencimento DATE DEFAULT NULL,
+  data_recebimento DATE DEFAULT NULL,
+  status VARCHAR(30) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_cliente (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS os_status (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ordens_servico (
+  id INT NOT NULL AUTO_INCREMENT,
+  numero INT DEFAULT NULL,
+  cliente_id INT DEFAULT NULL,
+  descricao TEXT,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  status VARCHAR(30) DEFAULT NULL,
+  data_abertura DATE DEFAULT NULL,
+  data_previsao DATE DEFAULT NULL,
+  data_conclusao DATE DEFAULT NULL,
+  telefone VARCHAR(30) DEFAULT NULL,
+  whatsapp VARCHAR(30) DEFAULT NULL,
+  categoria VARCHAR(100) DEFAULT NULL,
+  forma_pagamento VARCHAR(50) DEFAULT NULL,
+  status_id INT DEFAULT NULL,
+  responsavel VARCHAR(100) DEFAULT NULL,
+  local_id INT DEFAULT NULL,
+  prioridade ENUM('HIGH','MEDIA','BAIXA') DEFAULT 'MEDIA',
+  observacoes TEXT,
+  arquivo_arte VARCHAR(255) DEFAULT NULL,
+  data_entrega DATETIME DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY cliente_id (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS os_consumo (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  os_id BIGINT DEFAULT NULL,
+  produto_id BIGINT DEFAULT NULL,
+  quantidade DECIMAL(15,4) DEFAULT NULL,
+  data_consumo DATETIME DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS os_itens (
+  id INT NOT NULL AUTO_INCREMENT,
+  os_id INT DEFAULT NULL,
+  produto VARCHAR(150) DEFAULT NULL,
+  quantidade DECIMAL(10,2) DEFAULT NULL,
+  valor_unitario DECIMAL(10,2) DEFAULT NULL,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS os_historico (
+  id INT NOT NULL AUTO_INCREMENT,
+  os_id INT NOT NULL,
+  usuario_id INT DEFAULT NULL,
+  status_anterior VARCHAR(50) DEFAULT NULL,
+  status_novo VARCHAR(50) DEFAULT NULL,
+  observacao TEXT,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS os_arquivos (
+  id INT NOT NULL AUTO_INCREMENT,
+  os_id INT NOT NULL,
+  nome_arquivo VARCHAR(255) DEFAULT NULL,
+  caminho_arquivo VARCHAR(500) DEFAULT NULL,
+  tipo ENUM('ARTE','APROVACAO','IMPRESSAO','ENTREGA') DEFAULT NULL,
+  enviado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS producao (
+  id INT NOT NULL AUTO_INCREMENT,
+  os_id INT DEFAULT NULL,
+  cliente VARCHAR(255) DEFAULT NULL,
+  produto VARCHAR(255) DEFAULT NULL,
+  quantidade INT DEFAULT NULL,
+  data_entrega DATE DEFAULT NULL,
+  prioridade VARCHAR(20) DEFAULT NULL,
+  responsavel VARCHAR(150) DEFAULT NULL,
+  etapa VARCHAR(100) DEFAULT NULL,
+  status VARCHAR(50) DEFAULT NULL,
+  inicio DATETIME DEFAULT NULL,
+  termino DATETIME DEFAULT NULL,
+  observacao TEXT,
+  criado_em DATETIME DEFAULT NULL,
+  local_id INT DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_producao_status (status),
+  KEY idx_producao_os (os_id),
+  KEY idx_producao_entrega (data_entrega)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS agenda (
+  id INT NOT NULL AUTO_INCREMENT,
+  titulo VARCHAR(200) DEFAULT NULL,
+  descricao TEXT,
+  data_inicio DATETIME DEFAULT NULL,
+  data_fim DATETIME DEFAULT NULL,
+  usuario_id INT DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS agenda_eventos (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  titulo VARCHAR(200) DEFAULT NULL,
+  tipo VARCHAR(50) DEFAULT NULL,
+  data_evento DATE DEFAULT NULL,
+  descricao VARCHAR(1000) DEFAULT NULL,
+  cor VARCHAR(30) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS orcamentos (
+  id INT NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(20) DEFAULT NULL,
+  cliente_id INT DEFAULT NULL,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  observacoes TEXT,
+  status VARCHAR(30) DEFAULT NULL,
+  data_orcamento DATETIME DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY cliente_id (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS pedidos_venda (
+  id INT NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(20) DEFAULT NULL,
+  cliente_id INT DEFAULT NULL,
+  data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  status ENUM('ORCAMENTO','APROVADO','PRODUCAO','PRONTO','ENTREGUE','CANCELADO') DEFAULT 'ORCAMENTO',
+  local_id INT DEFAULT NULL,
+  observacoes TEXT,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS pedidos_venda_itens (
+  id INT NOT NULL AUTO_INCREMENT,
+  pedido_id INT DEFAULT NULL,
+  produto_id INT DEFAULT NULL,
+  descricao VARCHAR(255) DEFAULT NULL,
+  quantidade DECIMAL(10,2) DEFAULT NULL,
+  valor_unitario DECIMAL(10,2) DEFAULT NULL,
+  valor_total DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS produto_componentes (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  produto_id BIGINT DEFAULT NULL,
+  componente_id BIGINT DEFAULT NULL,
+  quantidade DECIMAL(15,4) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

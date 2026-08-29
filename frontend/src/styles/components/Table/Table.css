@@ -1,0 +1,51 @@
+.table-responsive{
+
+    overflow:auto;
+
+    border-radius:16px;
+
+}
+
+.table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.table thead{
+
+    background:var(--bg-secondary);
+
+}
+
+.table th{
+
+    color:var(--text-secondary);
+
+    text-align:left;
+
+    font-weight:600;
+
+}
+
+.table th,
+
+.table td{
+
+    padding:16px;
+
+}
+
+.table tbody tr{
+
+    border-top:1px solid var(--border);
+
+}
+
+.table tbody tr:hover{
+
+    background:var(--card-hover);
+
+}

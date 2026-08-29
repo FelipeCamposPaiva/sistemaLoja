@@ -1,0 +1,135 @@
+/*==================================================
+  CONTENT
+==================================================*/
+
+.erp-content{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:auto;
+
+    background:#f4f7fb;
+
+    padding:24px;
+
+    transition:.25s;
+
+}
+
+/*==================================================
+  WRAPPER
+==================================================*/
+
+.erp-content-wrapper{
+
+    width:100%;
+
+    max-width:1700px;
+
+    margin:0 auto;
+
+    animation:fadeContent .25s ease;
+
+}
+
+/*==================================================
+  SCROLL
+==================================================*/
+
+.erp-content::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+.erp-content::-webkit-scrollbar-thumb{
+
+    background:#d4d8df;
+
+    border-radius:10px;
+
+}
+
+.erp-content::-webkit-scrollbar-thumb:hover{
+
+    background:#b9c0ca;
+
+}
+
+.erp-content::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+/*==================================================
+  RESPONSIVO
+==================================================*/
+
+@media(max-width:1200px){
+
+    .erp-content{
+
+        padding:20px;
+
+    }
+
+}
+
+@media(max-width:992px){
+
+    .erp-content{
+
+        padding:18px;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .erp-content{
+
+        padding:15px;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .erp-content{
+
+        padding:12px;
+
+    }
+
+}
+
+/*==================================================
+  ANIMAÇÃO
+==================================================*/
+
+@keyframes fadeContent{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(12px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}

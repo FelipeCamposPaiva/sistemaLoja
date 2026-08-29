@@ -1,0 +1,62 @@
+.clientes-page{
+    width:100%;
+}
+
+.topo-clientes{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.acoes{
+    display:flex;
+    gap:10px;
+}
+
+.barra-pesquisa{
+    margin-bottom:25px;
+}
+
+.abas{
+    display:flex;
+    gap:20px;
+    margin-bottom:25px;
+    border-bottom:1px solid var(--border);
+}
+
+.aba{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--text-secondary);
+    padding-bottom:15px;
+    transition:.2s;
+}
+
+.aba:hover{
+    color:white;
+}
+
+.aba.ativa{
+    color:white;
+    border-bottom:3px solid var(--primary);
+}
+
+.aba span{
+    margin-left:8px;
+}
+
+@media(max-width:768px){
+
+    .topo-clientes{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:15px;
+
+    }
+
+}

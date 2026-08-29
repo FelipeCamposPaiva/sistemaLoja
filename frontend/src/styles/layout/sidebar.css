@@ -1,0 +1,415 @@
+/*==================================================
+SIDEBAR
+==================================================*/
+
+.erp-sidebar{
+
+    width:270px;
+
+    min-width:270px;
+
+    height:100vh;
+
+    background:#0f172a;
+
+    color:#ffffff;
+
+    display:flex;
+
+    flex-direction:column;
+
+    transition:.30s;
+
+    overflow:hidden;
+
+    position:sticky;
+
+    top:0;
+
+    left:0;
+
+    box-shadow:4px 0 20px rgba(0,0,0,.12);
+
+    z-index:200;
+
+}
+
+/*==================================================
+COLLAPSED
+==================================================*/
+
+.erp-sidebar.collapsed{
+
+    width:80px;
+
+    min-width:80px;
+
+}
+
+/*==================================================
+TOPO
+==================================================*/
+
+.sidebar-top{
+
+    height:72px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+.sidebar-logo{
+
+    height:46px;
+
+    object-fit:contain;
+
+}
+
+.collapse-btn{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.08);
+
+    color:#ffffff;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:18px;
+
+}
+
+.collapse-btn:hover{
+
+    background:#ff2d8a;
+
+}
+
+/*==================================================
+EMPRESA
+==================================================*/
+
+.empresa-box{
+
+    margin:18px;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    background:rgba(255,255,255,.06);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+.empresa-box svg{
+
+    font-size:28px;
+
+    color:#ffbe0b;
+
+}
+
+.empresa-box strong{
+
+    display:block;
+
+    font-size:15px;
+
+}
+
+.empresa-box small{
+
+    color:#cbd5e1;
+
+}
+
+/*==================================================
+MENU
+==================================================*/
+
+.sidebar-menu{
+
+    flex:1;
+
+    overflow:auto;
+
+    padding:12px;
+
+}
+
+/* Scroll */
+
+.sidebar-menu::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:8px;
+
+}
+
+/*==================================================
+ITENS
+==================================================*/
+
+.menu-item{
+
+    width:100%;
+
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:0 15px;
+
+    margin-bottom:6px;
+
+    border-radius:12px;
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+    font-size:15px;
+
+    font-weight:500;
+
+}
+
+.menu-item svg{
+
+    min-width:20px;
+
+    font-size:18px;
+
+}
+
+/* Hover */
+
+.menu-item:hover{
+
+    background:#1e293b;
+
+    color:#ffffff;
+
+}
+
+/* Item ativo */
+
+.menu-item.active{
+
+    background:#ff2d8a;
+
+    color:#ffffff;
+
+    box-shadow:0 8px 18px rgba(255,45,138,.25);
+
+}
+
+/*==================================================
+BOTÃO MENU
+==================================================*/
+
+.menu-button{
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    justify-content:flex-start;
+
+}
+
+.menu-button span{
+
+    flex:1;
+
+    text-align:left;
+
+}
+
+/*==================================================
+SUBMENU
+==================================================*/
+
+.submenu{
+
+    margin-left:20px;
+
+    margin-bottom:10px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:5px;
+
+    animation:submenu .25s ease;
+
+}
+
+.submenu a{
+
+    color:#94a3b8;
+
+    text-decoration:none;
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    transition:.20s;
+
+    font-size:14px;
+
+}
+
+.submenu a:hover{
+
+    background:#1e293b;
+
+    color:#ffffff;
+
+}
+
+.submenu a.active{
+
+    background:#2ec4b6;
+
+    color:#ffffff;
+
+}
+
+/*==================================================
+RODAPÉ
+==================================================*/
+
+.sidebar-footer{
+
+    padding:18px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+    font-size:13px;
+
+    color:#94a3b8;
+
+}
+
+/*==================================================
+ANIMAÇÕES
+==================================================*/
+
+@keyframes submenu{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-8px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/*==================================================
+RESPONSIVO
+==================================================*/
+
+@media(max-width:992px){
+
+    .erp-sidebar{
+
+        position:fixed;
+
+        left:-270px;
+
+        transition:.30s;
+
+    }
+
+    .erp-sidebar.open{
+
+        left:0;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .erp-sidebar{
+
+        width:250px;
+
+        min-width:250px;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .sidebar-logo{
+
+        height:40px;
+
+    }
+
+    .menu-item{
+
+        font-size:14px;
+
+    }
+
+}

@@ -1,0 +1,10 @@
+/* placeholder — global.css importa este arquivo */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #c5cdd6;
+  border-radius: 8px;
+}

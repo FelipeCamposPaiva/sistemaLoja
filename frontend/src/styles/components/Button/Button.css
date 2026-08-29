@@ -1,0 +1,93 @@
+.btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    font-size:14px;
+
+    padding:12px 18px;
+
+    transition:.25s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.btn-primary{
+
+    background:var(--primary);
+
+    color:#fff;
+
+}
+
+.btn-success{
+
+    background:var(--success);
+
+    color:#fff;
+
+}
+
+.btn-warning{
+
+    background:var(--warning);
+
+    color:#fff;
+
+}
+
+.btn-danger{
+
+    background:var(--danger);
+
+    color:#fff;
+
+}
+
+.btn-outline{
+
+    background:transparent;
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+
+}
+
+.btn-outline:hover{
+
+    background:var(--card-hover);
+
+}
+
+.btn-sm{
+
+    padding:8px 12px;
+
+    font-size:13px;
+
+}
+
+.btn-lg{
+
+    padding:14px 24px;
+
+}

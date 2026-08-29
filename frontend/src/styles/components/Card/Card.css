@@ -1,0 +1,57 @@
+.card{
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:20px;
+
+    transition:.25s;
+
+}
+
+.card:hover{
+
+    border-color:var(--primary);
+
+}
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:20px;
+
+}
+
+.card-title{
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.card-body{
+
+    width:100%;
+
+}
+
+.card-footer{
+
+    margin-top:20px;
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+}

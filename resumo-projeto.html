@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ERP Tem De Tudo — Resumo do Projeto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="resumo-projeto.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap brand-bar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">T</div>
+        <span>ERP Tem De Tudo</span>
+      </div>
+      <nav class="nav-toc" aria-label="Seções">
+        <a href="#visao">Visão</a>
+        <a href="#arquitetura">Arquitetura</a>
+        <a href="#stack">Stack</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#api">API</a>
+        <a href="#estrutura">Estrutura</a>
+        <a href="#rodar">Como rodar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="hero-kicker">Documentação de estudo · ago/2026</p>
+        <h1>Sistema ERP completo para varejo e serviços</h1>
+        <p class="hero-lead">
+          Monorepo com backend Java/Spring Boot e frontend React/Vite.
+          Cobre cadastros, estoque, compras, vendas (PDV), financeiro,
+          ordens de serviço, produção, e-commerce e painel de funcionários,
+          com autenticação JWT e menu por permissões.
+        </p>
+        <div class="meta-row">
+          <span class="chip"><strong>Pacote</strong> com.temdetudo / erp</span>
+          <span class="chip"><strong>DB</strong> MySQL · temdetudo_db</span>
+          <span class="chip"><strong>API</strong> :8080</span>
+          <span class="chip"><strong>UI</strong> Vite + React 19</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="visao">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Visão geral</h2>
+          <p>
+            O projeto é um ERP operacional (“Tem De Tudo”) voltado a loja/
+            operação mista: produtos, estoque, compras, PDV, financeiro,
+            OS/produção e canais de e-commerce. O frontend já mapeia uma
+            árvore ampla de telas; o backend expõe CRUDs REST e dashboards
+            para os domínios já modelados em JPA.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <span class="stack-label">Objetivo</span>
+            <h3>Operação unificada</h3>
+            <p>
+              Concentrar cadastros mestres, suprimentos, vendas, caixa,
+              contas a pagar/receber, serviços e produção em um único
+              sistema web autenticado.
+            </p>
+          </article>
+          <article class="card">
+            <span class="stack-label">Estado</span>
+            <h3>Em evolução ativa</h3>
+            <p>
+              Há ~23 controllers e ~22 entidades no backend; o frontend
+              possui dezenas de páginas por módulo, services dedicados,
+              guards de rota e um framework interno em
+              <code class="inline-code">src/framework</code>.
+            </p>
+          </article>
+          <article class="card">
+            <span class="stack-label">Acesso</span>
+            <h3>JWT + perfis</h3>
+            <p>
+              Login em <code class="inline-code">/api/auth</code>, sessão
+              stateless, BCrypt e seed de admin na primeira subida
+              (<code class="inline-code">admin</code> / perfil ADMIN).
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="arquitetura">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Arquitetura</h2>
+          <p>Cliente SPA consome API REST; persistência MySQL via Spring Data JPA.</p>
+        </div>
+
+        <div class="arch" aria-label="Diagrama em alto nível">
+          <div class="arch-box">
+            <strong>Frontend</strong>
+            <span>React 19 · Vite · Bootstrap · React Router · Axios</span>
+          </div>
+          <div class="arch-arrow" aria-hidden="true">→</div>
+          <div class="arch-box">
+            <strong>Backend</strong>
+            <span>Spring Boot 4.1 · Security · JWT · JPA</span>
+          </div>
+          <div class="arch-arrow" aria-hidden="true">→</div>
+          <div class="arch-box">
+            <strong>MySQL</strong>
+            <span>localhost:3306 · temdetudo_db · ddl-auto=none</span>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 1.25rem;">
+          <article class="card">
+            <h3>Camada web (SPA)</h3>
+            <ul>
+              <li>Providers: App, Auth, Theme, Menu, Sidebar, Toast, Modal…</li>
+              <li>Rotas públicas (login) e privadas com Layout</li>
+              <li>Menu lateral por módulo + permissões (`constants/menu.js`)</li>
+              <li>Services por domínio sob <code class="inline-code">framework/todos/services</code></li>
+              <li>Exportação PDF/Excel, máscaras BR, dashboards (Recharts)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Camada API</h3>
+            <ul>
+              <li>Pacote raiz: <code class="inline-code">com.temdetudo.erp</code></li>
+              <li>Padrão controller → repository/entity (alguns services)</li>
+              <li>Filtro JWT + SecurityFilterChain stateless</li>
+              <li>DTOs de login e dashboards (geral / financeiro)</li>
+              <li>Porta padrão <code class="inline-code">8080</code>; CORS habilitado</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Stack tecnológica</h2>
+        </div>
+        <div class="grid-2">
+          <article class="card">
+            <span class="stack-label">Backend</span>
+            <h3>Java 21 · Spring Boot 4.1.0</h3>
+            <ul>
+              <li>spring-boot-starter-webmvc, data-jpa, validation, security</li>
+              <li>MySQL Connector/J · Lombok · DevTools</li>
+              <li>JJWT 0.12.7 (api / impl / jackson)</li>
+              <li>Build Maven (wrapper em <code class="inline-code">backend/.mvn</code>)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="stack-label">Frontend</span>
+            <h3>React 19 · Vite 8</h3>
+            <ul>
+              <li>react-router-dom 7 · axios · bootstrap 5</li>
+              <li>lucide-react / react-icons · recharts · react-hot-toast</li>
+              <li>jspdf + autotable · xlsx · file-saver · @hello-pangea/dnd</li>
+              <li>API base: <code class="inline-code">VITE_API_URL</code> ou <code class="inline-code">http://localhost:8080/api</code></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="modulos">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Módulos funcionais</h2>
+          <p>Derivados do menu oficial do frontend (<code class="inline-code">frontend/src/constants/menu.js</code>).</p>
+        </div>
+
+        <div class="module">
+          <div class="module-item">
+            <div class="module-name">Início<span>Dashboard operacional</span></div>
+            <div class="tags">
+              <span class="tag">Dashboard</span>
+              <span class="tag">Agenda</span>
+              <span class="tag">Minha Conta</span>
+              <span class="tag">Integrações</span>
+              <span class="tag">Ferramentas</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Cadastros<span>Dados mestres</span></div>
+            <div class="tags">
+              <span class="tag">Clientes / Fornecedores</span>
+              <span class="tag">Produtos</span>
+              <span class="tag">Categorias</span>
+              <span class="tag">Marcas</span>
+              <span class="tag">Embalagens</span>
+              <span class="tag">Localizações</span>
+              <span class="tag">Vendedores</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Suprimentos<span>Estoque e compras</span></div>
+            <div class="tags">
+              <span class="tag">Controle de Estoque</span>
+              <span class="tag">Inventário</span>
+              <span class="tag">Ordens de Compra</span>
+              <span class="tag">Notas de Entrada</span>
+              <span class="tag">Conferência</span>
+              <span class="tag">Necessidades</span>
+              <span class="tag">Giro / FCI</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Vendas<span>PDV e faturamento</span></div>
+            <div class="tags">
+              <span class="tag">PDV</span>
+              <span class="tag">Pedidos</span>
+              <span class="tag">NF-e</span>
+              <span class="tag">NFC-e</span>
+              <span class="tag">Separação</span>
+              <span class="tag">Expedição</span>
+              <span class="tag">Devoluções</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Financeiro<span>Caixa e títulos</span></div>
+            <div class="tags">
+              <span class="tag">Dashboard Financeiro</span>
+              <span class="tag">Caixa</span>
+              <span class="tag">Contas a Receber</span>
+              <span class="tag">Contas a Pagar</span>
+              <span class="tag">Cobrança</span>
+              <span class="tag">Extrato</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Serviços<span>OS e produção</span></div>
+            <div class="tags">
+              <span class="tag">Orçamentos</span>
+              <span class="tag">Ordens de Serviço</span>
+              <span class="tag">Consumo OS</span>
+              <span class="tag">Produção</span>
+              <span class="tag">Painel Produção</span>
+              <span class="tag">NFS-e</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">E-commerce<span>Canais digitais</span></div>
+            <div class="tags">
+              <span class="tag">CRM</span>
+              <span class="tag">Pedidos</span>
+              <span class="tag">Perguntas</span>
+              <span class="tag">Pós-venda</span>
+              <span class="tag">Custos</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Funcionários<span>RH operacional</span></div>
+            <div class="tags">
+              <span class="tag">Ponto</span>
+              <span class="tag">Comissões</span>
+              <span class="tag">Performance</span>
+              <span class="tag">Holerite</span>
+            </div>
+          </div>
+          <div class="module-item">
+            <div class="module-name">Configurações<span>Sistema</span></div>
+            <div class="tags">
+              <span class="tag">Configurações gerais</span>
+              <span class="tag">Importação</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="api">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>API e domínio</h2>
+          <p>Principais recursos REST já presentes no backend e entidades JPA correspondentes.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Recurso</th>
+                <th>Path</th>
+                <th>Entidade / notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Auth</td>
+                <td><code>/api/auth</code></td>
+                <td>login, registrar, me, logout · Usuario / Perfil</td>
+              </tr>
+              <tr>
+                <td>Clientes</td>
+                <td><code>/api/clientes</code></td>
+                <td>Cliente</td>
+              </tr>
+              <tr>
+                <td>Produtos</td>
+                <td><code>/api/produtos</code></td>
+                <td>SKU, custos, preços, estoque min/max, NCM…</td>
+              </tr>
+              <tr>
+                <td>Categorias / Marcas</td>
+                <td><code>/api/categorias</code> · <code>/api/marcas</code></td>
+                <td>Cadastros auxiliares de produto</td>
+              </tr>
+              <tr>
+                <td>Estoque</td>
+                <td><code>/api/estoque</code></td>
+                <td>EstoqueMovimentacao</td>
+              </tr>
+              <tr>
+                <td>Inventário</td>
+                <td><code>/api/inventario</code> (+ itens)</td>
+                <td>Inventario / InventarioItem</td>
+              </tr>
+              <tr>
+                <td>Compras</td>
+                <td><code>/api/ordens-compra</code> · <code>/api/notas-entrada</code></td>
+                <td>Cabeçalho + itens</td>
+              </tr>
+              <tr>
+                <td>Financeiro</td>
+                <td><code>/api/caixa</code> · contas-pagar/receber</td>
+                <td>Caixa, ContaPagar, ContaReceber</td>
+              </tr>
+              <tr>
+                <td>Serviços</td>
+                <td><code>/api/os</code> · <code>/api/os-consumo</code> · <code>/api/producao</code></td>
+                <td>OrdemServico, OsConsumo, Producao</td>
+              </tr>
+              <tr>
+                <td>Agenda</td>
+                <td><code>/api/agenda</code></td>
+                <td>AgendaEvento</td>
+              </tr>
+              <tr>
+                <td>Dashboards</td>
+                <td><code>/api/dashboard-geral</code> · <code>/api/dashboard-financeiro</code></td>
+                <td>Agregações via DTOs</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="note">
+          <strong>Segurança:</strong> rotas sob <code class="inline-code">/api/auth/**</code>
+          são públicas; demais endpoints exigem JWT. Segredo e expiração
+          (24h) estão em <code class="inline-code">application.properties</code>.
+          O schema MySQL é gerenciado fora do Hibernate
+          (<code class="inline-code">ddl-auto=none</code>).
+        </p>
+      </div>
+    </section>
+
+    <section id="estrutura">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Estrutura do repositório</h2>
+        </div>
+        <pre class="pre">ERP-TemDeTudo/
+├── backend/                 # Spring Boot (Maven)
+│   └── src/main/java/com/temdetudo/erp/
+│       ├── config/          # seed admin, etc.
+│       ├── controller/      # ~23 REST controllers
+│       ├── dto/
+│       ├── entity/          # ~22 entidades JPA
+│       ├── mapper/
+│       ├── repository/
+│       ├── security/        # JWT filter, SecurityConfig
+│       └── service/
+├── frontend/                # Vite + React
+│   └── src/
+│       ├── constants/       # menu, permissões, regex
+│       ├── framework/       # rotas, guards, services, UI kit
+│       ├── pages/           # telas por módulo
+│       ├── providers/       # App/Auth/Theme/…
+│       └── styles/
+├── package.json             # deps soltas na raiz (legado/auxiliar)
+├── resumo-projeto.html      # este documento
+└── resumo-projeto.css</pre>
+      </div>
+    </section>
+
+    <section id="rodar">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Como rodar (local)</h2>
+          <p>Pré-requisitos: Java 21, Maven, Node.js, MySQL com database <code class="inline-code">temdetudo_db</code>.</p>
+        </div>
+        <div class="grid-2">
+          <article class="card">
+            <h3>1. Backend</h3>
+            <p>Ajuste usuário/senha em <code class="inline-code">backend/src/main/resources/application.properties</code>, depois:</p>
+            <pre class="pre" style="margin-top:0.85rem;">cd backend
+./mvnw spring-boot:run
+# API → http://localhost:8080</pre>
+          </article>
+          <article class="card">
+            <h3>2. Frontend</h3>
+            <p>Opcional: defina <code class="inline-code">VITE_API_URL</code>. Em seguida:</p>
+            <pre class="pre" style="margin-top:0.85rem;">cd frontend
+npm install
+npm run dev
+# UI → porta Vite (padrão 5173)</pre>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>
+        Resumo gerado a partir da inspeção do código-fonte de
+        <strong>ERP-TemDeTudo</strong> — não substitui README operacional nem
+        documentação de schema SQL.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
