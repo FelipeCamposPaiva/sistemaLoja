@@ -1,0 +1,386 @@
+.versao-page {
+    max-width: 1120px;
+    padding-bottom: 48px;
+}
+
+.versao-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.versao-top .dash-crumb {
+    margin: 0;
+}
+
+.versao-atualizado {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.versao-page h2 {
+    margin: 10px 0 20px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.versao-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    background: var(--accent);
+    border-radius: 16px;
+    padding: 28px 32px;
+    min-height: 132px;
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+
+.versao-hero p {
+    margin: 0;
+    max-width: 520px;
+    font-size: 26px;
+    line-height: 1.25;
+    font-weight: 650;
+    color: #fff;
+}
+
+.versao-hero-art {
+    position: relative;
+    width: 180px;
+    height: 88px;
+    flex-shrink: 0;
+}
+
+.versao-hero-art span {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+}
+
+.versao-hero-art span:nth-child(1) {
+    right: 8px;
+    top: 4px;
+    width: 72px;
+    height: 80px;
+}
+
+.versao-hero-art span:nth-child(2) {
+    right: 70px;
+    top: 18px;
+    width: 88px;
+    height: 54px;
+}
+
+.versao-hero-art span:nth-child(3) {
+    right: 118px;
+    top: 36px;
+    width: 54px;
+    height: 36px;
+}
+
+.versao-filtros {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.versao-filtros > span {
+    font-size: 14px;
+}
+
+.versao-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.versao-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    background: #232326;
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.versao-chips button.is-active {
+    background: #2b2b30;
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.versao-page h3 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.versao-destaques {
+    margin-bottom: 40px;
+}
+
+.versao-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.versao-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    min-height: 100%;
+}
+
+.versao-shot {
+    position: relative;
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    background: #2a3344;
+}
+
+.versao-shot.is-hub {
+    background: #2e3a28;
+}
+
+.versao-shot.is-pdv {
+    background: #24364a;
+}
+
+.versao-shot.is-conta {
+    background: #2a2d44;
+}
+
+.versao-shot.is-ecom {
+    background: #2d2640;
+}
+
+.versao-shot.is-agenda {
+    background: #243a3a;
+}
+
+.versao-shot-bar,
+.versao-shot-card,
+.versao-shot-line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+}
+
+.versao-shot-bar {
+    left: 12px;
+    top: 12px;
+    width: 42%;
+    height: 10px;
+}
+
+.versao-shot-card {
+    right: 12px;
+    top: 28px;
+    width: 46%;
+    height: 72px;
+    background: rgba(59, 130, 246, 0.35);
+}
+
+.versao-shot-line {
+    left: 12px;
+    top: 36px;
+    width: 38%;
+    height: 8px;
+}
+
+.versao-shot-line.is-short {
+    top: 52px;
+    width: 28%;
+}
+
+.versao-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    background: #1d4ed8;
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.versao-card h4 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.versao-card p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+    flex: 1;
+}
+
+.versao-card footer {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.versao-cta,
+.versao-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.versao-cta {
+    background: var(--accent);
+    color: #fff;
+}
+
+.versao-more {
+    border: 1px solid var(--line);
+    color: #fff;
+    background: transparent;
+}
+
+.versao-lista {
+    margin-bottom: 36px;
+}
+
+.versao-grupo {
+    margin-bottom: 22px;
+}
+
+.versao-grupo header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.versao-grupo header strong {
+    color: #fff;
+    font-size: 16px;
+}
+
+.versao-grupo ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.versao-grupo li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 88px;
+}
+
+.versao-grupo h4 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 15px;
+}
+
+.versao-grupo h4 em {
+    color: var(--accent);
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.versao-grupo h4 span {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.versao-grupo p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 720px;
+    line-height: 1.45;
+}
+
+.versao-grupo a {
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: 13px;
+    padding-top: 2px;
+}
+
+.versao-grupo a:hover,
+.versao-cta:hover,
+.versao-more:hover {
+    color: #fff;
+}
+
+.versao-vazio {
+    color: var(--muted);
+    margin: 8px 0 32px;
+}
+
+.versao-social {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 10px;
+    color: var(--muted);
+    font-size: 13px;
+    padding-top: 8px;
+}
+
+.versao-social a {
+    color: var(--accent);
+    text-decoration: none;
+    text-transform: lowercase;
+}
+
+@media (max-width: 1100px) {
+    .versao-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .versao-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .versao-grupo li {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

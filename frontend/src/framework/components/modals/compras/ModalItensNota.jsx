@@ -4,7 +4,7 @@ import {
   listarItensNota,
   salvarItemNota,
   excluirItemNota
-} from "../../services/notaEntradaItem.service";
+} from "../../../../services/notaEntradaItem.service";
 
 export default function ModalItensNota({
   aberto,

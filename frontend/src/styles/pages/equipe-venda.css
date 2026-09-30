@@ -1,0 +1,131 @@
+.eq-box {
+    display: grid;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 12px;
+    background: var(--panel, #fff);
+}
+
+.eq-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: baseline;
+}
+
+.eq-head strong {
+    font-size: 13px;
+}
+
+.eq-head span,
+.eq-hint {
+    font-size: 12px;
+    color: var(--muted, #64748b);
+}
+
+.eq-hint {
+    margin: 0;
+}
+
+.eq-pool {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    max-width: 140px;
+}
+
+.eq-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.eq-lista li {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 110px 130px 72px 32px;
+    gap: 6px;
+    align-items: center;
+}
+
+.eq-lista strong {
+    display: block;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.eq-lista small {
+    color: var(--muted, #64748b);
+}
+
+.eq-lista select,
+.eq-lista input,
+.eq-pool input,
+.eq-add select {
+    width: 100%;
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font: inherit;
+    font-size: 12px;
+    background: #fff;
+    color: inherit;
+}
+
+.eq-del {
+    border: 0;
+    background: transparent;
+    color: #ef4444;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.eq-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent, #ff2f92);
+}
+
+.eq-box.is-compact {
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+}
+
+.eq-box.is-compact .eq-lista li {
+    grid-template-columns: minmax(0, 1fr) 96px 110px 64px 28px;
+}
+
+.pdv-page .eq-lista select,
+.pdv-page .eq-lista input,
+.pdv-page .eq-add select,
+.pdv-page .eq-pool input {
+    background: #16161a;
+    color: inherit;
+    border-color: #333;
+}
+
+.pdv-page .eq-head span,
+.pdv-page .eq-hint,
+.pdv-page .eq-lista small {
+    color: #94a3b8;
+}
+
+@media (max-width: 720px) {
+    .eq-lista li,
+    .eq-box.is-compact .eq-lista li {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .eq-lista li > div {
+        grid-column: 1 / -1;
+    }
+}

@@ -1,7 +1,9 @@
 package com.temdetudo.erp.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ordens_servico")
@@ -11,21 +13,24 @@ public class OrdemServico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String numeroOS;
+    private Integer numero;
 
+    @Column(name = "cliente_id")
+    private Long clienteId;
+
+    @Column(name = "cliente_nome")
     private String cliente;
+
+    @Column(name = "nome_fantasia")
+    private String nomeFantasia;
+
+    private String equipamento;
+
+    private String marcadores;
 
     private String telefone;
 
-    private String vendedor;
-
-    private String prioridade;
-
-    private String arte;
-
-    private Integer quantidade;
-
-    private String loja;
+    private String whatsapp;
 
     private String descricao;
 
@@ -33,16 +38,41 @@ public class OrdemServico {
 
     private String status;
 
-    private LocalDate dataCriacao;
+    @Column(name = "data_abertura")
+    private LocalDate dataAbertura;
 
-    private LocalDate dataEntrega;
+    @Column(name = "data_previsao")
+    private LocalDate dataPrevisao;
 
-    @Column(length = 2000)
+    @Column(name = "data_conclusao")
+    private LocalDate dataConclusao;
+
+    @Column(name = "data_entrega")
+    private LocalDateTime dataEntrega;
+
+    private String categoria;
+
+    @Column(name = "forma_pagamento")
+    private String formaPagamento;
+
+    @Column(name = "status_id")
+    private Integer statusId;
+
+    private String responsavel;
+
+    @Column(name = "local_id")
+    private Integer localId;
+
+    private String prioridade;
+
+    @Column(columnDefinition = "TEXT")
     private String observacoes;
 
+    @Column(name = "arquivo_arte")
     private String arquivoArte;
 
-    // GETTERS E SETTERS
+    @Column(columnDefinition = "LONGTEXT")
+    private String detalhes;
 
     public Long getId() {
         return id;
@@ -52,12 +82,20 @@ public class OrdemServico {
         this.id = id;
     }
 
-    public String getNumeroOS() {
-        return numeroOS;
+    public Integer getNumero() {
+        return numero;
     }
 
-    public void setNumeroOS(String numeroOS) {
-        this.numeroOS = numeroOS;
+    public void setNumero(Integer numero) {
+        this.numero = numero;
+    }
+
+    public Long getClienteId() {
+        return clienteId;
+    }
+
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
 
     public String getCliente() {
@@ -68,6 +106,30 @@ public class OrdemServico {
         this.cliente = cliente;
     }
 
+    public String getNomeFantasia() {
+        return nomeFantasia;
+    }
+
+    public void setNomeFantasia(String nomeFantasia) {
+        this.nomeFantasia = nomeFantasia;
+    }
+
+    public String getEquipamento() {
+        return equipamento;
+    }
+
+    public void setEquipamento(String equipamento) {
+        this.equipamento = equipamento;
+    }
+
+    public String getMarcadores() {
+        return marcadores;
+    }
+
+    public void setMarcadores(String marcadores) {
+        this.marcadores = marcadores;
+    }
+
     public String getTelefone() {
         return telefone;
     }
@@ -76,44 +138,12 @@ public class OrdemServico {
         this.telefone = telefone;
     }
 
-    public String getVendedor() {
-        return vendedor;
+    public String getWhatsapp() {
+        return whatsapp;
     }
 
-    public void setVendedor(String vendedor) {
-        this.vendedor = vendedor;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
-    }
-
-    public String getArte() {
-        return arte;
-    }
-
-    public void setArte(String arte) {
-        this.arte = arte;
-    }
-
-    public Integer getQuantidade() {
-        return quantidade;
-    }
-
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
-    }
-
-    public String getLoja() {
-        return loja;
-    }
-
-    public void setLoja(String loja) {
-        this.loja = loja;
+    public void setWhatsapp(String whatsapp) {
+        this.whatsapp = whatsapp;
     }
 
     public String getDescricao() {
@@ -140,20 +170,84 @@ public class OrdemServico {
         this.status = status;
     }
 
-    public LocalDate getDataCriacao() {
-        return dataCriacao;
+    public LocalDate getDataAbertura() {
+        return dataAbertura;
     }
 
-    public void setDataCriacao(LocalDate dataCriacao) {
-        this.dataCriacao = dataCriacao;
+    public void setDataAbertura(LocalDate dataAbertura) {
+        this.dataAbertura = dataAbertura;
     }
 
-    public LocalDate getDataEntrega() {
+    public LocalDate getDataPrevisao() {
+        return dataPrevisao;
+    }
+
+    public void setDataPrevisao(LocalDate dataPrevisao) {
+        this.dataPrevisao = dataPrevisao;
+    }
+
+    public LocalDate getDataConclusao() {
+        return dataConclusao;
+    }
+
+    public void setDataConclusao(LocalDate dataConclusao) {
+        this.dataConclusao = dataConclusao;
+    }
+
+    public LocalDateTime getDataEntrega() {
         return dataEntrega;
     }
 
-    public void setDataEntrega(LocalDate dataEntrega) {
+    public void setDataEntrega(LocalDateTime dataEntrega) {
         this.dataEntrega = dataEntrega;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getFormaPagamento() {
+        return formaPagamento;
+    }
+
+    public void setFormaPagamento(String formaPagamento) {
+        this.formaPagamento = formaPagamento;
+    }
+
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
+    public String getResponsavel() {
+        return responsavel;
+    }
+
+    public void setResponsavel(String responsavel) {
+        this.responsavel = responsavel;
+    }
+
+    public Integer getLocalId() {
+        return localId;
+    }
+
+    public void setLocalId(Integer localId) {
+        this.localId = localId;
+    }
+
+    public String getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
     }
 
     public String getObservacoes() {
@@ -170,5 +264,13 @@ public class OrdemServico {
 
     public void setArquivoArte(String arquivoArte) {
         this.arquivoArte = arquivoArte;
+    }
+
+    public String getDetalhes() {
+        return detalhes;
+    }
+
+    public void setDetalhes(String detalhes) {
+        this.detalhes = detalhes;
     }
 }

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 150" fill="none" role="img" aria-label="Suas marcas, mais organizadas">
+  <text x="8" y="36" fill="#ff4fa3" font-family="Segoe Script, Brush Script MT, cursive" font-size="16">Suas marcas,</text>
+  <text x="18" y="58" fill="#ff4fa3" font-family="Segoe Script, Brush Script MT, cursive" font-size="16">mais organizadas!</text>
+  <rect x="168" y="18" width="42" height="54" rx="6" fill="#fde68a" stroke="#f59e0b" stroke-width="2"/>
+  <rect x="176" y="28" width="26" height="4" rx="2" fill="#fbbf24"/>
+  <rect x="176" y="38" width="20" height="4" rx="2" fill="#fbbf24"/>
+  <rect x="148" y="40" width="38" height="48" rx="6" fill="#fda4af"/>
+  <circle cx="167" cy="58" r="8" fill="#fff"/>
+  <rect x="198" y="36" width="36" height="52" rx="6" fill="#93c5fd"/>
+  <path d="M206 56h20M206 66h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <rect x="230" y="28" width="12" height="48" rx="4" fill="#f9a8d4" transform="rotate(18 236 52)"/>
+  <rect x="242" y="24" width="10" height="44" rx="4" fill="#86efac" transform="rotate(-12 247 46)"/>
+  <ellipse cx="210" cy="128" rx="48" ry="8" fill="#fbcfe8"/>
+</svg>

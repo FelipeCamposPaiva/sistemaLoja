@@ -41,3 +41,128 @@
     }
 
 }
+
+.estq-sku {
+    display: block;
+    color: var(--muted, #7a5a68);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.estq-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: #f3f4f6;
+}
+
+.estq-badge.is-entrada,
+.estq-badge.is-producao,
+.estq-badge.is-ativo {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.estq-badge.is-saida,
+.estq-badge.is-perda,
+.estq-badge.is-estorno,
+.estq-badge.is-estornado,
+.estq-badge.is-cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.estq-badge.is-ajuste,
+.estq-badge.is-balanco,
+.estq-badge.is-transferencia {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.estq-linha-estorno td {
+    color: #6b7280;
+}
+
+.estoque-page .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.estoque-page .btn-primary {
+    margin-top: 8px;
+}
+
+@media print {
+    .os-topo-acoes,
+    .os-card,
+    .dash-crumb,
+    .idx-text {
+        display: none !important;
+    }
+}
+
+.dash-sup .dash-kpis-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dash-sup .dash-kpi strong {
+    font-size: 22px;
+}
+
+.dash-sup-tables {
+    margin-top: 14px;
+}
+
+.dash-sup-bloco {
+    margin-top: 14px;
+    min-height: 0;
+}
+
+.dash-sup-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.dash-sup-toolbar h4 {
+    margin: 0;
+}
+
+.dash-sup-toolbar > div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dash-sup-table-wrap {
+    overflow: auto;
+    max-height: 320px;
+}
+
+.dash-sup-table-wrap.is-tall {
+    max-height: 480px;
+}
+
+.dash-sup .fer-search {
+    min-width: min(420px, 100%);
+}
+
+@media (max-width: 1100px) {
+    .dash-sup .dash-kpis-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .dash-sup .dash-kpis-4,
+    .dash-sup .dash-overview,
+    .dash-sup .dash-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}

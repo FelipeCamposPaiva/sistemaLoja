@@ -44,6 +44,14 @@ public interface ProdutoRepository
             Boolean produtoProducao
     );
 
+    java.util.Optional<Produto> findFirstBySkuIgnoreCase(
+            String sku
+    );
+
+    java.util.Optional<Produto> findFirstByCodigoBarras(
+            String codigoBarras
+    );
+
     List<Produto> findByConsomeEstoque(
             Boolean consomeEstoque
     );

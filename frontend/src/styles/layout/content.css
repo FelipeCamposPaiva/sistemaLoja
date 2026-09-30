@@ -12,7 +12,7 @@
 
     overflow:auto;
 
-    background:#f4f7fb;
+    background:var(--bg);
 
     padding:24px;
 
@@ -28,7 +28,7 @@
 
     width:100%;
 
-    max-width:1700px;
+    max-width:none;
 
     margin:0 auto;
 

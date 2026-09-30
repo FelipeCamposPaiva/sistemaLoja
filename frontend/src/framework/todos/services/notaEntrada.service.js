@@ -18,11 +18,12 @@ class NotaEntradaService extends BaseService {
 
     }
 
-    confirmar(id) {
+    confirmar(id, corpo = { modoData: "ENTRADA" }) {
 
-        return this.patch(
+        return this.put(
 
-            `/${id}/confirmar`
+            `/${id}/confirmar`,
+            corpo
 
         );
 

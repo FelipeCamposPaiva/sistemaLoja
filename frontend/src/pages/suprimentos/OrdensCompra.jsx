@@ -7,7 +7,7 @@ import {
   receberOrdem
 } from "../../services/ordemCompra.service";
 
-import ModalItensOrdem from "../../components/modals/compras/ModalItensOrdem";
+import ModalItensOrdem from "../../framework/components/modals/compras/ModalItensOrdem";
 
 import "../../styles/pages/ordens-compra.css";
 

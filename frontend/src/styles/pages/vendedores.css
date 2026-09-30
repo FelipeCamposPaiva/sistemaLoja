@@ -1,0 +1,329 @@
+.vend-page .ctt-hero h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ff2f92;
+}
+
+.vend-page .ctt-btn-incluir {
+    border-radius: 12px;
+}
+
+.vend-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 4px 0 14px;
+}
+
+.vend-busca {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #f3cfe0;
+    border-radius: 12px;
+    background: #fff;
+    min-height: 44px;
+    padding: 0 12px;
+    color: #9ca3af;
+}
+
+.vend-busca input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--text);
+    padding: 0 28px 0 8px;
+}
+
+.vend-limpar {
+    position: absolute;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.vend-mais {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #f3cfe0;
+    border-radius: 12px;
+    background: #fff;
+    color: #6b7280;
+    font: inherit;
+    cursor: pointer;
+}
+
+.vend-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.vend-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #f3cfe0;
+    background: #fff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.vend-chips button strong {
+    color: #111827;
+}
+
+.vend-chips button.is-on {
+    border-color: #ff2f92;
+    color: #ff2f92;
+    background: #fff5f9;
+}
+
+.vend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+}
+
+.vend-dot.is-todos { background: #ec4899; }
+.vend-dot.is-ativos { background: #22c55e; }
+.vend-dot.is-inativos { background: #9ca3af; }
+.vend-dot.is-excluidos { background: #ef4444; }
+
+.vend-tabela {
+    background: #fff;
+    border: 1px solid #f3cfe0;
+    border-radius: 16px;
+    overflow: auto;
+}
+
+.vend-ord {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.vend-nome {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    color: #374151;
+    cursor: pointer;
+    text-align: left;
+}
+
+.vend-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.vend-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.vend-status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.vend-status.is-ativo { color: #16a34a; }
+.vend-status.is-inativo { color: #9ca3af; }
+.vend-status.is-pendente { color: #2563eb; }
+.vend-status.is-excluido { color: #dc2626; }
+
+.vend-acoes {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.vend-acoes button {
+    border: 0;
+    background: transparent;
+    color: #9ca3af;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.vend-acoes button:hover {
+    background: #fff5f9;
+    color: #ff2f92;
+}
+
+.vend-rodape {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 12px 4px 8px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.vend-pagina {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vend-pagina select,
+.vend-pagina button {
+    min-height: 32px;
+    border: 1px solid #f3cfe0;
+    background: #fff;
+    border-radius: 8px;
+    font: inherit;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.vend-pagina button {
+    width: 32px;
+    padding: 0;
+}
+
+.vend-pagina button.is-on {
+    background: #ff2f92;
+    border-color: #ff2f92;
+    color: #fff;
+}
+
+.vend-promo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    max-width: 280px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #f9c2dc;
+    border-radius: 16px;
+    color: #be185d;
+    font-size: 13px;
+}
+
+.vend-promo p {
+    margin: 0;
+}
+
+.vend-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.vend-form label {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.vend-form input,
+.vend-form select {
+    min-height: 38px;
+    border: 1px solid #f3cfe0;
+    border-radius: 10px;
+    padding: 0 10px;
+    font: inherit;
+    color: var(--text);
+}
+
+.vend-cancelar {
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid #f3cfe0;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    font: inherit;
+}
+
+.vend-modal {
+    min-width: min(560px, 94vw);
+}
+
+.vend-page .pv-modal-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(43, 27, 36, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.vend-page .pv-modal {
+    display: grid;
+    gap: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+}
+
+.vend-page .loc-pop label {
+    display: grid;
+    gap: 4px;
+    padding: 6px 8px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.vend-page .loc-pop select {
+    min-height: 32px;
+    border: 1px solid #f3cfe0;
+    border-radius: 8px;
+}
+
+@media (max-width: 720px) {
+    .vend-form {
+        grid-template-columns: 1fr;
+    }
+}

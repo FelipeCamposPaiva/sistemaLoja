@@ -249,6 +249,8 @@ export default function Caixa() {
 
                 <th>Tipo</th>
 
+                <th>Origem</th>
+
                 <th>Descrição</th>
 
                 <th>Valor</th>
@@ -276,7 +278,7 @@ export default function Caixa() {
             <tr>
 
                 <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                         textAlign: "center",
                         padding: "30px"
@@ -326,6 +328,12 @@ export default function Caixa() {
                             </span>
 
                     }
+
+                </td>
+
+                <td>
+
+                    {movimento.origem || "—"}
 
                 </td>
 

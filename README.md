@@ -3,7 +3,7 @@
 Sistema ERP para varejo e serviços (cadastros, estoque, compras, PDV, financeiro, OS/produção, e-commerce e painel de funcionários). Monorepo com backend Java/Spring Boot e frontend React/Vite.
 
 Documentação HTML: [resumo-projeto.html](resumo-projeto.html)  
-Wiki: [Inicio](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Inicio) · [Backend](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Backend) · [Frontend](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Frontend)
+Wiki: [Inicio](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Inicio) · [Backend](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Backend) · [Frontend](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/Frontend) · [EER](https://github.com/FelipeCamposPaiva/sistemaLoja/wiki/EER)
 
 ## Stack
 

@@ -3,10 +3,9 @@ package com.temdetudo.erp.controller;
 import com.temdetudo.erp.dto.DashboardFinanceiroDTO;
 import com.temdetudo.erp.entity.Caixa;
 import com.temdetudo.erp.entity.ContaPagar;
-import com.temdetudo.erp.entity.ContaReceber;
 import com.temdetudo.erp.repository.CaixaRepository;
 import com.temdetudo.erp.repository.ContaPagarRepository;
-import com.temdetudo.erp.repository.ContaReceberRepository;
+import com.temdetudo.erp.service.JurosMultaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +21,10 @@ public class DashboardFinanceiroController {
     private CaixaRepository caixaRepository;
 
     @Autowired
-    private ContaReceberRepository receberRepository;
+    private ContaPagarRepository pagarRepository;
 
     @Autowired
-    private ContaPagarRepository pagarRepository;
+    private JurosMultaService jurosMulta;
 
     @GetMapping
     public DashboardFinanceiroDTO dashboard() {
@@ -62,14 +61,14 @@ public class DashboardFinanceiroController {
                         );
 
         BigDecimal receber =
-                receberRepository.findAll()
+                jurosMulta.listarAtualizadas()
                         .stream()
                         .filter(c ->
                                 !"RECEBIDO".equals(
                                         c.getStatus()
                                 )
                         )
-                        .map(ContaReceber::getValor)
+                        .map(JurosMultaService::totalDe)
                         .reduce(
                                 BigDecimal.ZERO,
                                 BigDecimal::add

@@ -2,48 +2,48 @@ import {
     createContext,
     useCallback,
     useContext,
-    useEffect,
     useMemo,
     useState
 } from "react";
 
-import axios from "axios";
+import api, { clearAuthorization, setAuthorization } from "../services/api";
 
-const API_URL =
-    import.meta.env.VITE_API_URL ||
-    (import.meta.env.DEV ? "/api" : "http://localhost:8080/api");
-
-const DEV_TOKEN = "dev-token";
-const DEV_LOGIN = "admin";
-const DEV_SENHA = "123456";
-
-const USUARIO_DEV = {
-    token: DEV_TOKEN,
-    tipo: "Bearer",
-    id: 1,
-    nome: "Administrador",
-    usuario: DEV_LOGIN,
-    email: "admin@temdetudovr.com.br",
-    perfil: "ADMIN"
-};
+const SESSAO_EXPLICITA_KEY = "erp-sessao-ok";
 
 const AuthContext = createContext(null);
 
-function tokenAceito(token) {
-    if (!token) {
+function sessaoExplicita() {
+    try {
+        return sessionStorage.getItem(SESSAO_EXPLICITA_KEY) === "1";
+    } catch {
         return false;
     }
+}
 
-    if (token === DEV_TOKEN) {
-        return import.meta.env.DEV;
+function marcarSessaoExplicita() {
+    try {
+        sessionStorage.setItem(SESSAO_EXPLICITA_KEY, "1");
+    } catch {
+        /* ignore */
     }
+}
 
-    return true;
+function limparSessaoExplicita() {
+    try {
+        sessionStorage.removeItem(SESSAO_EXPLICITA_KEY);
+    } catch {
+        /* ignore */
+    }
+}
+
+function tokenAceito(token) {
+    return Boolean(token) && sessaoExplicita();
 }
 
 function persistirSessao(tokenRecebido, dadosUsuario) {
     localStorage.setItem("token", tokenRecebido);
     localStorage.setItem("usuario", JSON.stringify(dadosUsuario));
+    setAuthorization(tokenRecebido);
 }
 
 function lerSessao() {
@@ -55,6 +55,7 @@ function lerSessao() {
             return { token: null, usuario: null };
         }
 
+        setAuthorization(token);
         return {
             token,
             usuario: raw ? JSON.parse(raw) : null
@@ -64,37 +65,43 @@ function lerSessao() {
     }
 }
 
+function mensagemErro(error) {
+    if (!error.response) {
+        return "Erro ao conectar com o servidor.";
+    }
+    return (
+        error.response.data?.mensagem ||
+        error.response.data?.message ||
+        "Usuário ou senha inválidos."
+    );
+}
+
 export function AuthProvider({ children }) {
     const sessao = lerSessao();
 
     const [token, setToken] = useState(sessao.token);
     const [usuario, setUsuario] = useState(sessao.usuario);
-    const [inicializando, setInicializando] = useState(
-        () => import.meta.env.DEV && !sessao.token
-    );
+    const [inicializando] = useState(false);
 
     const aplicarSessao = useCallback((tokenRecebido, dadosUsuario) => {
+        marcarSessaoExplicita();
         persistirSessao(tokenRecebido, dadosUsuario);
         setToken(tokenRecebido);
         setUsuario(dadosUsuario);
     }, []);
 
-    const aplicarSessaoDummy = useCallback(() => {
-        aplicarSessao(DEV_TOKEN, USUARIO_DEV);
-    }, [aplicarSessao]);
-
     const login = useCallback(async (usuarioLogin, senha) => {
         try {
-            const { data } = await axios.post(
-                `${API_URL}/auth/login`,
+            const { data } = await api.post(
+                "/auth/login",
                 {
-                    login: usuarioLogin,
-                    senha
-                }
+                    login: String(usuarioLogin ?? "").trim(),
+                    senha: String(senha ?? "").trim()
+                },
+                { timeout: 15000 }
             );
 
             const tokenRecebido = data?.token;
-
             if (!tokenRecebido) {
                 return {
                     sucesso: false,
@@ -103,65 +110,23 @@ export function AuthProvider({ children }) {
             }
 
             aplicarSessao(tokenRecebido, data);
-
             return { sucesso: true };
         } catch (error) {
-            if (!error.response) {
-                return {
-                    sucesso: false,
-                    mensagem: "Erro ao conectar com o servidor."
-                };
-            }
-
-            const mensagem =
-                error.response.data?.message ||
-                error.response.data?.mensagem ||
-                "Usuário ou senha inválidos.";
-
             return {
                 sucesso: false,
-                mensagem
+                mensagem: mensagemErro(error)
             };
         }
     }, [aplicarSessao]);
 
     const logout = useCallback(() => {
+        limparSessaoExplicita();
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
+        clearAuthorization();
         setToken(null);
         setUsuario(null);
     }, []);
-
-    useEffect(() => {
-        if (!import.meta.env.DEV) {
-            return;
-        }
-
-        if (tokenAceito(lerSessao().token)) {
-            setInicializando(false);
-            return;
-        }
-
-        let cancelado = false;
-
-        (async () => {
-            const resultado = await login(DEV_LOGIN, DEV_SENHA);
-
-            if (cancelado) {
-                return;
-            }
-
-            if (!resultado.sucesso) {
-                aplicarSessaoDummy();
-            }
-
-            setInicializando(false);
-        })();
-
-        return () => {
-            cancelado = true;
-        };
-    }, [aplicarSessaoDummy, login]);
 
     const value = useMemo(
         () => ({

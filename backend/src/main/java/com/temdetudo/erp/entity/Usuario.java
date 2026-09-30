@@ -1,5 +1,7 @@
 package com.temdetudo.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -84,6 +86,7 @@ public class Usuario {
         return email;
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getSenha() {
         return senha;
     }

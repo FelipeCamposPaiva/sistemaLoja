@@ -43,12 +43,24 @@ CREATE TABLE IF NOT EXISTS categorias (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS categorias_financeiras (
+  id INT NOT NULL AUTO_INCREMENT,
+  codigo VARCHAR(20) NOT NULL,
+  nome VARCHAR(120) NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  dre_grupo VARCHAR(80) DEFAULT NULL,
+  ordem INT DEFAULT 0,
+  ativo TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_cat_fin_codigo (codigo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS marcas (
   id INT NOT NULL AUTO_INCREMENT,
   nome VARCHAR(100) DEFAULT NULL,
   fabricante VARCHAR(255) DEFAULT NULL,
   descricao TEXT,
-  logo VARCHAR(255) DEFAULT NULL,
+  logo VARCHAR(500) DEFAULT NULL,
   site VARCHAR(255) DEFAULT NULL,
   email VARCHAR(150) DEFAULT NULL,
   telefone VARCHAR(30) DEFAULT NULL,
@@ -76,6 +88,25 @@ CREATE TABLE IF NOT EXISTS localizacoes (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS naturezas_operacao (
+  id INT NOT NULL AUTO_INCREMENT,
+  codigo VARCHAR(40) NOT NULL,
+  nome VARCHAR(180) NOT NULL,
+  cfop_interno VARCHAR(4) DEFAULT NULL,
+  cfop_interestadual VARCHAR(4) DEFAULT NULL,
+  tipo_documento VARCHAR(20) DEFAULT 'AMBOS',
+  para_contribuinte TINYINT(1) DEFAULT 0,
+  para_nao_contribuinte TINYINT(1) DEFAULT 1,
+  para_pessoa_fisica TINYINT(1) DEFAULT 1,
+  para_pessoa_juridica TINYINT(1) DEFAULT 1,
+  finalidade VARCHAR(20) DEFAULT 'AMBOS',
+  consumidor_final TINYINT(1) DEFAULT 0,
+  prioridade INT DEFAULT 50,
+  ativo TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_natureza_codigo (codigo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS clientes (
   id INT NOT NULL AUTO_INCREMENT,
   nome VARCHAR(150) DEFAULT NULL,
@@ -84,7 +115,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   email VARCHAR(150) DEFAULT NULL,
   endereco TEXT,
   data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-  tipo ENUM('FISICA','JURIDICA') DEFAULT 'FISICA',
+  tipo VARCHAR(80) DEFAULT NULL,
   nome_fantasia VARCHAR(255) DEFAULT NULL,
   cidade VARCHAR(100) DEFAULT NULL,
   estado VARCHAR(2) DEFAULT NULL,
@@ -93,6 +124,13 @@ CREATE TABLE IF NOT EXISTS clientes (
   observacoes TEXT,
   ativo TINYINT DEFAULT 1,
   tiny_id INT DEFAULT NULL,
+  tipo_pessoa VARCHAR(20) DEFAULT NULL,
+  contribuinte VARCHAR(2) DEFAULT '9',
+  ie VARCHAR(30) DEFAULT NULL,
+  consumidor_final TINYINT(1) DEFAULT 1,
+  finalidade VARCHAR(20) DEFAULT 'CONSUMO',
+  regime_tributario VARCHAR(30) DEFAULT NULL,
+  natureza_operacao_id INT DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -143,16 +181,19 @@ CREATE TABLE IF NOT EXISTS produtos (
   ativo TINYINT DEFAULT 1,
   observacoes TEXT,
   estoque_maximo DECIMAL(15,3) DEFAULT NULL,
-  localizacao VARCHAR(100) DEFAULT NULL,
+  localizacao VARCHAR(255) DEFAULT NULL,
   fornecedor_id BIGINT DEFAULT NULL,
   custo_compra DECIMAL(15,2) DEFAULT NULL,
   custo_medio DECIMAL(15,2) DEFAULT NULL,
   preco_atacado DECIMAL(15,2) DEFAULT NULL,
+  preco_promocional DECIMAL(15,2) DEFAULT NULL,
+  desconto_percentual DECIMAL(7,2) DEFAULT NULL,
   ncm VARCHAR(20) DEFAULT NULL,
   cest VARCHAR(20) DEFAULT NULL,
   produto_producao TINYINT(1) DEFAULT 0,
   consome_estoque TINYINT(1) DEFAULT 1,
   imagem VARCHAR(500) DEFAULT NULL,
+  midia LONGTEXT,
   descricao TEXT,
   tipo_produto VARCHAR(50) DEFAULT NULL,
   controla_lote TINYINT(1) DEFAULT 0,
@@ -178,12 +219,24 @@ CREATE TABLE IF NOT EXISTS estoque_movimentacao (
   produto_id INT NOT NULL,
   local_origem INT DEFAULT NULL,
   local_destino INT DEFAULT NULL,
-  tipo ENUM('ENTRADA','SAIDA','TRANSFERENCIA','PRODUCAO','PERDA') DEFAULT NULL,
-  quantidade DECIMAL(10,2) DEFAULT NULL,
+  tipo VARCHAR(30) DEFAULT NULL,
+  quantidade DECIMAL(14,4) DEFAULT NULL,
   observacao TEXT,
   usuario_id INT DEFAULT NULL,
+  usuario_nome VARCHAR(150) DEFAULT NULL,
   data_movimento DATETIME DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  origem VARCHAR(30) DEFAULT 'MANUAL',
+  origem_id BIGINT DEFAULT NULL,
+  origem_ref VARCHAR(150) DEFAULT NULL,
+  saldo_anterior DECIMAL(14,4) DEFAULT NULL,
+  saldo_posterior DECIMAL(14,4) DEFAULT NULL,
+  status VARCHAR(20) DEFAULT 'ATIVO',
+  movimento_origem_id INT DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_estq_mov_produto_data (produto_id, data_movimento),
+  KEY idx_estq_mov_usuario_data (usuario_id, data_movimento),
+  KEY idx_estq_mov_origem (origem, origem_id),
+  KEY idx_estq_mov_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS inventarios (
@@ -192,6 +245,7 @@ CREATE TABLE IF NOT EXISTS inventarios (
   data_inventario DATETIME DEFAULT NULL,
   usuario_id INT DEFAULT NULL,
   observacao TEXT,
+  localizacao VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -260,6 +314,7 @@ CREATE TABLE IF NOT EXISTS caixa (
   origem VARCHAR(50) DEFAULT NULL,
   referencia_id BIGINT DEFAULT NULL,
   data_movimento DATETIME DEFAULT NULL,
+  categoria VARCHAR(80) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -272,6 +327,14 @@ CREATE TABLE IF NOT EXISTS contas_pagar (
   vencimento DATE DEFAULT NULL,
   data_pagamento DATE DEFAULT NULL,
   status VARCHAR(30) DEFAULT NULL,
+  valor_pago DECIMAL(10,2) DEFAULT 0,
+  valor_original DECIMAL(10,2) DEFAULT NULL,
+  grupo_id BIGINT DEFAULT NULL,
+  parcela INT DEFAULT NULL,
+  parcelas INT DEFAULT NULL,
+  juros_pct DECIMAL(8,4) DEFAULT NULL,
+  origem_ids VARCHAR(500) DEFAULT NULL,
+  categoria VARCHAR(80) DEFAULT NULL,
   PRIMARY KEY (id),
   KEY idx_fornecedor (fornecedor_id),
   KEY idx_nota (nota_entrada_id)
@@ -285,6 +348,18 @@ CREATE TABLE IF NOT EXISTS contas_receber (
   vencimento DATE DEFAULT NULL,
   data_recebimento DATE DEFAULT NULL,
   status VARCHAR(30) DEFAULT NULL,
+  valor_pago DECIMAL(10,2) DEFAULT 0,
+  valor_original DECIMAL(10,2) DEFAULT NULL,
+  grupo_id BIGINT DEFAULT NULL,
+  parcela INT DEFAULT NULL,
+  parcelas INT DEFAULT NULL,
+  juros_pct DECIMAL(8,4) DEFAULT NULL,
+  origem_ids VARCHAR(500) DEFAULT NULL,
+  juros DECIMAL(10,2) DEFAULT 0.00,
+  multa DECIMAL(10,2) DEFAULT 0.00,
+  valor_atualizado DECIMAL(10,2) DEFAULT NULL,
+  dias_atraso INT DEFAULT 0,
+  categoria VARCHAR(80) DEFAULT NULL,
   PRIMARY KEY (id),
   KEY idx_cliente (cliente_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -299,9 +374,13 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
   id INT NOT NULL AUTO_INCREMENT,
   numero INT DEFAULT NULL,
   cliente_id INT DEFAULT NULL,
+  cliente_nome VARCHAR(255) DEFAULT NULL,
+  nome_fantasia VARCHAR(255) DEFAULT NULL,
+  equipamento VARCHAR(255) DEFAULT NULL,
+  marcadores VARCHAR(255) DEFAULT NULL,
   descricao TEXT,
   valor DECIMAL(10,2) DEFAULT NULL,
-  status VARCHAR(30) DEFAULT NULL,
+  status VARCHAR(40) DEFAULT NULL,
   data_abertura DATE DEFAULT NULL,
   data_previsao DATE DEFAULT NULL,
   data_conclusao DATE DEFAULT NULL,
@@ -316,6 +395,7 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
   observacoes TEXT,
   arquivo_arte VARCHAR(255) DEFAULT NULL,
   data_entrega DATETIME DEFAULT NULL,
+  detalhes LONGTEXT,
   PRIMARY KEY (id),
   KEY cliente_id (cliente_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -418,12 +498,25 @@ CREATE TABLE IF NOT EXISTS pedidos_venda (
   id INT NOT NULL AUTO_INCREMENT,
   numero VARCHAR(20) DEFAULT NULL,
   cliente_id INT DEFAULT NULL,
+  cliente_nome VARCHAR(255) DEFAULT NULL,
   data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
   valor_total DECIMAL(10,2) DEFAULT NULL,
-  status ENUM('ORCAMENTO','APROVADO','PRODUCAO','PRONTO','ENTREGUE','CANCELADO') DEFAULT 'ORCAMENTO',
+  status VARCHAR(40) DEFAULT 'APROVADO',
   local_id INT DEFAULT NULL,
   observacoes TEXT,
-  PRIMARY KEY (id)
+  vendedor VARCHAR(500) DEFAULT NULL,
+  origem VARCHAR(80) DEFAULT NULL,
+  estoque_lancado TINYINT(1) DEFAULT 0,
+  contas_lancadas TINYINT(1) DEFAULT 0,
+  separacao VARCHAR(40) DEFAULT 'PENDENTE',
+  expedicao VARCHAR(40) DEFAULT 'PENDENTE',
+  detalhes LONGTEXT,
+  natureza_operacao_id INT DEFAULT NULL,
+  natureza_operacao VARCHAR(180) DEFAULT NULL,
+  cfop VARCHAR(4) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY status (status),
+  KEY cliente_id (cliente_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS pedidos_venda_itens (
@@ -444,3 +537,65 @@ CREATE TABLE IF NOT EXISTS produto_componentes (
   quantidade DECIMAL(15,4) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS auditoria_log (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  entidade VARCHAR(40) DEFAULT NULL,
+  registro_id BIGINT DEFAULT NULL,
+  registro_nome VARCHAR(255) DEFAULT NULL,
+  acao VARCHAR(20) DEFAULT NULL,
+  usuario_id BIGINT DEFAULT NULL,
+  usuario_login VARCHAR(80) DEFAULT NULL,
+  usuario_nome VARCHAR(150) DEFAULT NULL,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  alteracoes LONGTEXT,
+  PRIMARY KEY (id),
+  KEY idx_auditoria_entidade (entidade, registro_id),
+  KEY idx_auditoria_data (criado_em)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS produto_midia (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  produto_id BIGINT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  nome VARCHAR(255) DEFAULT NULL,
+  mime VARCHAR(120) DEFAULT NULL,
+  tamanho BIGINT DEFAULT NULL,
+  arquivo VARCHAR(500) DEFAULT NULL,
+  url_externa VARCHAR(500) DEFAULT NULL,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY produto_id (produto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS produto_anuncio (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  produto_id BIGINT NOT NULL,
+  canal VARCHAR(40) NOT NULL,
+  codigo VARCHAR(80) DEFAULT NULL,
+  status VARCHAR(40) DEFAULT NULL,
+  video_enviado TINYINT(1) DEFAULT 0,
+  fotos_enviadas INT DEFAULT 0,
+  video_remoto VARCHAR(120) DEFAULT NULL,
+  mensagem VARCHAR(500) DEFAULT NULL,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY produto_id (produto_id),
+  KEY canal (canal)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS bens_patrimoniais (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  tipo VARCHAR(40) DEFAULT NULL,
+  nome VARCHAR(255) DEFAULT NULL,
+  descricao TEXT,
+  valor_aquisicao DECIMAL(12,2) DEFAULT 0,
+  data_aquisicao DATE DEFAULT NULL,
+  data_baixa DATE DEFAULT NULL,
+  status VARCHAR(30) DEFAULT 'ATIVO',
+  localizacao VARCHAR(255) DEFAULT NULL,
+  observacao TEXT,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+

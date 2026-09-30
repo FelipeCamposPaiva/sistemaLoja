@@ -1,0 +1,32 @@
+ALTER TABLE produtos ADD COLUMN imagem VARCHAR(500) DEFAULT NULL;
+ALTER TABLE produtos ADD COLUMN midia LONGTEXT NULL;
+
+CREATE TABLE IF NOT EXISTS produto_midia (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  produto_id BIGINT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  nome VARCHAR(255) DEFAULT NULL,
+  mime VARCHAR(120) DEFAULT NULL,
+  tamanho BIGINT DEFAULT NULL,
+  arquivo VARCHAR(500) DEFAULT NULL,
+  url_externa VARCHAR(500) DEFAULT NULL,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY produto_id (produto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS produto_anuncio (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  produto_id BIGINT NOT NULL,
+  canal VARCHAR(40) NOT NULL,
+  codigo VARCHAR(80) DEFAULT NULL,
+  status VARCHAR(40) DEFAULT NULL,
+  video_enviado TINYINT(1) DEFAULT 0,
+  fotos_enviadas INT DEFAULT 0,
+  video_remoto VARCHAR(120) DEFAULT NULL,
+  mensagem VARCHAR(500) DEFAULT NULL,
+  atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY produto_id (produto_id),
+  KEY canal (canal)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

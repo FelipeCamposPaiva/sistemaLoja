@@ -96,7 +96,7 @@ public class AuthService {
 
         ) {
 
-            throw new RuntimeException(
+            throw new BadCredentialsException(
 
                     "Usuário inativo."
 
@@ -114,7 +114,7 @@ public class AuthService {
 
         ) {
 
-            throw new RuntimeException(
+            throw new BadCredentialsException(
 
                     "Usuário bloqueado."
 

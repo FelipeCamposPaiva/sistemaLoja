@@ -2,8 +2,8 @@
 
     /* CORES */
 
-    --primary:#2563eb;
-    --primary-hover:#1d4ed8;
+    --primary:#ff2f92;
+    --primary-hover:#e0187d;
 
     --success:#22c55e;
     --warning:#f59e0b;
@@ -12,19 +12,19 @@
 
     /* BACKGROUND */
 
-    --bg:#0f172a;
-    --bg-secondary:#111827;
-    --card:#171c28;
-    --card-hover:#202738;
+    --bg:#fff3f7;
+    --bg-secondary:#fff7fa;
+    --card:#ffffff;
+    --card-hover:#ffe4f0;
 
     /* TEXTO */
 
-    --text:#ffffff;
-    --text-secondary:#94a3b8;
+    --text:#3d2a34;
+    --text-secondary:#9a7384;
 
     /* BORDAS */
 
-    --border:#252d3d;
+    --border:#f3cfe0;
 
     /* RAIO */
 

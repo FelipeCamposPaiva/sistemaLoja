@@ -1,0 +1,121 @@
+.dash-exp-kpis {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.dash-exp .dash-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.dash-exp .dash-pills select,
+.dash-exp .dash-pills button,
+.dash-exp .dash-pills a {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    background: var(--panel);
+    color: inherit;
+}
+
+.dash-exp-prefs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    font-size: 13px;
+}
+
+.dash-exp-prefs input[type="number"] {
+    width: 72px;
+    margin-left: 6px;
+}
+
+.dash-exp-kanban {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.dash-exp-col {
+    min-height: 280px;
+}
+
+.dash-exp-col h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dash-exp-col h4 i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dash-exp-col h4 b {
+    margin-left: auto;
+}
+
+.dash-exp-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dash-exp-col li {
+    display: grid;
+    gap: 2px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+}
+
+.dash-exp-col li a {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dash-exp-col em {
+    color: var(--muted);
+    font-style: normal;
+    font-size: 12px;
+}
+
+.dash-exp.is-kiosk .dash-crumb,
+.dash-exp.is-kiosk .dash-exp-prefs {
+    display: none;
+}
+
+.dash-exp.is-kiosk .dash-kpi strong {
+    font-size: 42px;
+}
+
+.dash-exp.is-kiosk .dash-exp-col li {
+    font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+    .dash-exp-kpis,
+    .dash-exp-kanban {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .dash-exp-kpis,
+    .dash-exp-kanban {
+        grid-template-columns: 1fr;
+    }
+}

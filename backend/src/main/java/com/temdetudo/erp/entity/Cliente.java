@@ -48,6 +48,27 @@ public class Cliente {
     @Column(name = "tiny_id")
     private Integer tinyId;
 
+    @Column(name = "tipo_pessoa", length = 20)
+    private String tipoPessoa;
+
+    @Column(length = 2)
+    private String contribuinte;
+
+    @Column(length = 30)
+    private String ie;
+
+    @Column(name = "consumidor_final")
+    private Boolean consumidorFinal;
+
+    @Column(length = 20)
+    private String finalidade;
+
+    @Column(name = "regime_tributario", length = 30)
+    private String regimeTributario;
+
+    @Column(name = "natureza_operacao_id")
+    private Long naturezaOperacaoId;
+
     // GETTERS E SETTERS
 
     public Long getId() {
@@ -176,5 +197,61 @@ public class Cliente {
 
     public void setTinyId(Integer tinyId) {
         this.tinyId = tinyId;
+    }
+
+    public String getTipoPessoa() {
+        return tipoPessoa;
+    }
+
+    public void setTipoPessoa(String tipoPessoa) {
+        this.tipoPessoa = tipoPessoa;
+    }
+
+    public String getContribuinte() {
+        return contribuinte;
+    }
+
+    public void setContribuinte(String contribuinte) {
+        this.contribuinte = contribuinte;
+    }
+
+    public String getIe() {
+        return ie;
+    }
+
+    public void setIe(String ie) {
+        this.ie = ie;
+    }
+
+    public Boolean getConsumidorFinal() {
+        return consumidorFinal;
+    }
+
+    public void setConsumidorFinal(Boolean consumidorFinal) {
+        this.consumidorFinal = consumidorFinal;
+    }
+
+    public String getFinalidade() {
+        return finalidade;
+    }
+
+    public void setFinalidade(String finalidade) {
+        this.finalidade = finalidade;
+    }
+
+    public String getRegimeTributario() {
+        return regimeTributario;
+    }
+
+    public void setRegimeTributario(String regimeTributario) {
+        this.regimeTributario = regimeTributario;
+    }
+
+    public Long getNaturezaOperacaoId() {
+        return naturezaOperacaoId;
+    }
+
+    public void setNaturezaOperacaoId(Long naturezaOperacaoId) {
+        this.naturezaOperacaoId = naturezaOperacaoId;
     }
 }

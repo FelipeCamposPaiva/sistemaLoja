@@ -31,4 +31,18 @@ public class AgendaEventoController {
 
         return repository.save(evento);
     }
+
+    @PutMapping("/{id}")
+    public AgendaEvento atualizar(
+            @PathVariable Long id,
+            @RequestBody AgendaEvento evento) {
+
+        evento.setId(id);
+        return repository.save(evento);
+    }
+
+    @DeleteMapping("/{id}")
+    public void excluir(@PathVariable Long id) {
+        repository.deleteById(id);
+    }
 }

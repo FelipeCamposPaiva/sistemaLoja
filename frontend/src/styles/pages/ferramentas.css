@@ -1,0 +1,308 @@
+.fer-title {
+    margin: 8px 0 16px;
+    font-size: 32px;
+}
+
+.int-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.int-add {
+    margin-top: 0;
+}
+
+.int-aviso {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.fer-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+}
+
+.fer-tabs button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.fer-tabs button.is-active.is-ok {
+    border-bottom-color: #22c55e;
+}
+
+.fer-tabs button.is-active.is-err {
+    border-bottom-color: #ef4444;
+}
+
+.fer-grupos h3 {
+    margin: 18px 0 8px;
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.fer-grupos ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.fer-grupos li {
+    margin: 0 0 6px;
+}
+
+.fer-grupos a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.fer-grupos a:hover {
+    text-decoration: underline;
+}
+
+.fer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.fer-head h2 {
+    margin: 8px 0 0;
+    font-size: 28px;
+}
+
+.fer-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.fer-filtros input {
+    flex: 1;
+    min-width: 180px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 12px 9px 34px;
+    font: inherit;
+}
+
+.fer-search {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+}
+
+.fer-search svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+}
+
+.fer-chip {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+select.fer-chip {
+    appearance: auto;
+    background: var(--panel);
+    color: var(--text);
+}
+
+.fer-empty {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 28px 32px;
+}
+
+.fer-empty.is-warn {
+    border-color: #f59e0b;
+}
+
+.fer-empty.is-ok {
+    border-color: #38bdf8;
+}
+
+.fer-empty p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    max-width: 420px;
+}
+
+.fer-gato {
+    width: 140px;
+    height: 110px;
+    flex-shrink: 0;
+}
+
+.fer-ajuda {
+    margin-top: 24px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.fer-ajuda a {
+    color: var(--accent);
+}
+
+.fer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.fer-table th,
+.fer-table td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+
+.fer-table th {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.fer-fail {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ef4444;
+    display: inline-block;
+}
+
+.fer-ok {
+    color: var(--accent);
+}
+
+.fer-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.fer-form {
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fer-form label,
+.fer-drawer label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.fer-form input,
+.fer-form select,
+.fer-drawer input,
+.fer-drawer select {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.fer-check {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+}
+
+.fer-mes {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fer-mes button {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.fer-page {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.fer-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.fer-scroll {
+    overflow: auto;
+}
+
+.fer-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #27272a;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    color: var(--muted);
+}
+
+@media (max-width: 900px) {
+    .fer-empty {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fer-page {
+        flex-direction: column;
+    }
+}

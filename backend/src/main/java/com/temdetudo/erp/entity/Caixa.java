@@ -28,6 +28,8 @@ public class Caixa {
     @Column(name = "referencia_id")
     private Long referenciaId;
 
+    private String categoria;
+
     public Long getId() {
         return id;
     }
@@ -82,5 +84,13 @@ public class Caixa {
 
     public void setReferenciaId(Long referenciaId) {
         this.referenciaId = referenciaId;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }

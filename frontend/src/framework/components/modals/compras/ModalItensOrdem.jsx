@@ -4,7 +4,7 @@ import {
   listarItens,
   salvarItem,
   excluirItem
-} from "../../services/OrdemCompraItemService";
+} from "../../../../services/OrdemCompraItemService";
 
 export default function ModalItensOrdem({
   aberto,

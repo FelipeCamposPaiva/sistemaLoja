@@ -25,7 +25,7 @@ const initialState = {
 
     resolvedMode: "light",
 
-    accent: "#2563eb",
+    accent: "#ff2f92",
 
     radius: 8,
 

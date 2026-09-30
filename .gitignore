@@ -29,7 +29,8 @@ Thumbs.db
 *.sw?
 
 # Banco local (H2 / dumps)
-backend/data/
+backend/uploads/
+uploads/
 *.mv.db
 *.trace.db
 

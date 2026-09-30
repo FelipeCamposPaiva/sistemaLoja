@@ -1,0 +1,1277 @@
+body.is-loja-publica {
+    background: #fff;
+    overflow: auto;
+}
+
+body.is-loja-publica #root {
+    min-height: 100%;
+    height: auto;
+}
+
+.loja-site {
+    --lj-pink: #f394bd;
+    --lj-price: #9e6d9a;
+    --lj-lilac: #ecd6fc;
+    --lj-menu: #ecd6fc;
+    --lj-menu-txt: #8632c1;
+    --lj-icon: #8632c1;
+    --lj-wa: #5ed979;
+    min-height: 100vh;
+    background: var(--lj-bg, #fff);
+    color: var(--lj-text, #201f1f);
+    font-family: "Anek Latin", Inter, "Segoe UI", sans-serif;
+}
+
+.loja-site a {
+    text-decoration: none;
+}
+
+.lj-erp-bar {
+    background: #3d2a34;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.lj-erp-bar a {
+    color: #f9a8d4;
+}
+
+.lj-top {
+    background: #fff;
+    border-bottom: 1px solid #f3e8ef;
+}
+
+.lj-top.is-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+}
+
+.lj-top-inner,
+.lj-nav-inner,
+.lj-foot-grid,
+.lj-foot-bar,
+.lj-sec {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.lj-top-inner {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, max-content);
+    gap: 18px;
+    align-items: center;
+    padding: 10px 0 12px;
+}
+
+.lj-brand {
+    display: flex;
+    align-items: center;
+}
+
+.lj-logo-svg {
+    width: 132px;
+    height: 44px;
+}
+
+.lj-logo-img {
+    height: 52px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+}
+
+.lj-burger {
+    display: none;
+    border: 0;
+    background: transparent;
+    color: #ff2f92;
+}
+
+.lj-search {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    background: #f7f7f8;
+    border: 1px solid #eee;
+    border-radius: 999px;
+    padding: 4px 4px 4px 16px;
+}
+
+.lj-search input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 10px 8px;
+    font: inherit;
+}
+
+.lj-search button {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #888;
+}
+
+.lj-top-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.lj-atende {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--lj-icon);
+    font-size: 12px;
+    line-height: 1.2;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.lj-atende strong {
+    display: block;
+    font-weight: 600;
+}
+
+.lj-bag {
+    position: relative;
+    color: #444;
+}
+
+.lj-bag em {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: var(--lj-pink);
+    color: #fff;
+    font-size: 10px;
+    font-style: normal;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 99px;
+    display: grid;
+    place-items: center;
+    padding: 0 4px;
+}
+
+.lj-nav {
+    background: var(--lj-menu);
+    border-bottom: 1px solid #f3e8ef;
+    color: var(--lj-menu-txt);
+}
+
+.lj-nav-inner {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 14px;
+    color: var(--lj-menu-txt);
+    overflow-x: auto;
+}
+
+.lj-nav-inner a {
+    color: inherit;
+}
+
+.lj-nav-inner a:hover,
+.lj-nav-inner a.active {
+    color: var(--lj-pink);
+}
+
+.lj-cats {
+    position: relative;
+}
+
+.lj-cats > button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: inherit;
+}
+
+.lj-mega {
+    position: absolute;
+    top: 120%;
+    left: 0;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid #f3e8ef;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+    min-width: 360px;
+    padding: 12px;
+    gap: 4px;
+}
+
+.lj-mega a {
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.lj-mega a:hover {
+    background: #fff1f7;
+}
+
+.lj-drawer {
+    position: fixed;
+    inset: 0 30% 0 0;
+    background: #fff;
+    z-index: 40;
+    padding: 48px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.12);
+}
+
+.lj-drawer-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: 0;
+    background: transparent;
+}
+
+.lj-main {
+    background: #fff;
+    padding-bottom: 48px;
+}
+
+.lj-hero {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    align-items: center;
+    min-height: 280px;
+    margin: 0;
+    background:
+        radial-gradient(circle at 12% 20%, #fff 0 18px, transparent 19px),
+        linear-gradient(180deg, #fde7f6 0%, #f9c6e8 55%, #f7b4e0 100%);
+    overflow: hidden;
+}
+
+.lj-hero--copa {
+    display: block;
+    min-height: 220px;
+    background: linear-gradient(90deg, #111 0%, #14532d 40%, #fff 100%);
+    color: #fff;
+}
+
+.lj-hero-copa {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 48px 0;
+}
+
+.lj-hero-copa span {
+    background: #22c55e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.lj-hero-copy {
+    text-align: center;
+    color: #e91e8c;
+}
+
+.lj-hero-copy em {
+    display: block;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.lj-hero-copy strong {
+    display: block;
+    font-size: 64px;
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+}
+
+.lj-hero-copy small {
+    color: #9d4d7a;
+}
+
+.lj-hero-art {
+    position: relative;
+    height: 220px;
+}
+
+.lj-pen,
+.lj-cup,
+.lj-key {
+    position: absolute;
+    border-radius: 999px;
+}
+
+.lj-pen {
+    width: 18px;
+    height: 150px;
+    transform: rotate(-28deg);
+    background: linear-gradient(#fff, #f9a8d4);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.lj-pen.is-a { left: 18%; top: 20px; background: linear-gradient(#fff, #f472b6); }
+.lj-pen.is-b { left: 38%; top: 8px; background: linear-gradient(#111, #333); }
+.lj-pen.is-c { left: 56%; top: 28px; background: linear-gradient(#60a5fa, #1d4ed8); }
+.lj-key { width: 54px; height: 54px; left: 8%; bottom: 28px; background: #fde68a; border-radius: 12px; }
+.lj-cup { width: 88px; height: 120px; border-radius: 18px 18px 28px 28px; bottom: 24px; }
+.lj-cup.is-a { right: 18%; background: #f472b6; }
+.lj-cup.is-b { right: 38%; background: #7c3aed; height: 100px; }
+.lj-cup.is-c { right: 8%; background: #111; }
+
+.lj-selos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 18px 0;
+    border-bottom: 1px solid #f3e8ef;
+}
+
+.lj-selos li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    color: #666;
+    font-size: 13px;
+}
+
+.lj-selos strong {
+    display: block;
+    color: #333;
+}
+
+.lj-cats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin: 22px auto;
+}
+
+.lj-heart.is-on,
+.lj-wish.is-on {
+    color: var(--lj-price);
+}
+
+.lj-cat-tile {
+    min-height: 110px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 16px;
+}
+
+.lj-cat-tile img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.lj-sec {
+    padding: 28px 0 8px;
+}
+
+.lj-sec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.lj-sec h1,
+.lj-sec h2 {
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+    flex: 1;
+}
+
+.lj-sec-head h2 {
+    text-align: center;
+}
+
+.lj-center {
+    text-align: center;
+}
+
+.lj-arrows {
+    display: flex;
+    gap: 6px;
+}
+
+.lj-arrows button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    background: #fff;
+}
+
+.lj-arrows button:disabled {
+    opacity: 0.4;
+}
+
+.lj-track,
+.lj-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.lj-grid {
+    margin-top: 18px;
+}
+
+.lj-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.lj-card-foto {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 48px;
+    overflow: hidden;
+}
+
+.lj-card-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lj-heart {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #999;
+}
+
+.lj-card-nome {
+    font-size: 12px;
+    color: #555;
+    min-height: 36px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lj-card-preco {
+    color: var(--lj-price);
+}
+
+.lj-card-preco small {
+    display: block;
+    color: #888;
+    font-size: 11px;
+}
+
+.lj-card-preco strong {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.lj-card-acoes {
+    display: flex;
+    gap: 8px;
+}
+
+.lj-qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.lj-qty button {
+    width: 28px;
+    height: 32px;
+    border: 0;
+    background: #fafafa;
+}
+
+.lj-qty span {
+    min-width: 24px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.lj-add {
+    flex: 1;
+    border: 0;
+    border-radius: 8px;
+    background: var(--lj-pink);
+    color: #fff;
+    font-weight: 700;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.lj-add:hover {
+    background: var(--lj-pink);
+}
+
+.lj-wa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--lj-wa);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.lj-marcas {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.lj-marca {
+    min-height: 88px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #444;
+    text-align: center;
+    padding: 8px;
+}
+
+.lj-deps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.lj-deps article {
+    background: #fff;
+    border: 1px solid #f3e8ef;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+}
+
+.lj-deps span {
+    color: #fbbf24;
+    display: block;
+    margin-top: 8px;
+}
+
+.lj-muted {
+    color: #888;
+    font-size: 13px;
+}
+
+.lj-empty,
+.lj-erro {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.lj-erro {
+    color: #b91c1c;
+}
+
+.lj-produto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.lj-produto-foto {
+    aspect-ratio: 1;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    font-size: 96px;
+}
+
+.lj-produto-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.lj-produto-preco {
+    color: var(--lj-price);
+    font-size: 32px;
+    font-weight: 700;
+    margin: 12px 0 18px;
+}
+
+.lj-rel {
+    margin-top: 40px;
+}
+
+.lj-cart ul {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lj-cart li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3e8ef;
+}
+
+.lj-cart footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.lj-form {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lj-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.lj-form input,
+.lj-form select {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.lj-linkish {
+    border: 0;
+    background: transparent;
+    color: var(--lj-pink);
+    margin: 12px 12px 0 0;
+}
+
+.lj-pagina {
+    max-width: 720px;
+    line-height: 1.6;
+}
+
+.lj-foot {
+    background: #f7f7f8;
+    padding: 36px 0 18px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #555;
+}
+
+.lj-foot-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 28px;
+}
+
+.lj-foot h3 {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.lj-foot a,
+.lj-foot p {
+    display: block;
+    margin: 6px 0;
+}
+
+.lj-end {
+    color: #888;
+}
+
+.lj-redes a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lj-foot-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.lj-float-wa {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--lj-wa, #27bf64);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
+    z-index: 30;
+    cursor: pointer;
+}
+
+.lj-suporte {
+    position: fixed;
+    right: 18px;
+    bottom: 86px;
+    width: min(320px, calc(100% - 36px));
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+    padding: 18px 16px 14px;
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lj-suporte-x {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.lj-suporte a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.lj-suporte a:hover {
+    background: #f7f7f8;
+}
+
+.lj-suporte img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.lj-fale {
+    background: #f7f7f8;
+    justify-content: center;
+}
+
+.lj-video {
+    background: #f7f7f7;
+    width: 100%;
+    max-width: none;
+    padding: 36px 16px;
+}
+
+.lj-video-grid {
+    width: min(1180px, 100%);
+    margin: 18px auto 0;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+}
+
+.lj-video-frame {
+    position: relative;
+    padding-top: 56.25%;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #111;
+}
+
+.lj-video-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.lj-video-prods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.lj-card.is-compact .lj-card-foto {
+    aspect-ratio: 1.1;
+}
+
+.lj-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 8px;
+    display: block;
+}
+
+.lj-dep {
+    background: #fff;
+    border: 1px solid #f3e8ef;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    color: inherit;
+    display: block;
+}
+
+.lj-alerta {
+    background: #9e6d9a;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.lj-cupom {
+    background: #fff7ed;
+    border: 1px dashed #ee8403;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 13px;
+}
+
+.lj-pix {
+    color: #199a64;
+    font-weight: 700;
+    margin: 0 0 12px;
+}
+
+.lj-box {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 16px 0;
+}
+
+.lj-box h3 {
+    color: var(--lj-price);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.lj-box label,
+.lj-calc-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #444;
+    margin-top: 10px;
+}
+
+.lj-box input,
+.lj-calc-grid input {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 10px;
+    font: inherit;
+}
+
+.lj-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.lj-calc-grid input {
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.lj-calc-result {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--lj-price);
+    margin-top: 12px;
+}
+
+.lj-wish {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    margin: 12px 0;
+}
+
+.lj-desc {
+    margin-top: 24px;
+}
+
+.lj-cart li small {
+    display: block;
+    color: #888;
+    font-size: 12px;
+}
+
+@media (max-width: 980px) {
+    .lj-video-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 980px) {
+    .lj-top-inner {
+        grid-template-columns: auto 1fr auto;
+    }
+    .lj-burger {
+        display: inline-flex;
+    }
+    .lj-top-links .lj-atende {
+        display: none;
+    }
+    .lj-nav {
+        display: none;
+    }
+    .lj-hero,
+    .lj-track,
+    .lj-grid,
+    .lj-marcas,
+    .lj-cats-grid,
+    .lj-selos,
+    .lj-deps,
+    .lj-produto-grid,
+    .lj-foot-grid,
+    .lj-foot-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+    .lj-hero {
+        min-height: 180px;
+    }
+    .lj-hero-copy strong {
+        font-size: 36px;
+    }
+    .lj-cart li {
+        grid-template-columns: 1fr auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .lj-track,
+    .lj-grid,
+    .lj-cats-grid,
+    .lj-marcas,
+    .lj-selos,
+    .lj-deps,
+    .lj-hero {
+        grid-template-columns: 1fr;
+    }
+}
+
+.lj-main:has(.lj-portais) {
+    padding-bottom: 0;
+}
+
+.lj-portais {
+    overflow: hidden;
+}
+
+.lj-portais-hero {
+    position: relative;
+    min-height: 280px;
+    padding: 48px 16px 140px;
+    text-align: center;
+    color: #c2186b;
+    background:
+        radial-gradient(circle at 8% 70%, #fff8 0 40px, transparent 41px),
+        radial-gradient(circle at 92% 30%, #fff6 0 50px, transparent 51px),
+        linear-gradient(180deg, #fdeef8 0%, #f8cfe8 42%, #f4b6dc 100%);
+}
+
+.lj-portais-kicker {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #9d4d7a;
+}
+
+.lj-portais-hero h1 {
+    margin: 8px 0 6px;
+    font-size: clamp(32px, 5vw, 48px);
+    color: #1f1a1d;
+}
+
+.lj-portais-sub {
+    margin: 0 auto;
+    max-width: 520px;
+    color: #6b4a5c;
+}
+
+.lj-portais-script {
+    position: absolute;
+    top: 36%;
+    width: 180px;
+    font-family: "Dancing Script", cursive;
+    font-size: 22px;
+    line-height: 1.2;
+    color: #e91e8c;
+}
+
+.lj-portais-script.is-left {
+    left: max(16px, calc(50% - 560px));
+    transform: rotate(-8deg);
+}
+
+.lj-portais-script.is-right {
+    right: max(16px, calc(50% - 560px));
+    transform: rotate(8deg);
+}
+
+.lj-portais-cards {
+    width: min(920px, calc(100% - 32px));
+    margin: -110px auto 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.lj-portal {
+    background: #fff;
+    border-radius: 22px;
+    padding: 28px 24px 20px;
+    box-shadow: 0 18px 40px rgba(157, 77, 122, 0.12);
+    text-align: center;
+}
+
+.lj-portal h2 {
+    margin: 8px 0 8px;
+    font-size: 22px;
+}
+
+.lj-portal > p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.45;
+    margin: 0 0 16px;
+}
+
+.lj-portal-badge {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+}
+
+.lj-portal.is-cliente {
+    background: linear-gradient(180deg, #fff7fb 0%, #fff 38%);
+}
+
+.lj-portal.is-cliente h2,
+.lj-portal.is-cliente .lj-portal-txt {
+    color: #e91e8c;
+}
+
+.lj-portal.is-cliente .lj-portal-badge,
+.lj-portal.is-cliente .lj-portal-btn {
+    background: #ff2f92;
+}
+
+.lj-portal.is-colab {
+    background: linear-gradient(180deg, #f7f2ff 0%, #fff 38%);
+}
+
+.lj-portal.is-colab h2,
+.lj-portal.is-colab .lj-portal-txt {
+    color: #6d28d9;
+}
+
+.lj-portal.is-colab .lj-portal-badge,
+.lj-portal.is-colab .lj-portal-btn {
+    background: #7c3aed;
+}
+
+.lj-portal form,
+.lj-portal-logado {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+}
+
+.lj-portal-logado {
+    align-items: stretch;
+}
+
+.lj-portal-logado strong,
+.lj-portal-logado span {
+    text-align: center;
+}
+
+.lj-portal-campo {
+    position: relative;
+    display: block;
+}
+
+.lj-portal-campo input {
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px 40px 12px 40px;
+    font: inherit;
+    background: #fff;
+}
+
+.lj-portal-ico,
+.lj-portal-olho {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0b0b0;
+    border: 0;
+    background: transparent;
+    display: inline-flex;
+}
+
+.lj-portal-ico {
+    left: 12px;
+}
+
+.lj-portal-olho {
+    right: 8px;
+    cursor: pointer;
+}
+
+.lj-portal-btn {
+    border: 0;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.lj-portal-txt {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    margin: 10px 0 4px;
+}
+
+.lj-portal-atalhos {
+    list-style: none;
+    padding: 12px 0 0;
+    margin: 8px 0 0;
+    border-top: 1px solid #f3e8ef;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #9d4d7a;
+    font-size: 11px;
+}
+
+.lj-portal.is-colab .lj-portal-atalhos {
+    color: #6d28d9;
+}
+
+.lj-portal-atalhos li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    line-height: 1.2;
+}
+
+@media (max-width: 820px) {
+    .lj-portais-script {
+        display: none;
+    }
+    .lj-portais-cards {
+        grid-template-columns: 1fr;
+        margin-top: -80px;
+    }
+}

@@ -23,6 +23,9 @@ public class Inventario {
 
     private String observacao;
 
+    @Column(length = 255)
+    private String localizacao;
+
     public Long getId() {
         return id;
     }
@@ -61,5 +64,13 @@ public class Inventario {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    public String getLocalizacao() {
+        return localizacao;
+    }
+
+    public void setLocalizacao(String localizacao) {
+        this.localizacao = localizacao;
     }
 }

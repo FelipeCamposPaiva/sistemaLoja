@@ -29,12 +29,32 @@ public class EstoqueMovimentacao {
     private String observacao;
 
     @Column(name = "usuario_id")
-    private Integer usuarioId;
+    private Long usuarioId;
+
+    @Column(name = "usuario_nome")
+    private String usuarioNome;
 
     @Column(name = "data_movimento")
     private LocalDateTime dataMovimento;
 
-    // GETTERS E SETTERS
+    private String origem;
+
+    @Column(name = "origem_id")
+    private Long origemId;
+
+    @Column(name = "origem_ref")
+    private String origemRef;
+
+    @Column(name = "saldo_anterior")
+    private BigDecimal saldoAnterior;
+
+    @Column(name = "saldo_posterior")
+    private BigDecimal saldoPosterior;
+
+    private String status;
+
+    @Column(name = "movimento_origem_id")
+    private Long movimentoOrigemId;
 
     public Long getId() {
         return id;
@@ -92,12 +112,20 @@ public class EstoqueMovimentacao {
         this.observacao = observacao;
     }
 
-    public Integer getUsuarioId() {
+    public Long getUsuarioId() {
         return usuarioId;
     }
 
-    public void setUsuarioId(Integer usuarioId) {
+    public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+
+    public String getUsuarioNome() {
+        return usuarioNome;
+    }
+
+    public void setUsuarioNome(String usuarioNome) {
+        this.usuarioNome = usuarioNome;
     }
 
     public LocalDateTime getDataMovimento() {
@@ -106,5 +134,61 @@ public class EstoqueMovimentacao {
 
     public void setDataMovimento(LocalDateTime dataMovimento) {
         this.dataMovimento = dataMovimento;
+    }
+
+    public String getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
+    }
+
+    public Long getOrigemId() {
+        return origemId;
+    }
+
+    public void setOrigemId(Long origemId) {
+        this.origemId = origemId;
+    }
+
+    public String getOrigemRef() {
+        return origemRef;
+    }
+
+    public void setOrigemRef(String origemRef) {
+        this.origemRef = origemRef;
+    }
+
+    public BigDecimal getSaldoAnterior() {
+        return saldoAnterior;
+    }
+
+    public void setSaldoAnterior(BigDecimal saldoAnterior) {
+        this.saldoAnterior = saldoAnterior;
+    }
+
+    public BigDecimal getSaldoPosterior() {
+        return saldoPosterior;
+    }
+
+    public void setSaldoPosterior(BigDecimal saldoPosterior) {
+        this.saldoPosterior = saldoPosterior;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getMovimentoOrigemId() {
+        return movimentoOrigemId;
+    }
+
+    public void setMovimentoOrigemId(Long movimentoOrigemId) {
+        this.movimentoOrigemId = movimentoOrigemId;
     }
 }

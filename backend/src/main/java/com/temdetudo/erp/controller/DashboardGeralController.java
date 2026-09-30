@@ -19,7 +19,7 @@ public class DashboardGeralController {
     private ProdutoRepository produtoRepository;
 
     @Autowired
-    private ProducaoRepository producaoRepository;
+    private OrdemServicoRepository ordemServicoRepository;
 
     @Autowired
     private CaixaRepository caixaRepository;
@@ -29,6 +29,9 @@ public class DashboardGeralController {
 
     @Autowired
     private ContaPagarRepository pagarRepository;
+
+    @Autowired
+    private com.temdetudo.erp.service.DashboardSuprimentosService dashboardSuprimentos;
 
     @GetMapping
     public DashboardGeralDTO dashboard() {
@@ -44,21 +47,28 @@ public class DashboardGeralController {
                 produtoRepository.count()
         );
 
-        dto.setTotalOS(
-                producaoRepository.count()
-        );
+        java.util.List<com.temdetudo.erp.entity.OrdemServico> ordens =
+                ordemServicoRepository.findAll();
 
-        dto.setOsProducao(
-                (long)
-                producaoRepository
-                        .findByStatus(
-                                "PRODUCAO"
-                        )
-                        .size()
-        );
+        dto.setTotalOS((long) ordens.size());
+
+        dto.setOsProducao(ordens.stream()
+                .filter(o -> {
+                    String s = o.getStatus() == null ? "" : o.getStatus().toUpperCase();
+                    return s.contains("PRODUC") || s.contains("ARTE") || s.contains("ACABAMENTO")
+                            || s.contains("ANDAMENTO");
+                })
+                .count());
+
+        dto.setTotalOrcamentos(ordens.stream()
+                .filter(o -> {
+                    String s = o.getStatus() == null ? "" : o.getStatus().toUpperCase();
+                    return s.contains("ORCAMENT") || s.contains("ORÇAMENT") || s.contains("EM_ABERTO");
+                })
+                .count());
 
         dto.setEstoqueBaixo(
-                0L
+                dashboardSuprimentos.contarReposicao()
         );
 
         dto.setSaldoCaixa(

@@ -22,6 +22,8 @@ const API_ENDPOINTS = {
 
     PEDIDOS: "/pedidos",
 
+    PEDIDOS_VENDA: "/pedidos-venda",
+
     ORCAMENTOS: "/orcamentos",
 
     ORDEM_SERVICO: "/os",
@@ -35,6 +37,8 @@ const API_ENDPOINTS = {
     CONTAS_RECEBER: "/contas-receber",
 
     CAIXA: "/caixa",
+
+    BALANCO_PATRIMONIAL: "/balanco-patrimonial",
 
     USUARIOS: "/usuarios",
 

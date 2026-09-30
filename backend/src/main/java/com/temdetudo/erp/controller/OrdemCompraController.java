@@ -2,20 +2,17 @@ package com.temdetudo.erp.controller;
 
 import com.temdetudo.erp.entity.OrdemCompra;
 import com.temdetudo.erp.entity.OrdemCompraItem;
-import com.temdetudo.erp.entity.Produto;
-import com.temdetudo.erp.entity.EstoqueMovimentacao;
-
+import com.temdetudo.erp.estoque.EstoqueOrigem;
 import com.temdetudo.erp.repository.OrdemCompraRepository;
 import com.temdetudo.erp.repository.OrdemCompraItemRepository;
-import com.temdetudo.erp.repository.ProdutoRepository;
-import com.temdetudo.erp.repository.EstoqueMovimentacaoRepository;
+import com.temdetudo.erp.service.EstoqueAuditoriaService;
+import com.temdetudo.erp.service.AuditoriaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.transaction.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,144 +28,83 @@ public class OrdemCompraController {
     private OrdemCompraItemRepository itemRepository;
 
     @Autowired
-    private ProdutoRepository produtoRepository;
+    private EstoqueAuditoriaService auditoriaService;
 
     @Autowired
-    private EstoqueMovimentacaoRepository movimentacaoRepository;
+    private AuditoriaService auditoria;
 
     @GetMapping
     public List<OrdemCompra> listar() {
-
         return repository.findAll();
-
     }
 
     @GetMapping("/{id}")
-    public OrdemCompra buscar(
-            @PathVariable Long id
-    ) {
-
-        return repository.findById(id)
-                .orElseThrow();
-
+    public OrdemCompra buscar(@PathVariable Long id) {
+        return repository.findById(id).orElseThrow();
     }
 
     @PostMapping
-    public OrdemCompra salvar(
-            @RequestBody OrdemCompra ordem
-    ) {
-
-        ordem.setDataEmissao(
-                LocalDateTime.now()
-        );
-
-        ordem.setStatus(
-                "ABERTA"
-        );
-
-        return repository.save(
-                ordem
-        );
-
+    public OrdemCompra salvar(@RequestBody OrdemCompra ordem) {
+        ordem.setDataEmissao(LocalDateTime.now());
+        ordem.setStatus("ABERTA");
+        OrdemCompra salvo = repository.save(ordem);
+        auditoria.registrarCriacao("PEDIDO", salvo.getId(), "OC #" + salvo.getId(), salvo);
+        return salvo;
     }
 
     @PutMapping("/{id}")
-    public OrdemCompra atualizar(
-            @PathVariable Long id,
-            @RequestBody OrdemCompra ordem
-    ) {
-
+    public OrdemCompra atualizar(@PathVariable Long id, @RequestBody OrdemCompra ordem) {
+        OrdemCompra anterior = repository.findById(id).orElseThrow();
+        var antes = auditoria.snapshot(anterior);
         ordem.setId(id);
-
-        return repository.save(
-                ordem
-        );
-
+        OrdemCompra salvo = repository.save(ordem);
+        auditoria.registrarAlteracao("PEDIDO", id, "OC #" + id, antes, auditoria.snapshot(salvo));
+        return salvo;
     }
 
     @DeleteMapping("/{id}")
-    public void excluir(
-            @PathVariable Long id
-    ) {
-
+    public void excluir(@PathVariable Long id) {
+        OrdemCompra ordem = repository.findById(id).orElseThrow();
+        if ("RECEBIDA".equalsIgnoreCase(ordem.getStatus())) {
+            throw new IllegalStateException(
+                    "Pedido já recebido. Estorne o estoque antes de cancelar para manter o histórico."
+            );
+        }
         repository.deleteById(id);
-
+        auditoria.registrarExclusao("PEDIDO", id, "OC #" + id, ordem);
     }
 
     @PutMapping("/{id}/receber")
     @Transactional
-    public OrdemCompra receber(
-            @PathVariable Long id
-    ) {
-
-        OrdemCompra ordem =
-                repository.findById(id)
-                        .orElseThrow();
-
-        List<OrdemCompraItem> itens =
-                itemRepository.findByOrdemId(id);
+    public OrdemCompra receber(@PathVariable Long id) {
+        OrdemCompra ordem = repository.findById(id).orElseThrow();
+        List<OrdemCompraItem> itens = itemRepository.findByOrdemId(id);
 
         for (OrdemCompraItem item : itens) {
-
-            Produto produto =
-                    produtoRepository
-                            .findById(
-                                    item.getProdutoId()
-                            )
-                            .orElseThrow();
-
-            BigDecimal estoqueAtual =
-                    produto.getEstoque() == null
-                            ? BigDecimal.ZERO
-                            : produto.getEstoque();
-
-            produto.setEstoque(
-                    estoqueAtual.add(
-                            item.getQuantidade()
-                    )
-            );
-
-            produtoRepository.save(
-                    produto
-            );
-
-            EstoqueMovimentacao mov =
-                    new EstoqueMovimentacao();
-
-            mov.setProdutoId(
-                    produto.getId()
-            );
-
-            mov.setTipo(
-                    "ENTRADA"
-            );
-
-            mov.setQuantidade(
-                    item.getQuantidade()
-            );
-
-            mov.setObservacao(
+            auditoriaService.registrarEntrada(
+                    item.getProdutoId(),
+                    item.getQuantidade(),
+                    EstoqueOrigem.PEDIDO,
+                    id,
+                    "Pedido OC #" + id,
                     "Recebimento OC #" + id
             );
-
-            mov.setDataMovimento(
-                    LocalDateTime.now()
-            );
-
-            movimentacaoRepository.save(
-                    mov
-            );
-
         }
 
-        ordem.setStatus(
-                "RECEBIDA"
-        );
-
-        return repository.save(
-                ordem
-        );
-
+        ordem.setStatus("RECEBIDA");
+        OrdemCompra salvo = repository.save(ordem);
+        auditoria.registrarResumo("PEDIDO", id, "OC #" + id, "ALTERAR", "recebimento da ordem de compra");
+        return salvo;
     }
 
+    @PutMapping("/{id}/estornar")
+    @Transactional
+    public OrdemCompra estornar(@PathVariable Long id) {
+        OrdemCompra ordem = repository.findById(id).orElseThrow();
+        auditoriaService.estornarOrigem(EstoqueOrigem.PEDIDO, id);
+        ordem.setStatus("ESTORNADA");
+        OrdemCompra salvo = repository.save(ordem);
+        auditoria.registrarResumo("PEDIDO", id, "OC #" + id, "ALTERAR", "estorno da ordem de compra");
+        return salvo;
+    }
 }

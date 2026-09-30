@@ -1,0 +1,77 @@
+.aud-page .os-toolbar select {
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    padding: 0 12px;
+    background: #fff;
+}
+
+.aud-login {
+    display: block;
+    color: var(--muted, #7a5a68);
+    font-size: 12px;
+}
+
+.aud-campos {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 13px;
+}
+
+.aud-campos em {
+    font-style: normal;
+    font-weight: 600;
+}
+
+.aud-hint {
+    color: var(--muted, #7a5a68);
+    font-size: 13px;
+}
+
+.aud-hint {
+    color: var(--muted, #7a5a68);
+    font-size: 13px;
+}
+
+.aud-titulo {
+    margin: 18px 0 4px;
+    font-size: 15px;
+}
+
+.aud-ficha {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.aud-linha-tempo {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+}
+
+.aud-linha-tempo > li {
+    border-left: 2px solid var(--accent);
+    padding: 0 0 14px 12px;
+}
+
+.aud-linha-tempo strong {
+    display: block;
+}
+
+.aud-linha-tempo span {
+    color: var(--muted, #7a5a68);
+    font-size: 12px;
+}
+
+.aud-linha-tempo ul {
+    margin: 6px 0 0;
+    padding-left: 16px;
+}
+
+.aud-linha-tempo code {
+    font-size: 12px;
+    background: #fff3f7;
+    padding: 1px 4px;
+    border-radius: 4px;
+}

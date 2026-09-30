@@ -1,0 +1,57 @@
+.promo-page .os-tabs {
+    margin: 12px 0 16px;
+}
+
+.promo-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+
+.promo-acoes label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.promo-acoes input {
+    min-width: 140px;
+    min-height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 0 10px;
+}
+
+.prd-promo-preview {
+    grid-column: 1 / -1;
+    margin: 0 0 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(185, 28, 28, 0.12);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.prd-preco-de {
+    text-decoration: line-through;
+    color: var(--muted);
+    margin-right: 6px;
+}
+
+.prd-off {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #b91c1c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}

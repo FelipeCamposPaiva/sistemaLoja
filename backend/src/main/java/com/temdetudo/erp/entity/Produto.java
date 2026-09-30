@@ -37,6 +37,12 @@ public class Produto {
     @Column(name = "preco_atacado")
     private BigDecimal precoAtacado;
 
+    @Column(name = "preco_promocional")
+    private BigDecimal precoPromocional;
+
+    @Column(name = "desconto_percentual")
+    private BigDecimal descontoPercentual;
+
     private BigDecimal estoque;
 
     @Column(name = "estoque_minimo")
@@ -72,6 +78,12 @@ public class Produto {
 
     @Column(columnDefinition = "TEXT")
     private String observacoes;
+
+    @Column(length = 500)
+    private String imagem;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String midia;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
@@ -165,6 +177,22 @@ public class Produto {
 
     public void setPrecoAtacado(BigDecimal precoAtacado) {
         this.precoAtacado = precoAtacado;
+    }
+
+    public BigDecimal getPrecoPromocional() {
+        return precoPromocional;
+    }
+
+    public void setPrecoPromocional(BigDecimal precoPromocional) {
+        this.precoPromocional = precoPromocional;
+    }
+
+    public BigDecimal getDescontoPercentual() {
+        return descontoPercentual;
+    }
+
+    public void setDescontoPercentual(BigDecimal descontoPercentual) {
+        this.descontoPercentual = descontoPercentual;
     }
 
     public BigDecimal getEstoque() {
@@ -277,6 +305,22 @@ public class Produto {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public String getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(String imagem) {
+        this.imagem = imagem;
+    }
+
+    public String getMidia() {
+        return midia;
+    }
+
+    public void setMidia(String midia) {
+        this.midia = midia;
     }
 
     public LocalDateTime getCriadoEm() {

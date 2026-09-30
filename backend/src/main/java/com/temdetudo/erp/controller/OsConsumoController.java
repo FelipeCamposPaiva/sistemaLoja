@@ -1,15 +1,15 @@
 package com.temdetudo.erp.controller;
 
-import com.temdetudo.erp.entity.*;
-import com.temdetudo.erp.repository.*;
+import com.temdetudo.erp.entity.OsConsumo;
+import com.temdetudo.erp.estoque.EstoqueOrigem;
+import com.temdetudo.erp.repository.OsConsumoRepository;
+import com.temdetudo.erp.service.EstoqueAuditoriaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.transaction.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,119 +21,37 @@ public class OsConsumoController {
     private OsConsumoRepository repository;
 
     @Autowired
-    private ProdutoRepository produtoRepository;
-
-    @Autowired
-    private EstoqueMovimentacaoRepository movimentacaoRepository;
+    private EstoqueAuditoriaService auditoriaService;
 
     @GetMapping("/{osId}")
-    public List<OsConsumo> listar(
-            @PathVariable Long osId
-    ) {
-
-        return repository.findByOsId(
-                osId
-        );
-
+    public List<OsConsumo> listar(@PathVariable Long osId) {
+        return repository.findByOsId(osId);
     }
 
     @PostMapping
-    public OsConsumo salvar(
-            @RequestBody OsConsumo consumo
-    ) {
-
-        return repository.save(
-                consumo
-        );
-
+    public OsConsumo salvar(@RequestBody OsConsumo consumo) {
+        return repository.save(consumo);
     }
 
     @DeleteMapping("/{id}")
-    public void excluir(
-            @PathVariable Long id
-    ) {
-
+    public void excluir(@PathVariable Long id) {
         repository.deleteById(id);
-
     }
 
     @PutMapping("/consumir/{osId}")
     @Transactional
-    public void consumir(
-            @PathVariable Long osId
-    ) {
-
-        List<OsConsumo> consumos =
-                repository.findByOsId(
-                        osId
-                );
+    public void consumir(@PathVariable Long osId) {
+        List<OsConsumo> consumos = repository.findByOsId(osId);
 
         for (OsConsumo item : consumos) {
-
-            Produto produto =
-                    produtoRepository
-                            .findById(
-                                    item.getProdutoId()
-                            )
-                            .orElseThrow();
-
-            BigDecimal estoqueAtual =
-                    produto.getEstoque() == null
-                            ? BigDecimal.ZERO
-                            : produto.getEstoque();
-
-            if (
-                    estoqueAtual.compareTo(
-                            item.getQuantidade()
-                    ) < 0
-            ) {
-
-                throw new RuntimeException(
-                        "Estoque insuficiente para produto "
-                                + produto.getId()
-                );
-
-            }
-
-            produto.setEstoque(
-                    estoqueAtual.subtract(
-                            item.getQuantidade()
-                    )
-            );
-
-            produtoRepository.save(
-                    produto
-            );
-
-            EstoqueMovimentacao mov =
-                    new EstoqueMovimentacao();
-
-            mov.setProdutoId(
-                    produto.getId()
-            );
-
-            mov.setTipo(
-                    "SAIDA"
-            );
-
-            mov.setQuantidade(
-                    item.getQuantidade()
-            );
-
-            mov.setObservacao(
+            auditoriaService.registrarSaida(
+                    item.getProdutoId(),
+                    item.getQuantidade(),
+                    EstoqueOrigem.OS,
+                    osId,
+                    "OS #" + osId,
                     "Consumo OS #" + osId
             );
-
-            mov.setDataMovimento(
-                    LocalDateTime.now()
-            );
-
-            movimentacaoRepository.save(
-                    mov
-            );
-
         }
-
     }
-
 }

@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -32,6 +33,13 @@ function springBootPlugin() {
     if (!child || child.killed) {
       return;
     }
+    if (process.platform === "win32" && child.pid) {
+      spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+        windowsHide: true,
+        stdio: "ignore"
+      });
+      return;
+    }
     child.kill();
   }
 
@@ -48,23 +56,32 @@ function springBootPlugin() {
         return;
       }
 
-      const mvnw = path.join(backendDir, "mvnw.cmd");
-
       server.config.logger.info(
         "Iniciando Spring Boot (backend) na porta 8080..."
       );
 
       const tmpDir = path.join(backendDir, ".tmp");
+      fs.mkdirSync(tmpDir, { recursive: true });
 
-      child = spawn(mvnw, ["spring-boot:run"], {
-        cwd: backendDir,
-        stdio: "inherit",
-        windowsHide: true,
-        env: {
-          ...process.env,
-          JAVA_TOOL_OPTIONS: `-Djava.io.tmpdir=${tmpDir}`
-        }
-      });
+      const env = {
+        ...process.env,
+        JAVA_TOOL_OPTIONS: `-Djava.io.tmpdir=${tmpDir}`
+      };
+
+      // Node no Windows recusa spawn direto de .cmd (EINVAL). Usa cmd.exe /c.
+      child =
+        process.platform === "win32"
+          ? spawn(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", "mvnw.cmd spring-boot:run"], {
+              cwd: backendDir,
+              stdio: "inherit",
+              windowsHide: true,
+              env
+            })
+          : spawn("./mvnw", ["spring-boot:run"], {
+              cwd: backendDir,
+              stdio: "inherit",
+              env
+            });
 
       child.on("exit", (code) => {
         if (code && code !== 0) {
@@ -87,6 +104,10 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": {
+        target: `http://127.0.0.1:${BACKEND_PORT}`,
+        changeOrigin: true
+      },
+      "/uploads": {
         target: `http://127.0.0.1:${BACKEND_PORT}`,
         changeOrigin: true
       }

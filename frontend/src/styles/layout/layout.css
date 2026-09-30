@@ -4,7 +4,7 @@
 
     min-height:100vh;
 
-    background:#f5f7fb;
+    background:var(--bg);
 
 }
 
@@ -12,9 +12,9 @@
 
     width:260px;
 
-    background:#1e293b;
+    background:var(--panel);
 
-    color:white;
+    color:var(--text);
 
     display:flex;
 

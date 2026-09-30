@@ -76,16 +76,26 @@ public class AuthController {
     */
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(
+    public ResponseEntity<LoginResponse> me(
 
             Authentication authentication
 
     ) {
 
+        if (authentication == null || !(authentication.getPrincipal() instanceof Usuario usuario)) {
+            return ResponseEntity.status(401).build();
+        }
+
         return ResponseEntity.ok(
-
-                authentication.getPrincipal()
-
+                new LoginResponse(
+                        null,
+                        "Bearer",
+                        usuario.getId(),
+                        usuario.getNome(),
+                        usuario.getUsuario(),
+                        usuario.getEmail(),
+                        usuario.getPerfil() == null ? null : usuario.getPerfil().name()
+                )
         );
 
     }
