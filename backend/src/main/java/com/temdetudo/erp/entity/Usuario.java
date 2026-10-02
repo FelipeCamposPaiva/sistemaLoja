@@ -42,6 +42,21 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean bloqueado = false;
 
+    @Column(name = "dois_fatores")
+    private Boolean doisFatores = false;
+
+    @Column(name = "codigo_2fa", length = 12)
+    private String codigo2fa;
+
+    @Column(name = "codigo_2fa_expira")
+    private LocalDateTime codigo2faExpira;
+
+    @Column(name = "recuperacao_token", length = 64)
+    private String recuperacaoToken;
+
+    @Column(name = "recuperacao_expira")
+    private LocalDateTime recuperacaoExpira;
+
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 
@@ -111,6 +126,26 @@ public class Usuario {
         return bloqueado;
     }
 
+    public Boolean getDoisFatores() {
+        return doisFatores;
+    }
+
+    public String getCodigo2fa() {
+        return codigo2fa;
+    }
+
+    public LocalDateTime getCodigo2faExpira() {
+        return codigo2faExpira;
+    }
+
+    public String getRecuperacaoToken() {
+        return recuperacaoToken;
+    }
+
+    public LocalDateTime getRecuperacaoExpira() {
+        return recuperacaoExpira;
+    }
+
     public LocalDateTime getCriadoEm() {
         return criadoEm;
     }
@@ -161,6 +196,26 @@ public class Usuario {
 
     public void setBloqueado(Boolean bloqueado) {
         this.bloqueado = bloqueado;
+    }
+
+    public void setDoisFatores(Boolean doisFatores) {
+        this.doisFatores = doisFatores;
+    }
+
+    public void setCodigo2fa(String codigo2fa) {
+        this.codigo2fa = codigo2fa;
+    }
+
+    public void setCodigo2faExpira(LocalDateTime codigo2faExpira) {
+        this.codigo2faExpira = codigo2faExpira;
+    }
+
+    public void setRecuperacaoToken(String recuperacaoToken) {
+        this.recuperacaoToken = recuperacaoToken;
+    }
+
+    public void setRecuperacaoExpira(LocalDateTime recuperacaoExpira) {
+        this.recuperacaoExpira = recuperacaoExpira;
     }
 
     public void setCriadoEm(LocalDateTime criadoEm) {

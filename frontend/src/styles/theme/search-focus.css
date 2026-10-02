@@ -1,0 +1,82 @@
+/* Barras de pesquisa: rosa clarinho quando selecionadas */
+
+.fer-search,
+.header-search,
+.shell-search,
+.kb-search,
+.loc-search,
+.loc-search-borda,
+.int-search,
+.lj-search,
+.crm-busca,
+.cat-filtros label,
+.pdv-field-busca,
+.pdv-drawer-busca {
+    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fer-search:focus-within svg,
+.header-search:focus-within svg,
+.shell-search:focus-within svg,
+.kb-search:focus-within svg,
+.loc-search:focus-within svg,
+.loc-search-borda:focus-within svg,
+.int-search:focus-within svg,
+.lj-search:focus-within svg,
+.crm-busca:focus-within svg,
+.cat-filtros label:focus-within svg,
+.pdv-field-busca:focus-within svg,
+.pdv-drawer-busca:focus-within svg {
+    color: var(--primary, #ff2f92) !important;
+}
+
+/* Borda no próprio input (listas padrão) */
+.fer-filtros .fer-search input:focus,
+.loc-search-borda input:focus,
+.pg-search:focus,
+input[placeholder*="esquis" i]:focus,
+input[placeholder*="uscar" i]:focus {
+    background: var(--search-focus-bg, #ffe8f4) !important;
+    border-color: var(--search-focus-border, #f48fb1) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.2));
+}
+
+/* Borda no wrapper (Marcas, Clientes, header, kanban, etc.) */
+.ctt-loja .fer-search:focus-within,
+.os-toolbar .fer-search:focus-within,
+.header-search:focus-within,
+.shell-search:focus-within,
+.shell-search.is-on,
+.kb-search:focus-within,
+.loc-search:focus-within,
+.int-search:focus-within,
+.lj-search:focus-within,
+.cat-filtros label:focus-within,
+.crm-busca:focus-within,
+.pdv-field-busca:focus-within,
+.pdv-drawer-busca:focus-within,
+.erp-shell.is-loja .shell-search:focus-within,
+.erp-shell.is-loja .shell-search.is-on {
+    background: var(--search-focus-bg, #ffe8f4) !important;
+    border-color: var(--search-focus-border, #f48fb1) !important;
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.2));
+}
+
+.ctt-loja .fer-search:focus-within input,
+.os-toolbar .fer-search:focus-within input,
+.header-search:focus-within input,
+.shell-search:focus-within input,
+.kb-search:focus-within input,
+.loc-search:focus-within input,
+.int-search:focus-within input,
+.lj-search:focus-within input,
+.cat-filtros label:focus-within input,
+.crm-busca:focus-within input,
+.pdv-field-busca:focus-within input,
+.pdv-drawer-busca:focus-within input {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none;
+}

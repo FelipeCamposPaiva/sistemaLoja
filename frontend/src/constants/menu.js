@@ -203,13 +203,6 @@ const MENU = [
         itens: [
 
             {
-                nome: "Dashboard de Estoque",
-                rota: "/estoque/dashboard",
-                icon: BarChart3,
-                permissao: PERMISSOES.ESTOQUE
-            },
-
-            {
                 nome: "Controle de Estoque",
                 rota: "/estoque",
                 icon: Warehouse,
@@ -261,7 +254,7 @@ const MENU = [
 
             {
                 nome: "Giro de Estoque",
-                rota: "/giro-estoque",
+                rota: "/dashboard#/estoque",
                 icon: RotateCcw
             },
 
@@ -332,12 +325,6 @@ const MENU = [
             },
 
             {
-                nome: "Dashboard de Expedição",
-                rota: "/expedicao/dashboard",
-                icon: BarChart3
-            },
-
-            {
                 nome: "Devoluções",
                 rota: "/devolucoes",
                 icon: RotateCcw
@@ -357,7 +344,7 @@ const MENU = [
 
             {
                 nome: "Dashboard Financeiro",
-                rota: "/dashboard-financeiro",
+                rota: "/dashboard#/financas",
                 icon: BarChart3
             },
 

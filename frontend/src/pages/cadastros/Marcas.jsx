@@ -1,38 +1,36 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+    ArrowLeft,
     ArrowUpDown,
-    CalendarDays,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
     ClipboardList,
     Download,
-    Eye,
     Factory,
     FileSpreadsheet,
-    FileText,
-    ImagePlus,
     Globe,
+    History,
+    Package,
     PauseCircle,
-    PenLine,
     Phone,
     Plus,
     Search,
     Tags,
-    Trash2,
     Upload,
     X
 } from "lucide-react";
 
 import ROTAS from "../../constants/rotas";
 import { MARCAS_CATALOGO, nomesDeArquivoMarcas } from "../../constants/marcasCatalogo";
+import useAuth from "../../hooks/useAuth";
+import { listarProdutos } from "../../services/produto.service";
 import { urlMidia } from "../../services/produtoMidia.service";
 import {
     atualizarMarca,
     buscarLogosNaWeb,
     enviarLogoMarca,
-    excluirMarca,
     importarMarcas,
     listarMarcas,
     removerLogoMarca,
@@ -45,13 +43,40 @@ import "../../styles/pages/ferramentas.css";
 import "../../styles/pages/clientes.css";
 import "../../styles/pages/marcas.css";
 
-const POR_PAGINA = 10;
+const TAMANHOS = [10, 20, 50];
+const HIST_KEY = "erp-marcas-import-hist-v1";
 
 function codigoDe(marca) {
     if (marca.codigo) {
         return marca.codigo;
     }
     return `M-${marca.id}`;
+}
+
+function lerHistoricoImport() {
+    try {
+        const bruto = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
+        return Array.isArray(bruto) ? bruto : [];
+    } catch {
+        return [];
+    }
+}
+
+function gravarHistoricoImport(item) {
+    const lista = [item, ...lerHistoricoImport()].slice(0, 20);
+    localStorage.setItem(HIST_KEY, JSON.stringify(lista));
+    return lista;
+}
+
+function baixarModeloCsv() {
+    const csv = "Nome;Fabricante;Descricao;Telefone;Situacao\n3M;3M do Brasil;;;Ativo\nBIC;BIC Brasil;;;Ativo\n";
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "modelo-marcas.csv";
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 function paraData(bruto) {
@@ -94,8 +119,10 @@ function exportarCsv(lista) {
         "Situação",
         "Data de cadastro",
         "Hora de cadastro",
+        "Cadastrado por",
         "Data de atualização",
-        "Hora de atualização"
+        "Hora de atualização",
+        "Atualizado por"
     ].join(";")];
     lista.forEach((marca) => {
         const cadastro = formatarQuando(instanteDe(marca, "cadastro"));
@@ -109,8 +136,10 @@ function exportarCsv(lista) {
             ativa(marca) ? "Ativo" : "Inativo",
             cadastro.data,
             cadastro.hora,
+            marca.criadoPor || "",
             atualizacao.data,
-            atualizacao.hora
+            atualizacao.hora,
+            marca.atualizadoPor || ""
         ].map(csvValor).join(";"));
     });
     const blob = new Blob(["\uFEFF" + linhas.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -122,23 +151,15 @@ function exportarCsv(lista) {
     URL.revokeObjectURL(url);
 }
 
-function Quando({ valor }) {
+function Quando({ valor, usuario }) {
     const { data, hora } = formatarQuando(valor);
     return (
         <span className="mrc-quando">
             {data}
             {hora ? <small>{hora}</small> : null}
+            {usuario ? <small>{usuario}</small> : null}
         </span>
     );
-}
-
-function noMesAtual(marca) {
-    const d = paraData(marca.criadoEm || marca.criado_em);
-    if (!d) {
-        return false;
-    }
-    const hoje = new Date();
-    return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
 }
 
 function ativa(marca) {
@@ -158,15 +179,17 @@ const FORM_VAZIO = {
 
 export default function Marcas() {
     const navigate = useNavigate();
+    const { usuario } = useAuth();
     const { hash, pathname, state } = useLocation();
     const [marcas, setMarcas] = useState([]);
+    const [produtos, setProdutos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [aviso, setAviso] = useState("");
     const [busca, setBusca] = useState("");
     const [situacao, setSituacao] = useState("todas");
-    const [soMes, setSoMes] = useState(false);
     const [ordem, setOrdem] = useState({ campo: "nome", dir: 1 });
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = useState(10);
     const [marcados, setMarcados] = useState([]);
     const [modal, setModal] = useState(null);
     const [form, setForm] = useState(FORM_VAZIO);
@@ -174,6 +197,7 @@ export default function Marcas() {
     const [aberto, setAberto] = useState(null);
     const [importando, setImportando] = useState(false);
     const [colar, setColar] = useState("");
+    const [historico, setHistorico] = useState(() => lerHistoricoImport());
     const [logoArquivo, setLogoArquivo] = useState(null);
     const [logoPreview, setLogoPreview] = useState("");
     const arquivoRef = useRef(null);
@@ -201,6 +225,7 @@ export default function Marcas() {
 
     useEffect(() => {
         carregar(true);
+        listarProdutos().then((lista) => setProdutos(Array.isArray(lista) ? lista : [])).catch(() => setProdutos([]));
     }, []);
 
     async function aplicarImportacao(nomes, origem) {
@@ -215,6 +240,13 @@ export default function Marcas() {
             await carregar(false);
             const novos = resumo.novos ?? 0;
             const ignorados = resumo.ignorados ?? 0;
+            setHistorico(gravarHistoricoImport({
+                quando: new Date().toISOString(),
+                origem,
+                novos,
+                ignorados,
+                usuario: usuario?.nome || usuario?.usuario || ""
+            }));
             setAviso(novos
                 ? `${novos} marca(s) importada(s)${ignorados ? ` · ${ignorados} já existiam` : ""} (${origem}).`
                 : `Nenhuma marca nova. ${ignorados} já estavam cadastradas.`);
@@ -251,6 +283,28 @@ export default function Marcas() {
         }
     }
 
+    const contagem = useMemo(() => {
+        const porId = new Map();
+        const porNome = new Map();
+        for (const p of produtos) {
+            if (p.marcaId) {
+                const chave = String(p.marcaId);
+                porId.set(chave, (porId.get(chave) || 0) + 1);
+            }
+            const nome = String(p.marca || "").trim().toLowerCase();
+            if (nome) {
+                porNome.set(nome, (porNome.get(nome) || 0) + 1);
+            }
+        }
+        return { porId, porNome };
+    }, [produtos]);
+
+    function qtdDe(marca) {
+        const porId = contagem.porId.get(String(marca?.id || "")) || 0;
+        const porNome = contagem.porNome.get(String(marca?.nome || "").trim().toLowerCase()) || 0;
+        return Math.max(porId, porNome, Number(marca?.qtdProdutos || 0));
+    }
+
     const filtradas = useMemo(() => {
         const termo = busca.trim().toLowerCase();
         const lista = marcas.filter((marca) => {
@@ -260,22 +314,32 @@ export default function Marcas() {
             if (situacao === "inativo" && ativa(marca)) {
                 return false;
             }
-            if (soMes && !noMesAtual(marca)) {
+            if (situacao === "com-produtos" && qtdDe(marca) <= 0) {
+                return false;
+            }
+            if (situacao === "sem-produtos" && qtdDe(marca) > 0) {
                 return false;
             }
             if (!termo) {
                 return true;
             }
-            return [codigoDe(marca), marca.nome, marca.descricao, marca.fabricante, marca.telefone, marca.email, marca.site]
+            const noCadastro = [marca.nome, marca.descricao, marca.fabricante, marca.telefone]
                 .join(" ")
                 .toLowerCase()
                 .includes(termo);
+            if (noCadastro) {
+                return true;
+            }
+            return produtos.some((p) => String(p.marcaId) === String(marca.id) && String(p.nome || "").toLowerCase().includes(termo));
         });
         const { campo, dir } = ordem;
         return [...lista].sort((a, b) => {
             const valor = (marca) => {
-                if (campo === "codigo") {
-                    return codigoDe(marca);
+                if (campo === "produtos") {
+                    return qtdDe(marca);
+                }
+                if (campo === "fabricante") {
+                    return marca.fabricante || "";
                 }
                 if (campo === "data") {
                     return instanteDe(marca, "cadastro");
@@ -288,18 +352,23 @@ export default function Marcas() {
                 }
                 return marca.nome || "";
             };
-            return String(valor(a)).localeCompare(String(valor(b)), "pt-BR", { numeric: true }) * dir;
+            const va = valor(a);
+            const vb = valor(b);
+            if (typeof va === "number" && typeof vb === "number") {
+                return (va - vb) * dir;
+            }
+            return String(va).localeCompare(String(vb), "pt-BR", { numeric: true }) * dir;
         });
-    }, [marcas, busca, situacao, soMes, ordem]);
+    }, [marcas, busca, situacao, ordem, produtos, contagem]);
 
     const total = marcas.length;
     const ativas = marcas.filter(ativa).length;
     const inativas = total - ativas;
-    const noMes = marcas.filter(noMesAtual).length;
-    const paginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+    const produtosVinculados = marcas.reduce((s, m) => s + qtdDe(m), 0);
+    const paginas = Math.max(1, Math.ceil(filtradas.length / porPagina));
     const paginaAtual = Math.min(pagina, paginas);
-    const inicio = (paginaAtual - 1) * POR_PAGINA;
-    const visiveis = filtradas.slice(inicio, inicio + POR_PAGINA);
+    const inicio = (paginaAtual - 1) * porPagina;
+    const visiveis = filtradas.slice(inicio, inicio + porPagina);
 
     function ordenar(campo) {
         setOrdem((atual) => ({
@@ -340,12 +409,6 @@ export default function Marcas() {
 
     function aplicarCard(card) {
         setPagina(1);
-        if (card === "mes") {
-            setSoMes((atual) => !atual);
-            setSituacao("todas");
-            return;
-        }
-        setSoMes(false);
         setSituacao(card);
     }
 
@@ -371,7 +434,7 @@ export default function Marcas() {
                 }
                 return;
             }
-            const modo = state?.modo === "ver" ? "ver" : "editar";
+            const modo = "editar";
             const atual = modalRef.current;
             if (atual?.marca?.id === marca.id && atual?.modo === modo) {
                 return;
@@ -407,7 +470,13 @@ export default function Marcas() {
         }
         setSalvando(true);
         try {
-            const payload = { ...form, nome: form.nome.trim() };
+            const quem = usuario?.nome || usuario?.usuario || "";
+            const payload = {
+                ...form,
+                nome: form.nome.trim(),
+                atualizadoPor: quem,
+                criadoPor: form.criadoPor || quem
+            };
             let salvo = modal?.marca;
             if (modal?.marca?.id) {
                 salvo = await atualizarMarca(modal.marca.id, payload);
@@ -430,20 +499,6 @@ export default function Marcas() {
         }
     }
 
-    async function remover(marca) {
-        if (!window.confirm(`Excluir a marca ${marca.nome}?`)) {
-            return;
-        }
-        try {
-            await excluirMarca(marca.id);
-            setMarcados((ids) => ids.filter((id) => id !== marca.id));
-            await carregar();
-            setAviso("Marca excluída.");
-        } catch {
-            setAviso("Não foi possível excluir a marca.");
-        }
-    }
-
     function toggleMarca(id) {
         setMarcados((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
     }
@@ -451,7 +506,7 @@ export default function Marcas() {
     const leitura = modal?.modo === "ver";
 
     return (
-        <div className="ctt-page ctt-loja mrc-page">
+        <div className="ctt-page ctt-loja mrc-page has-pager">
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>Início</Link>
                 <span>›</span>
@@ -494,10 +549,16 @@ export default function Marcas() {
                                     <ClipboardList size={14} /> catálogo Tem de Tudo ({MARCAS_CATALOGO.length})
                                 </button>
                                 <button type="button" onClick={() => arquivoRef.current?.click()}>
-                                    <FileSpreadsheet size={14} /> arquivo CSV / TXT
+                                    <FileSpreadsheet size={14} /> Importar marcas por CSV
+                                </button>
+                                <button type="button" onClick={baixarModeloCsv}>
+                                    <Download size={14} /> Baixar modelo CSV
                                 </button>
                                 <button type="button" onClick={() => { setColar(""); setAberto("colar"); }}>
                                     <ClipboardList size={14} /> colar lista de nomes
+                                </button>
+                                <button type="button" onClick={() => setAberto("historico")}>
+                                    <History size={14} /> Histórico de importações
                                 </button>
                                 <button type="button" onClick={buscarLogos} disabled={importando}>
                                     <Globe size={14} /> buscar logos na internet
@@ -517,7 +578,7 @@ export default function Marcas() {
                     <input
                         value={busca}
                         onChange={(e) => { setBusca(e.target.value); setPagina(1); }}
-                        placeholder="Pesquise por nome, código, fabricante ou telefone…"
+                        placeholder="Pesquisar por marca, fabricante ou produto..."
                         aria-label="Pesquisar marcas"
                     />
                     {busca ? (
@@ -529,12 +590,14 @@ export default function Marcas() {
                 <label className="mrc-sit">
                     <select
                         value={situacao}
-                        onChange={(e) => { setSituacao(e.target.value); setSoMes(false); setPagina(1); }}
+                        onChange={(e) => { setSituacao(e.target.value); setPagina(1); }}
                         aria-label="Situação"
                     >
-                        <option value="todas">Situação: todas</option>
-                        <option value="ativo">Situação: ativo</option>
-                        <option value="inativo">Situação: inativo</option>
+                        <option value="todas">Todas</option>
+                        <option value="ativo">Ativas</option>
+                        <option value="inativo">Inativas</option>
+                        <option value="com-produtos">Com produtos</option>
+                        <option value="sem-produtos">Sem produtos</option>
                     </select>
                 </label>
                 <button
@@ -550,39 +613,39 @@ export default function Marcas() {
             <div className="ctt-cards mrc-kpis">
                 <button
                     type="button"
-                    className={`ctt-card ctt-card-rosa${situacao === "todas" && !soMes ? " is-active" : ""}`}
+                    className={`ctt-card ctt-card-rosa${situacao === "todas" ? " is-active" : ""}`}
                     onClick={() => aplicarCard("todas")}
                 >
                     <span className="ctt-card-ico"><Tags size={16} /></span>
-                    <strong>{total}</strong>
+                    <strong>{total.toLocaleString("pt-BR")}</strong>
                     <small>Total de marcas</small>
                 </button>
                 <button
                     type="button"
-                    className={`ctt-card ctt-card-verde${situacao === "ativo" && !soMes ? " is-active" : ""}`}
+                    className={`ctt-card ctt-card-verde${situacao === "ativo" ? " is-active" : ""}`}
                     onClick={() => aplicarCard("ativo")}
                 >
                     <span className="ctt-card-ico"><Tags size={16} /></span>
-                    <strong>{ativas}</strong>
-                    <small>Marcas ativas</small>
+                    <strong>{ativas.toLocaleString("pt-BR")}</strong>
+                    <small>Ativas</small>
                 </button>
                 <button
                     type="button"
-                    className={`ctt-card ctt-card-lilas${situacao === "inativo" && !soMes ? " is-active" : ""}`}
+                    className={`ctt-card ctt-card-lilas${situacao === "inativo" ? " is-active" : ""}`}
                     onClick={() => aplicarCard("inativo")}
                 >
                     <span className="ctt-card-ico"><PauseCircle size={16} /></span>
-                    <strong>{inativas}</strong>
-                    <small>Marcas inativas</small>
+                    <strong>{inativas.toLocaleString("pt-BR")}</strong>
+                    <small>Inativas</small>
                 </button>
                 <button
                     type="button"
-                    className={`ctt-card ctt-card-pink${soMes ? " is-active" : ""}`}
-                    onClick={() => aplicarCard("mes")}
+                    className={`ctt-card ctt-card-pink${situacao === "com-produtos" ? " is-active" : ""}`}
+                    onClick={() => aplicarCard("com-produtos")}
                 >
-                    <span className="ctt-card-ico"><CalendarDays size={16} /></span>
-                    <strong>{noMes}</strong>
-                    <small>Cadastradas este mês</small>
+                    <span className="ctt-card-ico"><Package size={16} /></span>
+                    <strong>{produtosVinculados.toLocaleString("pt-BR")}</strong>
+                    <small>Produtos vinculados</small>
                 </button>
             </div>
 
@@ -603,13 +666,18 @@ export default function Marcas() {
                                 />
                             </th>
                             <th>
-                                <button type="button" className="mrc-ord" onClick={() => ordenar("codigo")}>
-                                    Código <ArrowUpDown size={12} />
+                                <button type="button" className="mrc-ord" onClick={() => ordenar("nome")}>
+                                    Marca <ArrowUpDown size={12} />
                                 </button>
                             </th>
                             <th>
-                                <button type="button" className="mrc-ord" onClick={() => ordenar("nome")}>
-                                    Descrição <ArrowUpDown size={12} />
+                                <button type="button" className="mrc-ord" onClick={() => ordenar("fabricante")}>
+                                    Fabricante <ArrowUpDown size={12} />
+                                </button>
+                            </th>
+                            <th>
+                                <button type="button" className="mrc-ord" onClick={() => ordenar("produtos")}>
+                                    Produtos <ArrowUpDown size={12} />
                                 </button>
                             </th>
                             <th>
@@ -619,15 +687,14 @@ export default function Marcas() {
                             </th>
                             <th>
                                 <button type="button" className="mrc-ord" onClick={() => ordenar("data")}>
-                                    Data de cadastro <ArrowUpDown size={12} />
+                                    Cadastro <ArrowUpDown size={12} />
                                 </button>
                             </th>
                             <th>
                                 <button type="button" className="mrc-ord" onClick={() => ordenar("atualizacao")}>
-                                    Data de atualização <ArrowUpDown size={12} />
+                                    Atualização <ArrowUpDown size={12} />
                                 </button>
                             </th>
-                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -636,24 +703,39 @@ export default function Marcas() {
                         ) : visiveis.length === 0 ? (
                             <tr><td colSpan={7} className="ctt-vazio">Nenhuma marca encontrada.</td></tr>
                         ) : visiveis.map((marca) => (
-                            <tr key={marca.id} className={marcados.includes(marca.id) ? "is-sel" : ""}>
-                                <td className="ctt-check">
+                            <tr
+                                key={marca.id}
+                                className={`mrc-linha${marcados.includes(marca.id) ? " is-sel" : ""}`}
+                                onClick={() => abrir(marca, "editar")}
+                            >
+                                <td className="ctt-check" onClick={(e) => e.stopPropagation()}>
                                     <input
                                         type="checkbox"
                                         checked={marcados.includes(marca.id)}
                                         onChange={() => toggleMarca(marca.id)}
                                     />
                                 </td>
-                                <td>{codigoDe(marca)}</td>
                                 <td>
-                                    <button type="button" className="mrc-nome" onClick={() => abrir(marca, "editar")}>
+                                    <span className="mrc-nome">
                                         {marca.logo ? (
                                             <img src={urlMidia(marca.logo)} alt="" />
                                         ) : (
-                                            <i aria-hidden><Tags size={14} /></i>
+                                            <i aria-hidden>{String(marca.nome || "?").charAt(0)}</i>
                                         )}
                                         {marca.nome}
-                                    </button>
+                                    </span>
+                                </td>
+                                <td>{marca.fabricante || marca.nome || "—"}</td>
+                                <td>
+                                    <span
+                                        className="mrc-qtd"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`${ROTAS.PRODUTOS}?marca=${encodeURIComponent(marca.nome || "")}&marcaId=${marca.id}`);
+                                        }}
+                                    >
+                                        {qtdDe(marca).toLocaleString("pt-BR")}
+                                    </span>
                                 </td>
                                 <td>
                                     <span className={`mrc-dot${ativa(marca) ? " is-on" : ""}`}>
@@ -661,21 +743,10 @@ export default function Marcas() {
                                     </span>
                                 </td>
                                 <td>
-                                    <Quando valor={instanteDe(marca, "cadastro")} />
+                                    <Quando valor={instanteDe(marca, "cadastro")} usuario={marca.criadoPor} />
                                 </td>
                                 <td>
-                                    <Quando valor={instanteDe(marca, "atualizacao")} />
-                                </td>
-                                <td className="mrc-acoes">
-                                    <button type="button" aria-label="Visualizar" onClick={() => abrir(marca, "ver")}>
-                                        <Eye size={16} />
-                                    </button>
-                                    <button type="button" aria-label="Editar" onClick={() => abrir(marca, "editar")}>
-                                        <PenLine size={16} />
-                                    </button>
-                                    <button type="button" aria-label="Excluir" onClick={() => remover(marca)}>
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <Quando valor={instanteDe(marca, "atualizacao")} usuario={marca.atualizadoPor} />
                                 </td>
                             </tr>
                         ))}
@@ -687,7 +758,7 @@ export default function Marcas() {
                 <span>
                     Mostrando {filtradas.length ? inicio + 1 : 0} a {Math.min(inicio + visiveis.length, filtradas.length)} de {filtradas.length} marcas
                 </span>
-                <div>
+                <nav className="erp-pager-nav" aria-label="Páginas">
                     <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina(paginaAtual - 1)} aria-label="Anterior">
                         <ChevronLeft size={14} />
                     </button>
@@ -695,7 +766,14 @@ export default function Marcas() {
                     <button type="button" disabled={paginaAtual >= paginas} onClick={() => setPagina(paginaAtual + 1)} aria-label="Próxima">
                         <ChevronRight size={14} />
                     </button>
-                </div>
+                </nav>
+                <label className="erp-pager-size">
+                    <select value={porPagina} onChange={(e) => { setPorPagina(Number(e.target.value)); setPagina(1); }} aria-label="Itens por página">
+                        {TAMANHOS.map((n) => (
+                            <option key={n} value={n}>{n} por página</option>
+                        ))}
+                    </select>
+                </label>
             </div>
 
             {aberto === "colar" ? (
@@ -727,73 +805,86 @@ export default function Marcas() {
                 </div>
             ) : null}
 
+            {aberto === "historico" ? (
+                <div className="pv-modal-bg" onClick={() => setAberto(null)}>
+                    <div className="pv-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Histórico de importações</h3>
+                        {historico.length === 0 ? (
+                            <p className="ctt-sub">Nenhuma importação registrada neste navegador.</p>
+                        ) : (
+                            <ul className="mrc-hist">
+                                {historico.map((item, i) => (
+                                    <li key={`${item.quando}-${i}`}>
+                                        <strong>{item.origem}</strong>
+                                        <span>{new Date(item.quando).toLocaleString("pt-BR")} · {item.usuario || "—"}</span>
+                                        <small>{item.novos} novas · {item.ignorados} já existiam</small>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        <div className="ctt-menu-acoes">
+                            <button type="button" className="mrc-acoes-cancelar" onClick={() => setAberto(null)}>Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
             {modal ? (
                 <div className="pv-modal-bg" onClick={fecharModal}>
                     <div className="mrc-modal" onClick={(e) => e.stopPropagation()}>
                         <header className="mrc-modal-head">
+                            <button type="button" className="mrc-voltar" onClick={fecharModal} aria-label="Voltar">
+                                <ArrowLeft size={18} />
+                            </button>
                             <div>
-                                <h3>
-                                    <Tags size={18} />
-                                    {leitura ? "Marca" : modal.marca ? "Editar marca" : "Incluir Marca"}
-                                </h3>
-                                <p>
-                                    {leitura
-                                        ? "Dados cadastrados da marca."
-                                        : "Preencha as informações da marca para cadastrá-la no sistema."}
-                                </p>
+                                <h3>{modal.marca ? "Editar marca" : "Incluir marca"}</h3>
                             </div>
                             <button type="button" className="mrc-modal-x" onClick={fecharModal} aria-label="Fechar">
                                 <X size={18} />
                             </button>
                         </header>
 
-                        <label
-                            className={`mrc-logo${leitura ? " is-off" : ""}`}
-                            onDragOver={(e) => {
-                                if (leitura) {
-                                    return;
-                                }
-                                e.preventDefault();
-                            }}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                if (!leitura) {
-                                    escolherLogo(e.dataTransfer.files?.[0]);
-                                }
-                            }}
-                        >
-                            {logoPreview ? (
-                                <img src={urlMidia(logoPreview)} alt="Logo da marca" />
-                            ) : (
-                                <span className="mrc-logo-ico"><ImagePlus size={22} /></span>
-                            )}
-                            <strong>Imagem da marca</strong>
-                            <small>Clique ou arraste o logo · JPG, PNG ou WEBP · até 8 MB</small>
-                            <input
-                                ref={logoRef}
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp,image/gif"
-                                hidden
-                                disabled={leitura}
-                                onChange={(e) => {
-                                    escolherLogo(e.target.files?.[0]);
-                                    e.target.value = "";
+                        <div className="mrc-campo">
+                            Logo da marca
+                            <div className="mrc-logo-edit">
+                            <label
+                                className={`mrc-logo-mini${leitura ? " is-off" : ""}`}
+                                onDragOver={(e) => {
+                                    if (!leitura) {
+                                        e.preventDefault();
+                                    }
                                 }}
-                            />
-                        </label>
-                        {logoPreview && !leitura ? (
-                            <button
-                                type="button"
-                                className="idx-text"
-                                onClick={() => {
-                                    setLogoArquivo(null);
-                                    setLogoPreview("");
-                                    setForm((a) => ({ ...a, logo: "" }));
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    if (!leitura) {
+                                        escolherLogo(e.dataTransfer.files?.[0]);
+                                    }
                                 }}
                             >
-                                remover imagem
-                            </button>
-                        ) : null}
+                                {logoPreview ? (
+                                    <img src={urlMidia(logoPreview)} alt="Logo da marca" />
+                                ) : (
+                                    <span>{String(form.nome || "?").charAt(0)}</span>
+                                )}
+                                <input
+                                    ref={logoRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    hidden
+                                    disabled={leitura}
+                                    onChange={(e) => {
+                                        escolherLogo(e.target.files?.[0]);
+                                        e.target.value = "";
+                                    }}
+                                />
+                            </label>
+                            {leitura ? null : (
+                                <button type="button" className="idx-text" onClick={() => logoRef.current?.click()}>
+                                    Alterar imagem
+                                </button>
+                            )}
+                            </div>
+                        </div>
 
                         <label className="mrc-campo">
                             Nome da marca *
@@ -814,22 +905,20 @@ export default function Marcas() {
                                 <input
                                     value={form.fabricante}
                                     disabled={leitura}
-                                    placeholder="Informe o fabricante (opcional)"
+                                    placeholder="Pode ser diferente da marca"
                                     onChange={(e) => setForm((a) => ({ ...a, fabricante: e.target.value }))}
                                 />
                             </span>
                         </label>
                         <label className="mrc-campo">
                             Descrição
-                            <span>
-                                <FileText size={15} />
-                                <input
-                                    value={form.descricao}
-                                    disabled={leitura}
-                                    placeholder="Ex.: Marca de material escolar"
-                                    onChange={(e) => setForm((a) => ({ ...a, descricao: e.target.value }))}
-                                />
-                            </span>
+                            <textarea
+                                rows={3}
+                                value={form.descricao}
+                                disabled={leitura}
+                                placeholder="Observações da marca"
+                                onChange={(e) => setForm((a) => ({ ...a, descricao: e.target.value }))}
+                            />
                         </label>
                         <label className="mrc-campo">
                             Telefone
@@ -843,28 +932,38 @@ export default function Marcas() {
                                 />
                             </span>
                         </label>
-
-                        <div className="mrc-status">
-                            <button
-                                type="button"
-                                className={`mrc-switch${form.ativo ? " is-on" : ""}`}
+                        <label className="mrc-campo">
+                            Situação
+                            <select
+                                value={form.ativo ? "ativo" : "inativo"}
                                 disabled={leitura}
-                                aria-pressed={form.ativo}
-                                onClick={() => setForm((a) => ({ ...a, ativo: !a.ativo }))}
-                            />
-                            <div>
-                                <strong>Ativo</strong>
-                                <small>Marca disponível para uso nos produtos.</small>
+                                onChange={(e) => setForm((a) => ({ ...a, ativo: e.target.value === "ativo" }))}
+                            >
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </label>
+
+                        {modal.marca ? (
+                            <div className="mrc-vinculos">
+                                <strong>Produtos vinculados</strong>
+                                <button
+                                    type="button"
+                                    className="idx-text"
+                                    onClick={() => navigate(`${ROTAS.PRODUTOS}?marca=${encodeURIComponent(form.nome || modal.marca.nome || "")}&marcaId=${modal.marca.id}`)}
+                                >
+                                    {qtdDe(modal.marca).toLocaleString("pt-BR")} produtos
+                                </button>
                             </div>
-                        </div>
+                        ) : null}
 
                         <div className="mrc-modal-foot">
                             <button type="button" className="mrc-acoes-cancelar" onClick={fecharModal}>
-                                {leitura ? "Fechar" : "Cancelar"}
+                                Cancelar
                             </button>
                             {leitura ? null : (
                                 <button type="button" className="ctt-btn-incluir mrc-incluir" disabled={salvando} onClick={salvar}>
-                                    <Plus size={15} /> {salvando ? "Salvando…" : "Salvar marca"}
+                                    {salvando ? "Salvando…" : "Salvar marca"}
                                 </button>
                             )}
                         </div>

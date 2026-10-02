@@ -36,7 +36,7 @@ function mensagemErro(error, padrao) {
     return error?.response?.data?.mensagem || padrao;
 }
 
-export default function DashboardSuprimentos() {
+export default function DashboardSuprimentos({ embutido = false, secao }) {
     const { pathname } = useLocation();
     const [dados, setDados] = useState(null);
     const [busca, setBusca] = useState("");
@@ -63,16 +63,17 @@ export default function DashboardSuprimentos() {
     }, []);
 
     useEffect(() => {
-        const alvo = pathname.includes("necessidades")
-            ? "reposicao"
-            : pathname.includes("giro")
-                ? "giro"
-                : null;
+        const alvo = secao
+            || (pathname.includes("necessidades")
+                ? "reposicao"
+                : pathname.includes("giro")
+                    ? "giro"
+                    : null);
         if (!alvo || !dados) {
             return;
         }
         document.getElementById(alvo)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, [pathname, dados]);
+    }, [pathname, dados, secao]);
 
     const reposicao = dados?.reposicao || [];
     const produtos = dados?.produtos || [];
@@ -138,14 +139,18 @@ export default function DashboardSuprimentos() {
         <div className="dash-home dash-sup">
             <header className="dash-vendas-head">
                 <div>
-                    <p className="dash-crumb">
-                        <Link to={ROTAS.INDICE}>início</Link>
-                        {" › "}
-                        <span>suprimentos</span>
-                        {" › "}
-                        <span>dashboard de estoque</span>
-                    </p>
-                    <h3>Dashboard de suprimentos e estoque</h3>
+                    {embutido ? null : (
+                        <>
+                            <p className="dash-crumb">
+                                <Link to={ROTAS.INDICE}>início</Link>
+                                {" › "}
+                                <span>suprimentos</span>
+                                {" › "}
+                                <span>dashboard de estoque</span>
+                            </p>
+                            <h3>Dashboard de suprimentos e estoque</h3>
+                        </>
+                    )}
                 </div>
                 <div className="dash-pills">
                     <button type="button" className="idx-pill" onClick={carregar} disabled={carregando}>

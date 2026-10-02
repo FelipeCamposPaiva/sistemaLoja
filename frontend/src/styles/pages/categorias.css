@@ -142,6 +142,12 @@
     padding: 0 10px;
 }
 
+.cat-filtros label:focus-within {
+    background: var(--search-focus-bg, #fff5fa);
+    border-color: var(--search-focus-border, #f4b6d2);
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.14));
+}
+
 .cat-filtros input,
 .cat-filtros select {
     border: 0;

@@ -246,7 +246,7 @@ export default function Maquinas() {
     }
 
     return (
-        <div className="prd-page mq-page" ref={raiz}>
+        <div className="prd-page mq-page has-pager" ref={raiz}>
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>Início</Link>
                 <span>›</span>
@@ -533,11 +533,6 @@ export default function Maquinas() {
                         Mostrando {inicio + 1} a {Math.min(inicio + porPagina, visiveis.length)} de {visiveis.length} máquinas
                     </span>
                     <div className="prd-foot-nav">
-                        <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Itens por página">
-                            {TAMANHOS.map((n) => (
-                                <option key={n} value={n}>{n} por página</option>
-                            ))}
-                        </select>
                         <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina((p) => Math.max(1, p - 1))} aria-label="Página anterior">
                             <ChevronLeft size={16} />
                         </button>
@@ -546,6 +541,13 @@ export default function Maquinas() {
                             <ChevronRight size={16} />
                         </button>
                     </div>
+                    <label className="erp-pager-size">
+                        <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Itens por página">
+                            {TAMANHOS.map((n) => (
+                                <option key={n} value={n}>{n} por página</option>
+                            ))}
+                        </select>
+                    </label>
                 </div>
             ) : null}
 

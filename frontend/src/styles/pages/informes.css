@@ -1,0 +1,478 @@
+.inf-page {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 0;
+}
+
+.inf-hero h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2b1b24;
+}
+
+.inf-title-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffe0ef;
+    color: #ff2f92;
+}
+
+.inf-hero-acoes {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.inf-ano {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #9a7384;
+    font-weight: 600;
+}
+
+.inf-ano select,
+.inf-sel select {
+    min-height: 42px;
+    border: 1px solid #f3cfe0;
+    border-radius: 12px;
+    background: #fff;
+    color: #2b1b24;
+    padding: 0 12px;
+    min-width: 110px;
+}
+
+.inf-gerar,
+.inf-mail {
+    border-radius: 12px !important;
+}
+
+.inf-exportar {
+    min-height: 42px;
+}
+
+.inf-menu {
+    background: #fff;
+    border: 1px solid #f3cfe0;
+    color: #2b1b24;
+    box-shadow: 0 12px 28px rgba(61, 42, 52, 0.12);
+}
+
+.inf-menu button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #2b1b24;
+}
+
+.inf-menu button:hover {
+    background: #fff3f7;
+}
+
+.inf-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(140px, 1fr)) minmax(240px, 1.7fr);
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+}
+
+.inf-kpi {
+    background: #fff;
+    border: 1px solid #f7d7e6;
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    min-height: 118px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #2b1b24;
+}
+
+.inf-kpi.is-warn {
+    background: #fff8e8;
+    border-color: #f5e0b8;
+}
+
+.inf-kpi.is-on {
+    outline: 2px solid #ff2f92;
+}
+
+.inf-kpi strong {
+    font-size: 28px;
+    line-height: 1.1;
+    margin-top: 6px;
+}
+
+.inf-kpi small {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b4a58;
+}
+
+.inf-kpi em {
+    font-style: normal;
+    font-size: 12px;
+    color: #b0899a;
+}
+
+.inf-kpi-ico {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inf-kpi-ico.is-doc { background: #f3e8ff; color: #7c3aed; }
+.inf-kpi-ico.is-team { background: #e7f3ff; color: #2563eb; }
+.inf-kpi-ico.is-ok { background: #e8f8ee; color: #16a34a; }
+.inf-kpi-ico.is-wait { background: #fff1d6; color: #d97706; }
+
+.inf-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #fff 0%, #ffe6f3 55%, #ffd6ec 100%);
+    border: 1px solid #f7cfe3;
+    border-radius: 16px;
+    padding: 12px 16px;
+    min-height: 118px;
+}
+
+.inf-banner h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: #c2185b;
+}
+
+.inf-banner p {
+    margin: 0;
+    font-size: 13px;
+    color: #8a5b70;
+}
+
+.inf-banner-art {
+    width: 92px;
+    min-width: 92px;
+    height: 84px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff 0%, #ffe0ef 100%);
+    border: 1px solid #ffc2de;
+    color: #ff2f92;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    padding: 8px;
+}
+
+.inf-filtros {
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.inf-sel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #9a7384;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.inf-limpar {
+    margin-left: auto;
+    background: transparent;
+    border: 0;
+    color: #ff2f92;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.inf-split {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    overflow: hidden;
+}
+
+.inf-split.has-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+}
+
+.inf-lista {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #f3cfe0;
+    border-radius: 16px;
+}
+
+.inf-lista-head {
+    padding: 12px 16px 8px;
+    font-weight: 700;
+    color: #2b1b24;
+    flex-shrink: 0;
+}
+
+.inf-scroll {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+.inf-table {
+    width: 100%;
+}
+
+.inf-table th {
+    font-size: 12px;
+    color: #9a7384;
+    font-weight: 600;
+    background: #fff;
+}
+
+.inf-table td,
+.inf-table th {
+    padding: 10px 12px;
+}
+
+.inf-table tbody tr {
+    cursor: pointer;
+}
+
+.inf-table tbody tr.is-sel,
+.inf-table tbody tr.is-check {
+    background: #ffe8f4;
+}
+
+.inf-pessoa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.inf-pessoa i,
+.inf-perfil i {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    font-style: normal;
+    flex-shrink: 0;
+}
+
+.inf-pessoa strong,
+.inf-perfil strong {
+    display: block;
+    font-size: 13px;
+    color: #2b1b24;
+}
+
+.inf-pessoa em,
+.inf-perfil em {
+    display: block;
+    font-style: normal;
+    font-size: 12px;
+    color: #b0899a;
+}
+
+.inf-sit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.inf-sit.is-disponivel {
+    background: #e8f8ee;
+    color: #16a34a;
+}
+
+.inf-sit.is-disponivel::before,
+.inf-sit.is-pendente::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.inf-sit.is-pendente {
+    background: #fff1d6;
+    color: #d97706;
+}
+
+.inf-painel {
+    min-height: 0;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #f3cfe0;
+    border-radius: 16px;
+    padding: 14px 14px 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inf-painel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.inf-painel-head h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.inf-fechar {
+    border: 0;
+    background: transparent;
+    color: #9a7384;
+    cursor: pointer;
+}
+
+.inf-perfil {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.inf-perfil span:last-child {
+    justify-self: end;
+}
+
+.inf-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid #f3cfe0;
+    margin-bottom: 12px;
+}
+
+.inf-tabs button {
+    border: 0;
+    background: transparent;
+    color: #9a7384;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    border-bottom: 2px solid transparent;
+}
+
+.inf-tabs button.is-on {
+    color: #ff2f92;
+    border-bottom-color: #ff2f92;
+}
+
+.inf-bloco {
+    background: #fff7fb;
+    border: 1px solid #f7d7e6;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.inf-bloco h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #2b1b24;
+}
+
+.inf-bloco dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inf-bloco dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.inf-bloco dt {
+    color: #8a5b70;
+}
+
+.inf-bloco dd {
+    margin: 0;
+    font-weight: 700;
+    color: #2b1b24;
+    text-align: right;
+}
+
+.inf-doc p {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #6b4a58;
+}
+
+.inf-acoes {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.inf-acoes .inf-mail {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+@media (max-width: 1200px) {
+    .inf-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .inf-banner {
+        grid-column: 1 / -1;
+    }
+    .inf-split.has-panel {
+        grid-template-columns: 1fr;
+        overflow: auto;
+    }
+}

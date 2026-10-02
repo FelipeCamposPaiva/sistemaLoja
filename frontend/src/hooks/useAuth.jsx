@@ -6,7 +6,8 @@ import {
     useState
 } from "react";
 
-import api, { clearAuthorization, setAuthorization } from "../services/api";
+import { clearAuthorization, setAuthorization } from "../services/api";
+import { loginApi, verificar2faApi } from "../services/auth.service";
 
 const SESSAO_EXPLICITA_KEY = "erp-sessao-ok";
 
@@ -92,14 +93,16 @@ export function AuthProvider({ children }) {
 
     const login = useCallback(async (usuarioLogin, senha) => {
         try {
-            const { data } = await api.post(
-                "/auth/login",
-                {
-                    login: String(usuarioLogin ?? "").trim(),
-                    senha: String(senha ?? "").trim()
-                },
-                { timeout: 15000 }
-            );
+            const data = await loginApi(String(usuarioLogin ?? "").trim(), String(senha ?? "").trim());
+
+            if (data?.precisa2fa) {
+                return {
+                    sucesso: false,
+                    precisa2fa: true,
+                    codigo: data.codigo2fa || "",
+                    mensagem: "Informe o código de verificação."
+                };
+            }
 
             const tokenRecebido = data?.token;
             if (!tokenRecebido) {
@@ -109,6 +112,23 @@ export function AuthProvider({ children }) {
                 };
             }
 
+            aplicarSessao(tokenRecebido, data);
+            return { sucesso: true };
+        } catch (error) {
+            return {
+                sucesso: false,
+                mensagem: mensagemErro(error)
+            };
+        }
+    }, [aplicarSessao]);
+
+    const confirmar2fa = useCallback(async (usuarioLogin, codigo) => {
+        try {
+            const data = await verificar2faApi(String(usuarioLogin ?? "").trim(), String(codigo ?? "").trim());
+            const tokenRecebido = data?.token;
+            if (!tokenRecebido) {
+                return { sucesso: false, mensagem: "Código inválido." };
+            }
             aplicarSessao(tokenRecebido, data);
             return { sucesso: true };
         } catch (error) {
@@ -134,10 +154,11 @@ export function AuthProvider({ children }) {
             usuario,
             autenticado: tokenAceito(token),
             inicializando,
+            confirmar2fa,
             login,
             logout
         }),
-        [token, usuario, inicializando, login, logout]
+        [token, usuario, inicializando, login, confirmar2fa, logout]
     );
 
     return (

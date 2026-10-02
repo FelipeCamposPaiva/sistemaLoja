@@ -64,6 +64,19 @@
     min-height: 40px;
 }
 
+.os-toolbar .fer-search:focus-within {
+    background: var(--search-focus-bg, #fff5fa);
+    border: 1px solid var(--search-focus-border, #f4b6d2);
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.14));
+}
+
+.os-toolbar .fer-search:focus-within input {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+}
+
 .os-tabs {
     display: flex;
     align-items: flex-end;

@@ -1,0 +1,6 @@
+# Copie para backend/config/local.properties (esse arquivo fica de fora do Git).
+# O backend só sobe com esses três valores definidos.
+DB_USERNAME=temdetudo
+DB_PASSWORD=
+JWT_SECRET=
+MYSQL_ROOT_PASSWORD=

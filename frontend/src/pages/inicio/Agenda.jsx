@@ -9,6 +9,7 @@ import {
 
 import useAuth from "../../hooks/useAuth.jsx";
 import { listarAgenda, salvarAgenda } from "../../services/agenda.service";
+import { normalizarEmpresas, unidadeAtual, unidadesDestino } from "../../constants/empresas";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
@@ -32,12 +33,6 @@ const STATUS = [
     { id: "finalizado", nome: "Finalizado" },
     { id: "atrasado", nome: "Atrasado" },
     { id: "cancelado", nome: "Cancelado" }
-];
-
-const EMPRESAS = [
-    { id: "matriz", nome: "Tem de Tudo Matriz" },
-    { id: "centro", nome: "Tem de Tudo Centro" },
-    { id: "norte", nome: "Tem de Tudo Norte" }
 ];
 
 const USUARIOS = [
@@ -166,7 +161,7 @@ function formVazio(data, hora = "09") {
         usuarios: [],
         descricao: "",
         status: "pendente",
-        empresas: ["matriz"],
+        empresas: [unidadeAtual().id],
         enviarGoogle: false
     };
 }
@@ -179,12 +174,15 @@ export default function Agenda() {
     const [vista, setVista] = useState("mensal");
     const [aba, setAba] = useState("meus");
     const [itens, setItens] = useState([]);
-    const [sync, setSync] = useState(() => lerJson(SYNC_KEY, {
-        empresaAtual: "matriz",
-        empresas: ["matriz"],
-        google: false,
-        googleQuando: null
-    }));
+    const [sync, setSync] = useState(() => {
+        const bruto = lerJson(SYNC_KEY, {});
+        return {
+            empresaAtual: unidadeAtual().id,
+            empresas: normalizarEmpresas(bruto.empresas || [unidadeAtual().id], { incluirAtual: true }),
+            google: Boolean(bruto.google),
+            googleQuando: bruto.googleQuando || null
+        };
+    });
     const [painel, setPainel] = useState(null);
     const [form, setForm] = useState(() => formVazio(hoje));
     const [listaUsuarios, setListaUsuarios] = useState(false);
@@ -223,7 +221,8 @@ export default function Agenda() {
 
     const visiveis = useMemo(() => {
         return itens.filter((item) => {
-            const nasEmpresas = (item.empresas || []).some((id) => sync.empresas.includes(id));
+            const empresasItem = normalizarEmpresas(item.empresas);
+            const nasEmpresas = empresasItem.some((id) => sync.empresas.includes(id));
             if (!nasEmpresas) {
                 return false;
             }
@@ -290,7 +289,7 @@ export default function Agenda() {
             descricao: form.descricao.trim(),
             usuarios: form.usuarios.length ? form.usuarios : [meuNome],
             status: form.id ? form.status : "pendente",
-            empresas: form.empresas.length ? form.empresas : [sync.empresaAtual],
+            empresas: normalizarEmpresas(form.empresas, { incluirAtual: true }),
             criadoPor: meuNome,
             google: Boolean(form.id && itens.find((i) => i.id === form.id)?.google) || form.enviarGoogle || sync.google
         };
@@ -595,8 +594,9 @@ export default function Agenda() {
 
                     <label>
                         Empresas
+                        <p className="agenda-hint">Você está em {unidadeAtual().nome}. Marque só as outras unidades.</p>
                         <ul className="agenda-checks is-compact">
-                            {EMPRESAS.map((empresa) => (
+                            {unidadesDestino().map((empresa) => (
                                 <li key={empresa.id}>
                                     <label>
                                         <input
@@ -605,11 +605,13 @@ export default function Agenda() {
                                             onChange={() => {
                                                 setForm((atual) => {
                                                     const tem = atual.empresas.includes(empresa.id);
+                                                    const destinos = atual.empresas.filter((id) => id !== unidadeAtual().id && id !== empresa.id);
+                                                    if (!tem) {
+                                                        destinos.push(empresa.id);
+                                                    }
                                                     return {
                                                         ...atual,
-                                                        empresas: tem
-                                                            ? atual.empresas.filter((id) => id !== empresa.id)
-                                                            : [...atual.empresas, empresa.id]
+                                                        empresas: [unidadeAtual().id, ...destinos]
                                                     };
                                                 });
                                             }}
@@ -655,11 +657,11 @@ export default function Agenda() {
                         </button>
                     </header>
 
-                    <p className="agenda-hint">Espelhe a agenda entre empresas do grupo e exporte para o Google Agenda.</p>
+                    <p className="agenda-hint">Espelhe a agenda nas outras unidades e exporte para o Google Agenda. {unidadeAtual().nome} já é a unidade atual.</p>
 
-                    <h4>Multi empresas</h4>
+                    <h4>Outras unidades</h4>
                     <ul className="agenda-checks">
-                        {EMPRESAS.map((empresa) => (
+                        {unidadesDestino().map((empresa) => (
                             <li key={empresa.id}>
                                 <label>
                                     <input
@@ -668,15 +670,14 @@ export default function Agenda() {
                                         onChange={() => {
                                             setSync((atual) => {
                                                 const tem = atual.empresas.includes(empresa.id);
-                                                const empresas = tem
-                                                    ? atual.empresas.filter((id) => id !== empresa.id)
-                                                    : [...atual.empresas, empresa.id];
+                                                const destinos = atual.empresas.filter((id) => id !== unidadeAtual().id && id !== empresa.id);
+                                                if (!tem) {
+                                                    destinos.push(empresa.id);
+                                                }
                                                 return {
                                                     ...atual,
-                                                    empresas: empresas.length ? empresas : [empresa.id],
-                                                    empresaAtual: empresas.includes(atual.empresaAtual)
-                                                        ? atual.empresaAtual
-                                                        : empresas[0] || empresa.id
+                                                    empresaAtual: unidadeAtual().id,
+                                                    empresas: [unidadeAtual().id, ...destinos]
                                                 };
                                             });
                                         }}

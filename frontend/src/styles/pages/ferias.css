@@ -1,0 +1,657 @@
+.ferias-page {
+    --f-text: #3d2a34;
+    --f-muted: #9a7384;
+    --f-line: #f3cfe0;
+    --f-accent: #ff2f92;
+    color: var(--f-text);
+    padding: 4px 4px 28px;
+}
+
+.ferias-crumb {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--f-muted);
+    margin-bottom: 10px;
+}
+
+.ferias-crumb a {
+    color: var(--f-muted);
+    text-decoration: none;
+}
+
+.ferias-crumb span:last-child {
+    color: var(--f-accent);
+    font-weight: 600;
+}
+
+.ferias-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ferias-head h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ferias-head h1 svg {
+    color: var(--f-accent);
+}
+
+.ferias-head p {
+    margin: 0;
+    color: var(--f-muted);
+    font-size: 13px;
+}
+
+.ferias-cta {
+    border: 0;
+    background: var(--f-accent);
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ferias-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.ferias-kpis article {
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+
+.ferias-kpi-ico {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.ferias-kpis strong {
+    display: block;
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.ferias-kpis b {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ferias-kpis em {
+    display: block;
+    font-style: normal;
+    color: var(--f-muted);
+    font-size: 12px;
+}
+
+.ferias-kpis .is-rosa .ferias-kpi-ico { background: #ffe4ef; color: #fb7185; }
+.ferias-kpis .is-rosa strong { color: #fb7185; }
+.ferias-kpis .is-laranja .ferias-kpi-ico { background: #ffedd5; color: #f59e0b; }
+.ferias-kpis .is-laranja strong { color: #f59e0b; }
+.ferias-kpis .is-roxa .ferias-kpi-ico { background: #ede9fe; color: #8b5cf6; }
+.ferias-kpis .is-roxa strong { color: #8b5cf6; }
+.ferias-kpis .is-amarela .ferias-kpi-ico { background: #fef3c7; color: #d97706; }
+.ferias-kpis .is-amarela strong { color: #d97706; }
+
+.ferias-topo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.ferias-card {
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 16px;
+    padding: 14px 16px 8px;
+    min-width: 0;
+}
+
+.ferias-card header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    margin-bottom: 10px;
+}
+
+.ferias-card h2 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.ferias-card header p {
+    margin: 0;
+    color: var(--f-muted);
+    font-size: 12px;
+    width: 100%;
+}
+
+.ferias-prox {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+}
+
+.ferias-prox li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 8px 4px 12px;
+}
+
+.ferias-prox strong {
+    display: block;
+    font-size: 13px;
+}
+
+.ferias-prox span,
+.ferias-prox em {
+    display: block;
+    font-size: 11px;
+    font-style: normal;
+    color: var(--f-muted);
+}
+
+.ferias-prox em {
+    color: var(--f-accent);
+    font-weight: 600;
+}
+
+.ferias-av {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.ferias-vazio {
+    color: var(--f-muted);
+    font-size: 13px;
+    padding: 18px 4px;
+}
+
+.ferias-cal-card header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.ferias-cal-card header h2 {
+    flex: unset;
+}
+
+.ferias-legenda {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--f-muted);
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+}
+
+.ferias-cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ferias-cal-nav button {
+    border: 1px solid var(--f-line);
+    background: #fff;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--f-text);
+}
+
+.ferias-cal-nav strong {
+    font-size: 13px;
+    min-width: 130px;
+    text-align: center;
+}
+
+.ferias-legenda i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.ferias-legenda i.is-prog,
+.ferias-day.is-prog { background: #fce7f3; color: #be185d; }
+.ferias-legenda i.is-gozo,
+.ferias-day.is-gozo { background: #dcfce7; color: #15803d; }
+.ferias-legenda i.is-outra,
+.ferias-day.is-outra { background: #f1f5f9; color: #475569; }
+
+.ferias-cal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding-bottom: 8px;
+}
+
+.ferias-dow {
+    font-size: 11px;
+    color: var(--f-muted);
+    text-align: center;
+    padding: 4px 0;
+}
+
+.ferias-day {
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+}
+
+.ferias-day.is-fora {
+    color: #d4b3c2;
+    background: transparent;
+}
+
+.ferias-day.is-hoje {
+    box-shadow: inset 0 0 0 1px var(--f-accent);
+    font-weight: 700;
+}
+
+.ferias-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.ferias-tabs {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.ferias-tabs button {
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--f-muted);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ferias-tabs button.is-on {
+    background: #ffe4ef;
+    color: var(--f-accent);
+}
+
+.ferias-busca {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: var(--f-muted);
+}
+
+.ferias-busca input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    background: transparent;
+    font: inherit;
+    color: var(--f-text);
+}
+
+.ferias-ano {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--f-muted);
+}
+
+.ferias-ano select,
+.ferias-pag select {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--f-text);
+}
+
+.ferias-table-wrap {
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 16px;
+    overflow: auto;
+}
+
+.ferias-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ferias-table th,
+.ferias-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f8e4ee;
+    white-space: nowrap;
+}
+
+.ferias-table th {
+    color: var(--f-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ferias-table tbody tr {
+    cursor: pointer;
+}
+
+.ferias-table tbody tr.is-on,
+.ferias-table tbody tr:hover {
+    background: #fff7fa;
+}
+
+.ferias-table td a,
+.ferias-table td .ferias-nome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.ferias-table td a .ferias-av,
+.ferias-table td .ferias-nome .ferias-av {
+    width: 32px;
+    height: 32px;
+    font-size: 10px;
+}
+
+.ferias-table td a b,
+.ferias-table td .ferias-nome b {
+    display: block;
+    font-size: 13px;
+}
+
+.ferias-table td a small,
+.ferias-table td .ferias-nome small {
+    display: block;
+    color: var(--f-muted);
+    font-weight: 400;
+}
+
+.ferias-pill {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ferias-pill.is-prog { background: #ffe4ef; color: #be185d; }
+.ferias-pill.is-aq { background: #dbeafe; color: #1d4ed8; }
+.ferias-pill.is-enc { background: #dcfce7; color: #15803d; }
+.ferias-pill.is-prop { background: #ffedd5; color: #c2410c; }
+
+.ferias-pag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px 14px;
+    color: var(--f-muted);
+    font-size: 12px;
+}
+
+.ferias-pag div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ferias-pag button {
+    border: 1px solid #f8e4ee;
+    background: #fff;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.ferias-pag button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.ferias-pag strong {
+    min-width: 22px;
+    text-align: center;
+    color: #fff;
+    background: var(--f-accent);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.ferias-recibo {
+    background: #fff;
+    border: 1px solid #f8e4ee;
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ferias-recibo svg {
+    color: var(--f-accent);
+    flex-shrink: 0;
+}
+
+.ferias-recibo strong {
+    display: block;
+    font-size: 13px;
+}
+
+.ferias-recibo span {
+    display: block;
+    font-size: 12px;
+    color: var(--f-muted);
+}
+
+.ferias-recibo dl {
+    margin: 0;
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.ferias-recibo dt {
+    font-size: 11px;
+    color: var(--f-muted);
+}
+
+.ferias-recibo dd {
+    margin: 2px 0 0;
+    font-weight: 700;
+    font-size: 13px;
+    color: #059669;
+}
+
+.ferias-recibo a {
+    margin-left: auto;
+    color: var(--f-accent);
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.ferias-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(61, 42, 52, 0.35);
+    display: grid;
+    place-items: center;
+    z-index: 40;
+    padding: 16px;
+}
+
+.ferias-modal {
+    width: min(520px, 100%);
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    display: grid;
+    gap: 12px;
+}
+
+.ferias-modal header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ferias-modal h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.ferias-modal header button {
+    border: 0;
+    background: #fff7fa;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.ferias-modal label {
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.ferias-modal label span {
+    color: var(--f-muted);
+    font-size: 12px;
+}
+
+.ferias-modal input,
+.ferias-modal select {
+    border: 1px solid var(--f-line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+}
+
+.ferias-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.ferias-dias {
+    margin: 0;
+    font-size: 13px;
+    color: var(--f-muted);
+}
+
+.ferias-erro {
+    margin: 0;
+    color: #be123c;
+    font-size: 13px;
+}
+
+.ferias-modal footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.ferias-ghost {
+    border: 1px solid var(--f-line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+@media (max-width: 720px) {
+    .ferias-kpis,
+    .ferias-topo,
+    .ferias-prox,
+    .ferias-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ferias-head {
+        flex-direction: column;
+    }
+}

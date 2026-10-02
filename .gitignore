@@ -12,6 +12,7 @@ backend/.tmp/
 .env.*
 !.env.example
 *.local
+backend/config/local.properties
 
 # Logs
 *.log
@@ -31,6 +32,8 @@ Thumbs.db
 # Banco local (H2 / dumps)
 backend/uploads/
 uploads/
+backend/data/
+data/*.json
 *.mv.db
 *.trace.db
 

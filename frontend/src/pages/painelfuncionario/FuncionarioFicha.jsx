@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import ROTAS from "../../constants/rotas";
 import {
     EMPRESA_RH,
-    FERIAS,
     INFORMES,
     RESCISOES,
     SITUACAO,
@@ -13,7 +12,8 @@ import {
     documentosDe,
     documentosEmpresa,
     funcionarioPorId,
-    holeritesDe
+    holeritesDe,
+    listarFerias
 } from "../../constants/rh";
 
 import "../../styles/layout/app-shell.css";
@@ -43,7 +43,7 @@ export default function FuncionarioFicha() {
     const sit = SITUACAO[f.situacao] || SITUACAO.ativo;
     const docs = documentosDe(f.id);
     const docsEmpresa = documentosEmpresa();
-    const ferias = FERIAS.filter((x) => String(x.funcId) === String(f.id));
+    const ferias = listarFerias().filter((x) => String(x.funcId) === String(f.id));
     const rescisoes = RESCISOES.filter((x) => String(x.funcId) === String(f.id));
     const informe = INFORMES.find((x) => String(x.funcId) === String(f.id));
     const holerites = holeritesDe(f.id);
@@ -89,6 +89,7 @@ export default function FuncionarioFicha() {
                     {f.experienciaFim ? <div><dt>Experiência</dt><dd>vence {dataBr(f.experienciaFim)}{f.experienciaProrrogacao ? ` · prorrogação ${dataBr(f.experienciaProrrogacao)}` : ""}</dd></div> : null}
                     {f.contrato ? <div><dt>Contrato</dt><dd>{f.contrato}</dd></div> : null}
                     {f.desligamento ? <div><dt>Desligamento</dt><dd>{dataBr(f.desligamento)} {f.causaAfastamento ? `· ${f.causaAfastamento}` : ""}</dd></div> : null}
+                    {f.observacao ? <div><dt>Observação</dt><dd>{f.observacao}</dd></div> : null}
                 </dl>
                 {f.dependentes?.length > 0 && (
                     <div className="rh-dep">

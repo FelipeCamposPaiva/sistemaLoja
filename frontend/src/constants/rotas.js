@@ -32,13 +32,13 @@ ESTOQUE:"/estoque",
 
 AUDITORIA_ESTOQUE:"/estoque/auditoria",
 
-DASHBOARD_SUPRIMENTOS:"/estoque/dashboard",
+DASHBOARD_SUPRIMENTOS:"/dashboard#/estoque",
 
 ORDENS_COMPRA:"/pedidos_compra",
 
 NECESSIDADES_COMPRA:"/necessidades-compra",
 
-GIRO_ESTOQUE:"/giro-estoque",
+GIRO_ESTOQUE:"/dashboard#/estoque",
 
 NOTAS_ENTRADA:"/notas_entrada",
 
@@ -52,7 +52,7 @@ SEPARACAO:"/separacao",
 
 EXPEDICAO:"/expedicao",
 
-DASHBOARD_EXPEDICAO:"/expedicao/dashboard",
+DASHBOARD_EXPEDICAO:"/dashboard#/expedicao",
 
 CONTAS_RECEBER:"/contas-receber",
 
@@ -93,6 +93,8 @@ FERRAMENTAS:"/ferramentas_geral",
 PONTO:"/ponto",
 
 FUNCIONARIOS:"/funcionarios",
+
+FERIAS:"/ferias",
 
 RH:"/rh",
 

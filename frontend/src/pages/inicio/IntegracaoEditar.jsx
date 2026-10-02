@@ -25,6 +25,7 @@ import {
     padraoCfgIntegracao
 } from "../../constants/integracoes";
 import ROTAS from "../../constants/rotas";
+import { salvarChatGpt, statusChatGpt, testarChatGpt } from "../../services/ia.service";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
@@ -106,6 +107,11 @@ export default function IntegracaoEditar() {
     const [sub, setSub] = useState("estoque");
     const [salvo, setSalvo] = useState(false);
     const [painel, setPainel] = useState(null);
+    const [gptChave, setGptChave] = useState("");
+    const [gptModelo, setGptModelo] = useState("gpt-4o-mini");
+    const [gptStatus, setGptStatus] = useState({ configurado: false });
+    const [gptMsg, setGptMsg] = useState("");
+    const [gptBusy, setGptBusy] = useState(false);
 
     useEffect(() => {
         setCfg(lerCfgIntegracao(id));
@@ -115,12 +121,26 @@ export default function IntegracaoEditar() {
         setSalvo(false);
     }, [id]);
 
+    useEffect(() => {
+        if (id !== "chatgpt") {
+            return;
+        }
+        statusChatGpt()
+            .then((s) => {
+                setGptStatus(s || {});
+                if (s?.modelo) {
+                    setGptModelo(s.modelo);
+                }
+            })
+            .catch(() => setGptStatus({ configurado: false }));
+    }, [id]);
+
     if (!meta || !instalada) {
         return <Navigate to={ROTAS.INTEGRACOES} replace />;
     }
 
     const abas = canal ? ABAS_CANAL : ABAS_CANAL.filter((item) => item.id === "conexao");
-    const conectada = ativa;
+    const conectada = id === "chatgpt" ? !!gptStatus.configurado : ativa;
 
     function setCampo(chave, valor) {
         setCfg((atual) => ({ ...atual, [chave]: valor }));
@@ -132,8 +152,54 @@ export default function IntegracaoEditar() {
     }
 
     function salvar() {
+        if (id === "chatgpt") {
+            gravarGpt();
+            return;
+        }
         gravarCfgIntegracao(id, cfg);
         setSalvo(true);
+    }
+
+    async function gravarGpt() {
+        setGptBusy(true);
+        setGptMsg("");
+        try {
+            const res = await salvarChatGpt({ apiKey: gptChave, modelo: gptModelo });
+            if (res?.ok) {
+                setGptStatus(res);
+                setGptChave("");
+                setSalvo(true);
+                setGptMsg("ChatGPT conectado à sua conta da OpenAI.");
+            } else {
+                setGptMsg(res?.mensagem || "Não foi possível salvar a chave.");
+            }
+        } catch {
+            setGptMsg("Falha ao gravar. Confira se o backend está no ar.");
+        } finally {
+            setGptBusy(false);
+        }
+    }
+
+    async function testarGpt() {
+        setGptBusy(true);
+        setGptMsg("");
+        try {
+            if (gptChave.trim()) {
+                const gravou = await salvarChatGpt({ apiKey: gptChave, modelo: gptModelo });
+                if (!gravou?.ok) {
+                    setGptMsg(gravou?.mensagem || "Chave não aceita.");
+                    return;
+                }
+                setGptStatus(gravou);
+                setGptChave("");
+            }
+            const res = await testarChatGpt();
+            setGptMsg(res?.ok ? "Conexão ok. O ChatGPT respondeu." : (res?.mensagem || "Teste falhou."));
+        } catch {
+            setGptMsg("Não foi possível testar agora.");
+        } finally {
+            setGptBusy(false);
+        }
     }
 
     function alternarConexao() {
@@ -206,7 +272,61 @@ export default function IntegracaoEditar() {
                 ) : null}
 
                 <section className="int-panel">
-                    {aba === "conexao" ? (
+                    {aba === "conexao" && id === "chatgpt" ? (
+                        <>
+                            <Campo
+                                label="Nome da integração no ERP"
+                            >
+                                <input
+                                    className="int-input"
+                                    value={cfg.nome}
+                                    onChange={(e) => setCampo("nome", e.target.value)}
+                                />
+                            </Campo>
+                            <article className="int-status-card">
+                                <span className="idx-logo" style={{ background: meta.cor, color: meta.tinta }}>
+                                    {meta.sigla}
+                                </span>
+                                <div>
+                                    <strong>{meta.nome}</strong>
+                                    <em className={conectada ? "is-on" : "is-off"}>
+                                        <i />
+                                        {conectada ? `conectada (${gptStatus.mascara || gptModelo})` : "desconectada"}
+                                    </em>
+                                </div>
+                            </article>
+                            <p className="int-hint">
+                                O ChatGPT da caixa verde (chat.openai.com) não entra por login neste ERP.
+                                Use a mesma conta em <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">platform.openai.com/api-keys</a>,
+                                crie uma chave secreta e cole abaixo. Essa chave fica só no servidor, em data/openai.json.
+                            </p>
+                            <Campo label="Chave da API (sk-…)" hint={gptStatus.mascara ? `Chave atual: ${gptStatus.mascara}` : "A chave não aparece de novo depois de salvar."}>
+                                <input
+                                    className="int-input"
+                                    type="password"
+                                    autoComplete="off"
+                                    value={gptChave}
+                                    onChange={(e) => setGptChave(e.target.value)}
+                                    placeholder={gptStatus.configurado ? "Cole uma chave nova para trocar" : "sk-proj-…"}
+                                />
+                            </Campo>
+                            <Campo label="Modelo">
+                                <select className="int-input" value={gptModelo} onChange={(e) => setGptModelo(e.target.value)}>
+                                    <option value="gpt-4o-mini">gpt-4o-mini (rápido e barato)</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                                </select>
+                            </Campo>
+                            {gptMsg ? <p className="int-hint">{gptMsg}</p> : null}
+                            <div className="idx-drawer-actions" style={{ marginTop: 8 }}>
+                                <button type="button" className="idx-pill" disabled={gptBusy} onClick={testarGpt}>
+                                    {gptBusy ? "testando…" : "testar conexão"}
+                                </button>
+                            </div>
+                        </>
+                    ) : null}
+
+                    {aba === "conexao" && id !== "chatgpt" ? (
                         <>
                             <Campo label="Nome da integração no ERP">
                                 <input

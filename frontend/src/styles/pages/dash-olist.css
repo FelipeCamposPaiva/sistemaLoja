@@ -1,0 +1,257 @@
+.dash-ol {
+    max-width: 1280px;
+}
+
+.dash-ol-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin: 0 0 18px;
+}
+
+.dash-ol-head h3 {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.dash-ol-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.dash-ol-embed .dash-vendas-head {
+    margin-top: 0;
+}
+
+.dash-ol-tabs a {
+    color: var(--muted);
+    text-decoration: none;
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
+}
+
+.dash-ol-tabs a.is-on {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+.dash-ol-tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.dash-ol-tools button,
+.dash-ol-filtro > button {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dash-ol-tools button.is-on,
+.dash-ol-filtro > button.is-on {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.dash-ol-filtro {
+    position: relative;
+}
+
+.dash-ol-filtro ul {
+    position: absolute;
+    right: 0;
+    top: 36px;
+    z-index: 5;
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    min-width: 180px;
+}
+
+.dash-ol-filtro li button {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 8px;
+}
+
+.dash-ol-kpis {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.dash-ol-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+}
+
+.dash-ol-card header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dash-ol-card small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.dash-ol-card h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.dash-ol-card h4 small {
+    margin-left: 8px;
+}
+
+.dash-ol-card header strong,
+.dash-ol-card h4 strong {
+    display: block;
+    font-size: 24px;
+}
+
+.dash-ol-card em {
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dash-ol-card a {
+    margin-top: auto;
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.dash-ol-chart {
+    height: 180px;
+    margin: 8px 0 12px;
+}
+
+.dash-ol-chart.is-pie {
+    height: 210px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+
+.dash-ol-chart.is-tall {
+    height: 240px;
+}
+
+.dash-ol-visao {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.dash-ol-visao h4 {
+    margin: 0 0 12px;
+}
+
+.dash-ol-visao ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.dash-ol-visao li b {
+    display: block;
+    font-size: 18px;
+}
+
+.dash-ol-visao li span,
+.dash-ol-periodo {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.dash-ol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.dash-ol-grid.is-fin .is-wide {
+    grid-column: 1 / -1;
+}
+
+.dash-ol-legenda {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+}
+
+.dash-ol-legenda li {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.dash-ol-legenda i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dash-ol-card ul {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    flex: 1;
+}
+
+.dash-ol-card li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+}
+
+.dash-ol-links {
+    display: flex;
+    gap: 16px;
+}
+
+.dash-ol-card .is-up { color: #22c55e; }
+.dash-ol-card .is-down { color: #f43f5e; }
+.dash-ol-card .is-flat { color: var(--muted); }
+
+@media (max-width: 1100px) {
+    .dash-ol-kpis,
+    .dash-ol-grid,
+    .dash-ol-visao ul,
+    .dash-ol-chart.is-pie {
+        grid-template-columns: 1fr;
+    }
+}

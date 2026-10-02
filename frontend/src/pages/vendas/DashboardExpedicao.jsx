@@ -43,7 +43,7 @@ function mensagemErro(error, padrao) {
     return error?.response?.data?.mensagem || padrao;
 }
 
-export default function DashboardExpedicao() {
+export default function DashboardExpedicao({ embutido = false }) {
     const [dados, setDados] = useState(null);
     const [aviso, setAviso] = useState("");
     const [prefs, setPrefs] = useState(lerPrefs);
@@ -155,14 +155,18 @@ export default function DashboardExpedicao() {
         <div className={`dash-home dash-exp${kiosk ? " is-kiosk" : ""}`}>
             <header className="dash-vendas-head">
                 <div>
-                    <p className="dash-crumb">
-                        <Link to={ROTAS.INDICE}>início</Link>
-                        {" › "}
-                        <span>vendas</span>
-                        {" › "}
-                        <span>dashboard de expedição</span>
-                    </p>
-                    <h3>Dashboard de expedição</h3>
+                    {embutido ? null : (
+                        <>
+                            <p className="dash-crumb">
+                                <Link to={ROTAS.INDICE}>início</Link>
+                                {" › "}
+                                <span>vendas</span>
+                                {" › "}
+                                <span>dashboard de expedição</span>
+                            </p>
+                            <h3>Dashboard de expedição</h3>
+                        </>
+                    )}
                     <p className="prd-sub">Atualizado {agora.toLocaleTimeString("pt-BR")} · a cada {prefs.refresh}s</p>
                 </div>
                 <div className="dash-pills">

@@ -169,7 +169,7 @@ export default function Vendedores() {
     const leitura = modal?.modo === "ver";
 
     return (
-        <div className="ctt-page ctt-loja vend-page">
+        <div className="ctt-page ctt-loja vend-page has-pager">
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>Início</Link>
                 <span>›</span>
@@ -332,11 +332,6 @@ export default function Vendedores() {
                     Mostrando {filtrados.length ? inicio + 1 : 0} a {Math.min(inicio + visiveis.length, filtrados.length)} de {filtrados.length} vendedores
                 </span>
                 <div className="vend-pagina">
-                    <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Por página">
-                        <option value={10}>10 por página</option>
-                        <option value={20}>20 por página</option>
-                        <option value={50}>50 por página</option>
-                    </select>
                     <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina((n) => n - 1)} aria-label="Anterior">
                         <ChevronLeft size={14} />
                     </button>
@@ -345,6 +340,13 @@ export default function Vendedores() {
                         <ChevronRight size={14} />
                     </button>
                 </div>
+                <label className="erp-pager-size">
+                    <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Por página">
+                        <option value={10}>10 por página</option>
+                        <option value={20}>20 por página</option>
+                        <option value={50}>50 por página</option>
+                    </select>
+                </label>
             </div>
 
             <aside className="vend-promo" aria-hidden>

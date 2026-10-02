@@ -1,4 +1,5 @@
 import api, { resource } from "./api";
+import { normalizarEmpresas, unidadeAtual } from "../constants/empresas";
 
 const agenda = resource("/agenda");
 
@@ -24,7 +25,7 @@ export function eventoDaApi(raw) {
         descricao: extra.texto || raw?.titulo || "",
         usuarios: extra.usuarios || [],
         status: raw?.tipo || extra.status || "pendente",
-        empresas: extra.empresas || ["matriz"],
+        empresas: extra.empresas ? normalizarEmpresas(extra.empresas) : [unidadeAtual().id],
         criadoPor: extra.criadoPor || "",
         google: Boolean(extra.google)
     };

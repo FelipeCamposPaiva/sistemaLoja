@@ -3,6 +3,7 @@ package com.temdetudo.erp.repository;
 import com.temdetudo.erp.entity.Produto;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -39,6 +40,9 @@ public interface ProdutoRepository
     List<Produto> findByMarcaId(
             Integer marcaId
     );
+
+    @Query("SELECT p.marcaId, COUNT(p) FROM Produto p WHERE p.marcaId IS NOT NULL GROUP BY p.marcaId")
+    List<Object[]> contarPorMarcaId();
 
     List<Produto> findByProdutoProducao(
             Boolean produtoProducao

@@ -4,23 +4,36 @@ import { Bell, ChevronDown, LifeBuoy, LogOut, Settings, Store, User } from "luci
 
 import MENU, { itensPlanos } from "../constants/menu";
 import { AVISOS, gravarAvisosLidos, lerAvisosLidos } from "../constants/avisos";
+import { CONTA_PREFS_EVT, corDe, lerConta, temaEscuroAtivo } from "../constants/conta";
 import ROTAS from "../constants/rotas";
 import useAuth from "../hooks/useAuth.jsx";
 import logo from "../assets/logo/logo.svg";
+import ChatGptWidget from "../components/ChatGptWidget";
 
 import "../styles/layout/layout.css";
 import "../styles/layout/content.css";
 import "../styles/layout/app-shell.css";
 import "../styles/pages/indice.css";
+import "../styles/theme/search-focus.css";
+import "../styles/theme/pager.css";
 
 const MENU_FIXO_KEY = "erp-menu-fixo";
-const CONTA_KEY = "erp-minha-conta-v1";
 
-function rotaAtiva(pathname, rota) {
+function ancoraRota(rota) {
+    const texto = String(rota || "");
+    const i = texto.indexOf("#");
+    if (i < 0) {
+        return "";
+    }
+    return texto.slice(i + 1).replace(/^\//, "");
+}
+
+function rotaAtiva(pathname, rota, hash = "") {
     if (!rota) {
         return false;
     }
     const caminho = String(rota).split("#")[0] || rota;
+    const ancora = ancoraRota(rota);
     if (caminho === "/" || caminho === "/index") {
         return pathname === "/" || pathname === "/index";
     }
@@ -28,7 +41,11 @@ function rotaAtiva(pathname, rota) {
         return pathname === "/loja-admin";
     }
     if (pathname === caminho) {
-        return true;
+        if (!ancora) {
+            return true;
+        }
+        const atual = String(hash || "").replace(/^#/, "").replace(/^\//, "");
+        return atual === ancora || atual.startsWith(`${ancora}/`);
     }
     if (caminho === "/ponto" || caminho === "/pdv") {
         return false;
@@ -39,7 +56,14 @@ function rotaAtiva(pathname, rota) {
     return pathname.startsWith(`${caminho}/`) || (caminho === "/ordem_servicos" && pathname.startsWith("/os"));
 }
 
-function grupoDaRota(pathname) {
+function linkAtivo(isActive, pathname, rota, hash) {
+    if (ancoraRota(rota)) {
+        return rotaAtiva(pathname, rota, hash);
+    }
+    return Boolean(isActive) || rotaAtiva(pathname, rota, hash);
+}
+
+function grupoDaRota(pathname, hash = "") {
     if (pathname === "/loja-admin" || pathname.startsWith("/loja-admin/")) {
         return MENU.find((grupo) => grupo.id === "loja-virtual") || MENU[0];
     }
@@ -47,12 +71,15 @@ function grupoDaRota(pathname) {
     let tamanho = -1;
     MENU.forEach((grupo) => {
         itensPlanos(grupo).forEach((item) => {
-            if (item.rota && rotaAtiva(pathname, item.rota) && String(item.rota).length > tamanho) {
+            if (item.rota && rotaAtiva(pathname, item.rota, hash) && String(item.rota).length > tamanho) {
                 melhor = grupo;
                 tamanho = String(item.rota).length;
             }
         });
     });
+    if (!melhor && pathname === "/dashboard") {
+        return MENU.find((grupo) => grupo.id === "inicio") || MENU[0];
+    }
     return melhor || MENU[0];
 }
 
@@ -62,25 +89,21 @@ function iniciaisNome(nome) {
 }
 
 function dadosConta(usuario) {
-    try {
-        const bruto = JSON.parse(localStorage.getItem(CONTA_KEY) || "{}");
-        return {
-            nome: bruto.nome || usuario?.nome || "Administrador",
-            empresa: bruto.empresa || "Tem de Tudo — Volta Redonda",
-            cargo: bruto.cargo || usuario?.perfil || "ADMIN"
-        };
-    } catch {
-        return {
-            nome: usuario?.nome || "Administrador",
-            empresa: "Tem de Tudo — Volta Redonda",
-            cargo: usuario?.perfil || "ADMIN"
-        };
-    }
+    const bruto = lerConta(usuario);
+    return {
+        nome: bruto.nome,
+        empresa: bruto.empresa,
+        cargo: bruto.cargo,
+        foto: bruto.foto,
+        cor: bruto.cor,
+        tema: bruto.tema,
+        notificacoes: bruto.notificacoes !== false
+    };
 }
 
-function FlyoutLoja({ itens, pathname }) {
+function FlyoutLoja({ itens, pathname, hash }) {
     const ativoId = itens.find((item) =>
-        item.filhos?.some((filho) => rotaAtiva(pathname, filho.rota))
+        item.filhos?.some((filho) => rotaAtiva(pathname, filho.rota, hash))
     )?.id;
     const [abertos, setAbertos] = useState(() => (ativoId ? [ativoId] : []));
 
@@ -130,11 +153,11 @@ function FlyoutLoja({ itens, pathname }) {
                                             key={filho.rota}
                                             to={filho.rota}
                                             className={({ isActive }) =>
-                                                `flyout-link${isActive || rotaAtiva(pathname, filho.rota) ? " is-active" : ""}`
+                                                `flyout-link${linkAtivo(isActive, pathname, filho.rota, hash) ? " is-active" : ""}`
                                             }
                                         >
                                             {filho.nome}
-                                            {filho.beta ? <em className="flyout-beta">BETA</em> : null}
+                                            <em className="flyout-beta">BETA</em>
                                         </NavLink>
                                     ))}
                                 </div>
@@ -148,12 +171,12 @@ function FlyoutLoja({ itens, pathname }) {
                         to={item.rota === "/" ? "/index" : item.rota}
                         end={item.rota === "/loja-admin"}
                         className={({ isActive }) =>
-                            `flyout-link${isActive || rotaAtiva(pathname, item.rota) ? " is-active" : ""}`
+                            `flyout-link${linkAtivo(isActive, pathname, item.rota, hash) ? " is-active" : ""}`
                         }
                     >
                         {Icon ? <Icon size={16} strokeWidth={1.7} /> : null}
                         {item.nome}
-                        {item.beta ? <em className="flyout-beta">BETA</em> : null}
+                        {item.externo ? null : <em className="flyout-beta">BETA</em>}
                     </NavLink>
                 );
             })}
@@ -164,10 +187,10 @@ function FlyoutLoja({ itens, pathname }) {
 export default function AppLayout() {
     const { usuario, logout } = useAuth();
     const navigate = useNavigate();
-    const { pathname } = useLocation();
+    const { pathname, hash } = useLocation();
     const pdv = pathname === "/pdv";
     const loja = true;
-    const [grupoId, setGrupoId] = useState(() => grupoDaRota(pathname).id);
+    const [grupoId, setGrupoId] = useState(() => grupoDaRota(pathname, hash).id);
     const [fixo, setFixo] = useState(() => {
         try {
             return localStorage.getItem(MENU_FIXO_KEY) !== "0";
@@ -177,12 +200,23 @@ export default function AppLayout() {
     });
     const [painel, setPainel] = useState(null);
     const [lidos, setLidos] = useState(lerAvisosLidos);
+    const [contaTick, setContaTick] = useState(0);
     const shellRef = useRef(null);
 
     useEffect(() => {
-        setGrupoId(grupoDaRota(pathname).id);
+        setGrupoId(grupoDaRota(pathname, hash).id);
         setPainel(null);
-    }, [pathname]);
+    }, [pathname, hash]);
+
+    useEffect(() => {
+        function sync() {
+            const contaNova = lerConta(usuario);
+            setContaTick((n) => n + 1);
+            setFixo(contaNova.menu !== "compacto");
+        }
+        window.addEventListener(CONTA_PREFS_EVT, sync);
+        return () => window.removeEventListener(CONTA_PREFS_EVT, sync);
+    }, [usuario]);
 
     useEffect(() => {
         function fechar(ev) {
@@ -211,8 +245,9 @@ export default function AppLayout() {
     const principais = MENU.filter((grupo) => grupo.id !== "configuracoes");
     const config = MENU.find((grupo) => grupo.id === "configuracoes");
     const naoLidos = AVISOS.filter((a) => !lidos.includes(a.id)).length;
-    const conta = dadosConta(usuario);
+    const conta = useMemo(() => dadosConta(usuario), [usuario, contaTick]);
     const iniciais = iniciaisNome(conta.nome);
+    const escuro = temaEscuroAtivo(conta.tema);
     const flyoutConta = painel === "conta";
     const flyoutAvisos = painel === "avisos";
 
@@ -257,7 +292,10 @@ export default function AppLayout() {
     }
 
     return (
-        <div className={`erp-shell${fixo ? " is-pinned" : ""}${pdv ? " is-pdv" : ""}${loja ? " is-loja" : ""}`}>
+        <div
+            className={`erp-shell${fixo ? " is-pinned" : ""}${pdv ? " is-pdv" : ""}${loja ? " is-loja" : ""}${escuro ? " is-escuro" : ""}`}
+            style={{ "--accent": corDe(conta.cor) }}
+        >
             <div className="shell-nav" ref={shellRef}>
                 <nav className="rail" aria-label="Módulos">
                     <button type="button" className="rail-brand" onClick={() => navigate(ROTAS.INDICE)}>
@@ -306,7 +344,9 @@ export default function AppLayout() {
                             title="Minha conta"
                             onClick={() => setPainel(painel === "conta" ? null : "conta")}
                         >
-                            <span className="rail-avatar" aria-hidden="true">{iniciais}</span>
+                            <span className="rail-avatar" aria-hidden="true">
+                                {conta.foto ? <img src={conta.foto} alt="" /> : iniciais}
+                            </span>
                             <span>Minha conta</span>
                         </button>
 
@@ -318,7 +358,7 @@ export default function AppLayout() {
                             onClick={() => setPainel(painel === "avisos" ? null : "avisos")}
                         >
                             <Bell size={20} strokeWidth={1.7} />
-                            {naoLidos ? <em>{naoLidos > 9 ? "9+" : naoLidos}</em> : null}
+                            {conta.notificacoes && naoLidos ? <em>{naoLidos > 9 ? "9+" : naoLidos}</em> : null}
                             <span>Notificações</span>
                         </button>
 
@@ -405,7 +445,7 @@ export default function AppLayout() {
                                     <strong>{grupoAtivo.titulo}</strong>
                                 </header>
                                 {grupoAtivo.id === "loja-virtual" ? (
-                                    <FlyoutLoja itens={grupoAtivo.itens} pathname={pathname} />
+                                    <FlyoutLoja itens={grupoAtivo.itens} pathname={pathname} hash={hash} />
                                 ) : (
                                     <div className="flyout-list">
                                         {grupoAtivo.itens.map((item) => {
@@ -417,11 +457,12 @@ export default function AppLayout() {
                                                     to={to}
                                                     end
                                                     className={({ isActive }) =>
-                                                        `flyout-link${isActive || rotaAtiva(pathname, item.rota) ? " is-active" : ""}`
+                                                        `flyout-link${linkAtivo(isActive, pathname, item.rota, hash) ? " is-active" : ""}`
                                                     }
                                                 >
                                                     {Icon ? <Icon size={16} strokeWidth={1.7} /> : null}
                                                     {item.nome}
+                                                    <em className="flyout-beta">BETA</em>
                                                 </NavLink>
                                             );
                                         })}
@@ -431,10 +472,6 @@ export default function AppLayout() {
                                     <LogOut size={16} />
                                     Sair do sistema
                                 </button>
-                                <p className="flyout-loja">
-                                    Tem de Tudo, que vende papelaria,
-                                    é parte da sua história!
-                                </p>
                             </>
                         )}
                     </aside>
@@ -448,6 +485,7 @@ export default function AppLayout() {
                     </div>
                 </main>
             </div>
+            <ChatGptWidget oculto={pdv} />
         </div>
     );
 }

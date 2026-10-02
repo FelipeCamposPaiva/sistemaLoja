@@ -91,6 +91,7 @@ export default function Funcionarios() {
                             <th>Nome</th>
                             <th>Cargo</th>
                             <th>Admissão</th>
+                            <th>Saída</th>
                             <th>CPF</th>
                             <th>Salário</th>
                             <th>Situação</th>
@@ -108,6 +109,7 @@ export default function Funcionarios() {
                                     </td>
                                     <td>{f.cargo || "—"}</td>
                                     <td>{f.admissao ? f.admissao.split("-").reverse().join("/") : "—"}</td>
+                                    <td>{f.desligamento ? f.desligamento.split("-").reverse().join("/") : "—"}</td>
                                     <td>{f.cpf || "—"}</td>
                                     <td>{f.salario ? brl(f.salario) : "—"}</td>
                                     <td><span className={`rh-pill is-${sit.classe}`}>{sit.nome}</span></td>

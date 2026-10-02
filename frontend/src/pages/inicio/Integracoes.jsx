@@ -105,10 +105,9 @@ export default function Integracoes() {
 
     function instalar(id) {
         setMinhas((atual) => {
-            if (atual.some((item) => item.id === id)) {
-                return atual;
-            }
-            return [...atual, { id, ativa: true }];
+            const next = atual.some((item) => item.id === id) ? atual : [...atual, { id, ativa: true }];
+            gravarMinhasIntegracoes(next);
+            return next;
         });
         if (id === "google-agenda") {
             try {
@@ -122,7 +121,7 @@ export default function Integracoes() {
                 /* ignore */
             }
         }
-        navigate(ROTAS.INTEGRACOES);
+        navigate(id === "chatgpt" ? "/integracoes/chatgpt" : ROTAS.INTEGRACOES);
     }
 
     function alternarAtiva(id) {

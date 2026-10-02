@@ -21,6 +21,38 @@ export function brl(valor) {
     return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const PARTICULAS_NOME = new Set(["de", "da", "do", "dos", "das", "e"]);
+
+export function nomePessoa(nome) {
+    if (!nome) {
+        return "—";
+    }
+    return String(nome)
+        .toLowerCase()
+        .split(/\s+/)
+        .map((parte, i) => {
+            if (i > 0 && PARTICULAS_NOME.has(parte)) {
+                return parte;
+            }
+            return parte.charAt(0).toUpperCase() + parte.slice(1);
+        })
+        .join(" ");
+}
+
+export function setorDoFuncionario(func) {
+    const cargo = String(func?.cargo || "").toLowerCase();
+    if (/produ|gr[áa]fic|design|colabor/.test(cargo)) {
+        return "Produção";
+    }
+    if (/admin|pr[oó]-labore|s[oó]cia|s[oó]cio/.test(cargo)) {
+        return "Administração";
+    }
+    if (/vended|atend/.test(cargo)) {
+        return "Vendas";
+    }
+    return "Geral";
+}
+
 export function competenciaBr(comp) {
     if (!comp) {
         return "—";
@@ -298,6 +330,152 @@ export const FUNCIONARIOS_RH = [
         cargo: "Vendedora",
         depto: "001 - GERAL",
         dependentes: []
+    },
+    {
+        id: 2501,
+        matricula: "012",
+        nome: "IVANA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2014",
+        desligamento: "2018",
+        observacao: "Planilha só com o ano.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2502,
+        matricula: "013",
+        nome: "SABRINA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        desligamento: "2024-04-30",
+        observacao: "Planilha sem entrada. Saída 31/04/2024 ajustada para 30/04/2024.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2503,
+        matricula: "014",
+        nome: "MEIRIELE",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2021-11-30",
+        desligamento: "2024-03-31",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2504,
+        matricula: "015",
+        nome: "MONALIZA",
+        situacao: "ativo",
+        cargo: "Colaborador",
+        observacao: "Planilha sem entrada nem saída.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2505,
+        matricula: "016",
+        nome: "ANDJARA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2022-05-19",
+        desligamento: "2022-07-30",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2506,
+        matricula: "017",
+        nome: "JOELMA TULLER",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2022-08-01",
+        desligamento: "2023-11-30",
+        observacao: "Saída 31/11/2023 ajustada para 30/11/2023.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2507,
+        matricula: "018",
+        nome: "MARINA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2022-08-22",
+        desligamento: "2022-09-30",
+        observacao: "Primeira Marina da planilha (2022).",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2508,
+        matricula: "019",
+        nome: "LAISA AMARAL",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2023-11-27",
+        desligamento: "2024-04-30",
+        observacao: "Saída 31/04/2024 ajustada para 30/04/2024.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2509,
+        matricula: "020",
+        nome: "CARMEM BEATRIZ",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2023-12-04",
+        desligamento: "2024-11-30",
+        observacao: "Saída 31/11/2024 ajustada para 30/11/2024.",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2510,
+        matricula: "021",
+        nome: "ANA JULIA DE SOUZA OLIVEIRA",
+        situacao: "ativo",
+        cargo: "Colaborador",
+        admissao: "2024-11-25",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2511,
+        matricula: "022",
+        nome: "ANA LIVIA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2025-01-27",
+        desligamento: "2025-01-31",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2512,
+        matricula: "023",
+        nome: "MARINA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        admissao: "2025-02-07",
+        desligamento: "2025-02-12",
+        observacao: "Segunda Marina da planilha (2025).",
+        depto: "001 - GERAL",
+        dependentes: []
+    },
+    {
+        id: 2513,
+        matricula: "024",
+        nome: "GABRIELA RIBEIRO MELLO DE LIMA",
+        situacao: "desligado",
+        cargo: "Colaborador",
+        observacao: "Planilha Ponto Gabi — Atualizar (recibos, sem marcação diária).",
+        depto: "001 - GERAL",
+        dependentes: []
     }
 ];
 
@@ -365,27 +543,110 @@ export const FERIAS = [
     },
     {
         funcId: 216,
+        cargo: "Atendente",
+        aquisitivoIni: "2026-08-01",
+        aquisitivoFim: "2027-07-31",
+        vencidas: 12.5,
+        abono: 0,
+        gozo: 0,
+        limite: "2027-07-02",
+        status: "aquisitivo"
+    },
+    {
+        funcId: 216,
         aquisitivoIni: "2025-08-01",
         aquisitivoFim: "2026-07-31",
         vencidas: 30,
         abono: 0,
         gozo: 30,
         limite: "2027-07-02",
+        status: "encerrado"
+    },
+    {
+        funcId: 104,
+        cargo: "Produção",
+        aquisitivoIni: "2026-07-12",
+        aquisitivoFim: "2027-07-11",
+        vencidas: 15,
+        abono: 0,
+        gozo: 15,
+        limite: "2028-06-12",
+        gozoIni: "2026-12-20",
+        gozoFim: "2027-01-03",
+        status: "programado"
+    },
+    {
+        funcId: 105,
+        cargo: "Atendente",
+        aquisitivoIni: "2026-06-01",
+        aquisitivoFim: "2027-05-31",
+        vencidas: 17.5,
+        abono: 0,
+        gozo: 15,
+        limite: "2028-05-02",
+        gozoIni: "2026-09-15",
+        gozoFim: "2026-09-29",
+        status: "aquisitivo"
+    },
+    {
+        funcId: 2194,
+        cargo: "Produção",
+        aquisitivoIni: "2026-06-02",
+        aquisitivoFim: "2027-06-01",
+        vencidas: 17.5,
+        abono: 0,
+        gozo: 15,
+        limite: "2028-05-03",
+        gozoIni: "2026-10-05",
+        gozoFim: "2026-10-19",
+        status: "programado"
+    },
+    {
+        funcId: 23,
+        cargo: "Produção",
+        admissao: "2026-03-10",
+        aquisitivoIni: "2026-03-10",
+        aquisitivoFim: "2027-03-09",
+        vencidas: 15,
+        abono: 0,
+        gozo: 15,
+        limite: "2027-03-09",
+        gozoIni: "2026-08-10",
+        gozoFim: "2026-08-24",
+        salarioBase: 1654.2,
+        ferias: 1240.65,
+        terco: 413.55,
+        inss: 0,
+        proventos: 1654.2,
+        liquido: 1654.2,
+        status: "encerrado"
+    },
+    {
+        funcId: 801,
+        nome: "MARIA VITÓRIA",
+        cargo: "Administração",
+        admissao: "2026-01-12",
+        aquisitivoIni: "2026-01-12",
+        aquisitivoFim: "2027-01-11",
+        vencidas: 0,
+        abono: 0,
+        gozo: 0,
+        limite: "2027-01-11",
         status: "proporcional-rescisao"
     },
     {
-        funcId: 216,
-        aquisitivoIni: "2026-08-01",
-        aquisitivoFim: "2027-07-31",
-        vencidas: 12.5,
+        funcId: 802,
+        nome: "RICARDO SOUZA",
+        cargo: "Produção",
+        admissao: "2025-01-20",
+        aquisitivoIni: "2025-01-20",
+        aquisitivoFim: "2026-01-19",
+        vencidas: 22.5,
         abono: 0,
-        gozo: 30,
-        limite: "2028-07-02",
-        status: "encerrado"
-    },
-    { funcId: 104, aquisitivoIni: "2026-07-12", aquisitivoFim: "2027-07-11", vencidas: 15, abono: 0, gozo: 30, limite: "2028-06-12", status: "aquisitivo" },
-    { funcId: 105, aquisitivoIni: "2026-06-01", aquisitivoFim: "2027-05-31", vencidas: 17.5, abono: 0, gozo: 30, limite: "2028-05-02", status: "aquisitivo" },
-    { funcId: 2194, aquisitivoIni: "2026-06-02", aquisitivoFim: "2027-06-01", vencidas: 17.5, abono: 0, gozo: 30, limite: "2028-05-03", status: "aquisitivo" }
+        gozo: 0,
+        limite: "2026-08-19",
+        status: "aquisitivo"
+    }
 ];
 
 export const RESCISOES = [
@@ -457,11 +718,22 @@ export const RESCISOES = [
 ];
 
 export const INFORMES = [
-    { funcId: 1, eSocial: "000004", calendario: 2025, exercicio: 2026, tributaveis: 7590, inss: 834.9, irrf: 0, decimo: 0, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA" },
-    { funcId: 32, eSocial: "000001", calendario: 2025, exercicio: 2026, tributaveis: 8904, inss: 687.5, irrf: 0, decimo: 496.76, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA" },
-    { funcId: 3, eSocial: "000003", calendario: 2025, exercicio: 2026, tributaveis: 4723.76, inss: 361.5, irrf: 0, decimo: 486.55, indenizacao: 467.56, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA" },
-    { funcId: 216, eSocial: "000002", calendario: 2025, exercicio: 2026, tributaveis: 6075.3, inss: 455.62, irrf: 0, decimo: 278.72, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA" }
+    { funcId: 32, eSocial: "000001", calendario: 2025, exercicio: 2026, tributaveis: 7590, inss: 834.9, irrf: 0, decimo: 0, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 216, eSocial: "000002", calendario: 2025, exercicio: 2026, tributaveis: 8904, inss: 687.5, irrf: 0, decimo: 496.76, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 104, eSocial: "000007", calendario: 2025, exercicio: 2026, tributaveis: 4723.76, inss: 361.5, irrf: 0, decimo: 486.55, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 105, eSocial: "000005", calendario: 2025, exercicio: 2026, tributaveis: 6375.3, inss: 455.62, irrf: 0, decimo: 278.72, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 2194, eSocial: "000006", calendario: 2025, exercicio: 2026, tributaveis: 5648.12, inss: 423.61, irrf: 0, decimo: 345.1, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 23, eSocial: "000008", calendario: 2025, exercicio: 2026, tributaveis: 6214.9, inss: 482.3, irrf: 0, decimo: 412.55, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 2401, eSocial: "000010", calendario: 2025, exercicio: 2026, tributaveis: 5902.45, inss: 438.77, irrf: 0, decimo: 389.21, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 90, eSocial: "000009", calendario: 2025, exercicio: 2026, tributaveis: 6483.8, inss: 512.4, irrf: 0, decimo: 403.66, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 3, eSocial: "000003", calendario: 2025, exercicio: 2026, tributaveis: 4723.76, inss: 361.5, irrf: 0, decimo: 486.55, indenizacao: 467.56, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" },
+    { funcId: 1, eSocial: "000004", calendario: 2025, exercicio: 2026, tributaveis: 19452, inss: 0, irrf: 0, decimo: 0, indenizacao: 0, data: "2026-02-24", responsavel: "LEVI CARVALHO CANELLA", status: "disponivel" }
 ];
+
+export function informesDoExercicio(ano) {
+    const alvo = Number(ano);
+    return INFORMES.filter((item) => item.exercicio === alvo || item.calendario === alvo);
+}
 
 export const AVISOS_RH = [
     { id: 1, tipo: "experiencia", funcId: 105, titulo: "1º vencimento da experiência", detalhe: "Gabriela — 15/07/2026", inicio: "2026-07-08", fim: "2026-07-15", gravidade: "alta" },
@@ -537,7 +809,7 @@ export function funcionarioPorId(id) {
 const RH_EXTRA_KEY = "erp-rh-extra-v1";
 
 function extraVazio() {
-    return { funcionarios: [], movimentos: [] };
+    return { funcionarios: [], movimentos: [], ferias: [] };
 }
 
 export function lerRhExtra() {
@@ -581,6 +853,17 @@ export function salvarMovimento(item) {
 
 export function movimentosPorTipo(tipo) {
     return (lerRhExtra().movimentos || []).filter((m) => m.tipo === tipo);
+}
+
+export function listarFerias() {
+    return [...FERIAS, ...(lerRhExtra().ferias || [])];
+}
+
+export function salvarFerias(item) {
+    const extra = lerRhExtra();
+    extra.ferias = [item, ...(extra.ferias || [])];
+    gravarRhExtra(extra);
+    return item;
 }
 
 export function documentosDe(funcId) {

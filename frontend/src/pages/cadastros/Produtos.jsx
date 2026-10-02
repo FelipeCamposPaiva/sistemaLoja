@@ -366,6 +366,16 @@ function exportarCsv(lista) {
     URL.revokeObjectURL(url);
 }
 
+function passaFiltroMarca(produto, marca, marcaId) {
+    if (!marca && !marcaId) {
+        return true;
+    }
+    if (marcaId && String(produto.marcaId) === String(marcaId)) {
+        return true;
+    }
+    return Boolean(marca && String(produto.marca || "").toLowerCase().includes(marca.toLowerCase()));
+}
+
 export default function Produtos() {
     const navigate = useNavigate();
     const [params] = useSearchParams();
@@ -385,12 +395,12 @@ export default function Produtos() {
     const [colunas, setColunas] = useState(colunasSalvas);
     const [modal, setModal] = useState(null);
     const [filtros, setFiltros] = useState({
-        marca: "",
+        marca: params.get("marca") || "",
         grupo: "",
         localizacao: params.get("localizacao") || ""
     });
     const [rascunho, setRascunho] = useState({
-        marca: "",
+        marca: params.get("marca") || "",
         grupo: "",
         localizacao: params.get("localizacao") || ""
     });
@@ -413,8 +423,12 @@ export default function Produtos() {
                 listarProdutos(),
                 listarMarcas().catch(() => [])
             ]);
+            const nomes = new Map();
             const logos = new Map();
             (Array.isArray(marcas) ? marcas : []).forEach((marca) => {
+                if (marca?.id != null) {
+                    nomes.set(String(marca.id), marca.nome || "");
+                }
                 if (!marca?.logo) {
                     return;
                 }
@@ -432,7 +446,7 @@ export default function Produtos() {
                     const achada = listaMarcas.find((m) => nome.includes(String(m.nome).trim().toLowerCase()));
                     logoMarca = achada?.logo;
                 }
-                return { ...n, logoMarca };
+                return { ...n, marca: n.marca || nomes.get(String(p.marcaId || n.marcaId || "")) || "", logoMarca };
             }));
         } catch (erro) {
             console.error("Erro ao carregar produtos:", erro);
@@ -605,7 +619,7 @@ export default function Produtos() {
             if (soPromocao && !emPromocao(p)) {
                 return false;
             }
-            if (filtros.marca && !(p.marca || "").toLowerCase().includes(filtros.marca.toLowerCase())) {
+            if (!passaFiltroMarca(p, filtros.marca, params.get("marcaId"))) {
                 return false;
             }
             if (filtros.grupo && !(p.grupo || "").toLowerCase().includes(filtros.grupo.toLowerCase())) {
@@ -642,7 +656,7 @@ export default function Produtos() {
             return dir === "desc" ? -cmp : cmp;
         });
         return itens;
-    }, [produtos, busca, tipo, soAtivos, filtroEstoque, soPromocao, ordem, dir, filtros]);
+    }, [produtos, busca, tipo, soAtivos, filtroEstoque, soPromocao, ordem, dir, filtros, params]);
 
     const contagens = useMemo(() => {
         const termo = busca.toLowerCase().trim();
@@ -656,7 +670,7 @@ export default function Produtos() {
             if (soPromocao && !emPromocao(p)) {
                 return false;
             }
-            if (filtros.marca && !(p.marca || "").toLowerCase().includes(filtros.marca.toLowerCase())) {
+            if (!passaFiltroMarca(p, filtros.marca, params.get("marcaId"))) {
                 return false;
             }
             if (filtros.grupo && !(p.grupo || "").toLowerCase().includes(filtros.grupo.toLowerCase())) {
@@ -674,7 +688,7 @@ export default function Produtos() {
         });
         c.contem = kitsQueContemSku(universo, busca).length;
         return c;
-    }, [produtos, soAtivos, filtroEstoque, soPromocao, busca, filtros]);
+    }, [produtos, soAtivos, filtroEstoque, soPromocao, busca, filtros, params]);
 
     const grupos = useMemo(
         () => [...new Set(produtos.map((p) => p.grupo).filter(Boolean))]
@@ -718,7 +732,7 @@ export default function Produtos() {
     }
 
     const temFiltro = busca || !soAtivos || (filtroEstoque && filtroEstoque !== "todos") || soPromocao || tipo !== "todos"
-        || filtros.marca || filtros.grupo || filtros.localizacao;
+        || filtros.marca || params.get("marcaId") || filtros.grupo || filtros.localizacao;
 
     function limparFiltros() {
         setBusca("");
@@ -832,7 +846,7 @@ export default function Produtos() {
     }
 
     return (
-        <div className="prd-page" ref={raiz}>
+        <div className="prd-page has-pager" ref={raiz}>
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>Início</Link>
                 <span>›</span>
@@ -1263,11 +1277,6 @@ export default function Produtos() {
                         Mostrando {inicio + 1} a {Math.min(inicio + porPagina, visiveis.length)} de {visiveis.length.toLocaleString("pt-BR")} {tipo === "contem" ? "kits/fabricados" : "produtos"}
                     </span>
                     <div className="prd-foot-nav">
-                        <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Itens por página">
-                            {TAMANHOS.map((n) => (
-                                <option key={n} value={n}>{n} por página</option>
-                            ))}
-                        </select>
                         <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina((p) => Math.max(1, p - 1))} aria-label="Página anterior">
                             <ChevronLeft size={16} />
                         </button>
@@ -1289,6 +1298,13 @@ export default function Produtos() {
                             <ChevronRight size={16} />
                         </button>
                     </div>
+                    <label className="erp-pager-size">
+                        <select value={porPagina} onChange={(e) => setPorPagina(Number(e.target.value))} aria-label="Itens por página">
+                            {TAMANHOS.map((n) => (
+                                <option key={n} value={n}>{n} por página</option>
+                            ))}
+                        </select>
+                    </label>
                 </div>
             ) : null}
 

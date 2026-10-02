@@ -195,12 +195,6 @@
 }
 
 .vend-rodape {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 12px 4px 8px;
     color: #9ca3af;
     font-size: 13px;
 }

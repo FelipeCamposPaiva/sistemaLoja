@@ -256,6 +256,17 @@
     padding-right: 0;
 }
 
+.pdv-field-busca:focus-within,
+.pdv-drawer-busca:focus-within {
+    background: var(--search-focus-bg, #fff5fa);
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.14)), inset 0 0 0 1px var(--search-focus-border, #f4b6d2);
+}
+
+.pdv-field-busca:focus-within svg,
+.pdv-drawer-busca:focus-within svg {
+    color: var(--primary, #ff2f92);
+}
+
 .pdv-field-busca svg,
 .pdv-drawer-busca svg {
     color: var(--pdv-muted);

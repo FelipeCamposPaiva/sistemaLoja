@@ -37,7 +37,8 @@ export const CATALOGO_INTEGRACOES = [
     { id: "mercos", nome: "Mercos", tipo: "Outra Integração", grupo: "outras", sigla: "Me", cor: "#0ea5e9", tinta: "#fff" },
     { id: "arquivei", nome: "Arquivei", tipo: "Outra Integração", grupo: "outras", sigla: "Ar", cor: "#16a34a", tinta: "#fff" },
     { id: "meli99", nome: "99Meli", tipo: "Outra Integração", grupo: "outras", sigla: "99", cor: "#f97316", tinta: "#111" },
-    { id: "whatsapp-business", nome: "WhatsApp Business", tipo: "Outra Integração", grupo: "outras", sigla: "WA", cor: "#25d366", tinta: "#052e16" }
+    { id: "whatsapp-business", nome: "WhatsApp Business", tipo: "Outra Integração", grupo: "outras", sigla: "WA", cor: "#25d366", tinta: "#052e16" },
+    { id: "chatgpt", nome: "ChatGPT", tipo: "Inteligência artificial", grupo: "outras", sigla: "GPT", cor: "#10a37f", tinta: "#fff" }
 ];
 
 export const PADRAO_MINHAS_INTEGRACOES = [

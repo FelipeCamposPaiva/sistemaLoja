@@ -68,6 +68,10 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         Usuario usuario = usuarioOpt.get();
+        if (Boolean.FALSE.equals(usuario.getAtivo()) || Boolean.TRUE.equals(usuario.getBloqueado())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(

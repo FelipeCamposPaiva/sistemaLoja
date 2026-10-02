@@ -102,6 +102,22 @@
     font-size: 12px;
 }
 
+.mrc-linha {
+    cursor: pointer;
+}
+
+.mrc-tabela tbody tr.mrc-linha:hover td {
+    background: #fff7fb;
+}
+
+.mrc-tabela tbody tr.mrc-linha.is-sel td {
+    background: #fff0f7;
+}
+
+.mrc-tabela tbody tr.mrc-linha.is-sel:hover td {
+    background: #ffe8f4;
+}
+
 .mrc-nome {
     display: inline-flex;
     align-items: center;
@@ -110,13 +126,15 @@
     background: transparent;
     padding: 0;
     font: inherit;
+    font-weight: 700;
     color: inherit;
-    cursor: pointer;
     text-align: left;
 }
 
-.mrc-nome:hover {
+.mrc-qtd {
     color: #ff2f92;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .mrc-tabela {
@@ -260,10 +278,106 @@
 .mrc-modal-head {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid #fce7f3;
+}
+
+.mrc-modal-head > div {
+    flex: 1;
+}
+
+.mrc-voltar {
+    border: 0;
+    background: transparent;
+    color: #9a7384;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+}
+
+.mrc-logo-edit {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mrc-logo-mini {
+    width: 72px;
+    height: 72px;
+    border: 1px dashed #f3cfe0;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #fff7fb;
+    cursor: pointer;
+    color: #ff2f92;
+    font-weight: 800;
+    font-size: 22px;
+}
+
+.mrc-logo-mini.is-off {
+    cursor: default;
+}
+
+.mrc-logo-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+}
+
+.mrc-campo textarea,
+.mrc-campo select {
+    width: 100%;
+    border: 1px solid #f3cfe0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+    color: #2b1b24;
+    background: #fff;
+}
+
+.mrc-campo select {
+    min-height: 44px;
+}
+
+.mrc-vinculos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fff7fb;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.mrc-hist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.mrc-hist li {
+    display: grid;
+    gap: 2px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #fce7f3;
+    font-size: 13px;
+}
+
+.mrc-hist span,
+.mrc-hist small {
+    color: #9a7384;
 }
 
 .mrc-modal-head h3 {
@@ -344,7 +458,7 @@
     font-size: 14px;
 }
 
-.mrc-campo span {
+.mrc-campo > span {
     display: flex;
     align-items: center;
     gap: 8px;

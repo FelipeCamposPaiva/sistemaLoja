@@ -119,7 +119,7 @@ const LISTA = [
         categoria: "FINANCEIRO",
         titulo: "Ações de contas em um só fluxo",
         texto: "Contas a pagar, a receber e o caixa ficam no mesmo menu financeiro, com o dashboard de valores.",
-        rota: "/dashboard-financeiro"
+        rota: "/dashboard#/financas"
     },
     {
         id: "agenda-lista",

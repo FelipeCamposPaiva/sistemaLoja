@@ -36,7 +36,9 @@ const ImportadorGestor = lazy(() => import("../pages/ferramentas/ImportadorGesto
 const Ponto = lazy(() => import("../pages/painelfuncionario/Ponto"));
 const Funcionarios = lazy(() => import("../pages/painelfuncionario/Funcionarios"));
 const FuncionarioFicha = lazy(() => import("../pages/painelfuncionario/FuncionarioFicha"));
+const Ferias = lazy(() => import("../pages/painelfuncionario/Ferias"));
 const RhFolha = lazy(() => import("../pages/painelfuncionario/RhFolha"));
+const InformesRendimentos = lazy(() => import("../pages/painelfuncionario/InformesRendimentos"));
 const Comissoes = lazy(() => import("../pages/painelfuncionario/Comissoes"));
 const RhHub = lazy(() => import("../pages/painelfuncionario/RhHub"));
 const RhCadastro = lazy(() => import("../pages/painelfuncionario/RhCadastro"));
@@ -74,7 +76,6 @@ const Promocoes = lazy(() => import("../pages/vendas/Promocoes"));
 const PedidoVenda = lazy(() => import("../pages/vendas/PedidoVenda"));
 const Separacao = lazy(() => import("../pages/vendas/Separacao"));
 const Expedicao = lazy(() => import("../pages/vendas/Expedicao"));
-const DashboardExpedicao = lazy(() => import("../pages/vendas/DashboardExpedicao"));
 const ContasReceber = lazy(() => import("../pages/financas/ContasReceber"));
 const ContasPagar = lazy(() => import("../pages/financas/ContasPagar"));
 const Balancete = lazy(() => import("../pages/financas/Balancete"));
@@ -143,7 +144,7 @@ const rotasMenu = [
         MENU.flatMap((grupo) =>
             grupo.itens
                 .map((item) => item.rota)
-                .filter((rota) => rota && !["/", "/index", "/dashboard", "/detalhes_versao", "/home_agenda", "/integracoes", "/integracoes", "/integracoes/nova", "/ferramentas", "/ferramentas_geral", "/contatos", "/contatos#/", "/dashboard#/vendas", "/dados_conta", "/clientes", "/produtos", "/produtos#list", "/produto_categorias", "/categorias-produtos", "/marcas", "/marcas#list", "/vendedores", "/vendedores#list", "/moveis", "/maquinas", "/embalagens", "/embalagens#list", "/localizacoes", "/ponto", "/ponto/registros", "/ponto/espelho", "/ponto/ajustes", "/ponto/relatorios", "/funcionarios", "/ferias", "/rescisoes", "/informes", "/rh-avisos", "/holerite", "/guias", "/rh-documentos", "/comissoes", "/painel-producao", "/producao", "/rh", "/crm", "/loja", "/loja-admin", "/pedido-ecommerce", "/notas-entrada", "/notas_entrada", "/notas_entrada#list", "/conferencia-compra", "/entrada_de_mercadorias", "/servicos-tomados", "/servicos_tomados", "/servicos_tomados#/", "/pdv", "/promocoes", "/produtos/reajuste", "/pedido-venda", "/vendas", "/vendas#list", "/separacao", "/expedicao", "/expedicao/dashboard", "/contas-receber", "/contas-pagar", "/balancete", "/balanco-patrimonial", "/cobranca-bancaria", "/minha-conta", "/configuracoes", "/configuracoes/juros-multa", "/auditoria", "/estoque", "/estoque/auditoria", "/estoque/dashboard", "/ordens-compra", "/pedidos_compra", "/pedidos_compra#list", "/necessidades-compra", "/giro-estoque", "/inventario", "/ordem_servicos", "/ordem_servicos/relatorio-tecnicos", "/tecnicos", "/nfs", "/os", "/os/nova", "/nova-os"].includes(rota))
+                .filter((rota) => rota && !["/", "/index", "/dashboard", "/detalhes_versao", "/home_agenda", "/integracoes", "/integracoes", "/integracoes/nova", "/ferramentas", "/ferramentas_geral", "/contatos", "/contatos#/", "/dashboard#/vendas", "/dashboard#/financas", "/dashboard#/estoque", "/dashboard#/expedicao", "/dashboard-financeiro", "/dados_conta", "/clientes", "/produtos", "/produtos#list", "/produto_categorias", "/categorias-produtos", "/marcas", "/marcas#list", "/vendedores", "/vendedores#list", "/moveis", "/maquinas", "/embalagens", "/embalagens#list", "/localizacoes", "/ponto", "/ponto/registros", "/ponto/espelho", "/ponto/ajustes", "/ponto/relatorios", "/funcionarios", "/ferias", "/rescisoes", "/informes", "/rh-avisos", "/holerite", "/guias", "/rh-documentos", "/comissoes", "/painel-producao", "/producao", "/rh", "/crm", "/loja", "/loja-admin", "/pedido-ecommerce", "/notas-entrada", "/notas_entrada", "/notas_entrada#list", "/conferencia-compra", "/entrada_de_mercadorias", "/servicos-tomados", "/servicos_tomados", "/servicos_tomados#/", "/pdv", "/promocoes", "/produtos/reajuste", "/pedido-venda", "/vendas", "/vendas#list", "/separacao", "/expedicao", "/expedicao/dashboard", "/contas-receber", "/contas-pagar", "/balancete", "/balanco-patrimonial", "/cobranca-bancaria", "/minha-conta", "/configuracoes", "/configuracoes/juros-multa", "/auditoria", "/estoque", "/estoque/auditoria", "/estoque/dashboard", "/ordens-compra", "/pedidos_compra", "/pedidos_compra#list", "/necessidades-compra", "/giro-estoque", "/inventario", "/ordem_servicos", "/ordem_servicos/relatorio-tecnicos", "/tecnicos", "/nfs", "/os", "/os/nova", "/nova-os"].includes(rota))
         )
     )
 ];
@@ -175,6 +176,7 @@ export default function AppRoutes() {
                     <Route element={<AppLayout />}>
                         <Route path="/index" element={<Indice />} />
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/dashboard-financeiro" element={<Navigate to="/dashboard#/financas" replace />} />
                         <Route path="/detalhes_versao" element={<DetalhesVersao />} />
                         <Route path="/home_agenda" element={<Agenda />} />
                         <Route path="/agenda" element={<Navigate to="/home_agenda" replace />} />
@@ -182,7 +184,7 @@ export default function AppRoutes() {
                         <Route path="/integracoes/nova" element={<Integracoes />} />
                         <Route path="/integracoes/:id" element={<IntegracaoEditar />} />
                         <Route path="/contatos" element={<ClientesFornecedores />} />
-                        <Route path="/contatos/novo" element={<ContatoForm />} />
+                        <Route path="/contatos/novo" element={<Navigate to="/contatos#/add" replace />} />
                         <Route path="/contatos/:id" element={<ContatoForm />} />
                         <Route path="/produtos" element={<HashList><Produtos /></HashList>} />
                         <Route path="/produto_categorias" element={<Categorias />} />
@@ -195,7 +197,7 @@ export default function AppRoutes() {
                         <Route path="/maquinas" element={<Maquinas />} />
                         <Route path="/embalagens" element={<HashList><Embalagens /></HashList>} />
                         <Route path="/clientes" element={<Navigate to="/contatos#/" replace />} />
-                        <Route path="/clientes/novo" element={<Navigate to="/contatos/novo" replace />} />
+                        <Route path="/clientes/novo" element={<Navigate to="/contatos#/add" replace />} />
                         <Route path="/clientes/:id" element={<ContatoRedirect />} />
                         <Route path="/ponto" element={<Ponto />} />
                         <Route path="/ponto/registros" element={<Ponto />} />
@@ -204,9 +206,9 @@ export default function AppRoutes() {
                         <Route path="/ponto/relatorios" element={<Ponto />} />
                         <Route path="/funcionarios" element={<Funcionarios />} />
                         <Route path="/funcionarios/:id" element={<FuncionarioFicha />} />
-                        <Route path="/ferias" element={<RhFolha />} />
+                        <Route path="/ferias" element={<Ferias />} />
                         <Route path="/rescisoes" element={<RhFolha />} />
-                        <Route path="/informes" element={<RhFolha />} />
+                        <Route path="/informes" element={<InformesRendimentos />} />
                         <Route path="/rh-avisos" element={<RhFolha />} />
                         <Route path="/holerite" element={<RhFolha />} />
                         <Route path="/guias" element={<RhFolha />} />
@@ -241,11 +243,11 @@ export default function AppRoutes() {
                         <Route path="/servicos-tomados" element={<Navigate to="/servicos_tomados#/" replace />} />
                         <Route path="/estoque" element={<ControleEstoque />} />
                         <Route path="/estoque/auditoria" element={<AuditoriaEstoque />} />
-                        <Route path="/estoque/dashboard" element={<DashboardSuprimentos />} />
+                        <Route path="/estoque/dashboard" element={<Navigate to="/dashboard#/estoque" replace />} />
                         <Route path="/pedidos_compra" element={<HashList><OrdensCompra /></HashList>} />
                         <Route path="/ordens-compra" element={<RedirectPedidosCompra />} />
-                        <Route path="/necessidades-compra" element={<DashboardSuprimentos />} />
-                        <Route path="/giro-estoque" element={<DashboardSuprimentos />} />
+                        <Route path="/necessidades-compra" element={<DashboardSuprimentos secao="reposicao" />} />
+                        <Route path="/giro-estoque" element={<Navigate to="/dashboard#/estoque" replace />} />
                         <Route path="/inventario" element={<Inventario />} />
                         <Route path="/localizacoes" element={<Localizacoes />} />
                         <Route path="/crm" element={<Crm />} />
@@ -266,7 +268,7 @@ export default function AppRoutes() {
                         <Route path="/pedidos" element={<RedirectVendas />} />
                         <Route path="/separacao" element={<Separacao />} />
                         <Route path="/separacao/:id" element={<Separacao />} />
-                        <Route path="/expedicao/dashboard" element={<DashboardExpedicao />} />
+                        <Route path="/expedicao/dashboard" element={<Navigate to="/dashboard#/expedicao" replace />} />
                         <Route path="/expedicao" element={<Expedicao />} />
                         <Route path="/contas-receber" element={<ContasReceber />} />
                         <Route path="/contas-pagar" element={<ContasPagar />} />

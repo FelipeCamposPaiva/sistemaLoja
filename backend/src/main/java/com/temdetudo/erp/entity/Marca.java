@@ -36,6 +36,15 @@ public class Marca {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
+    @Column(name = "criado_por")
+    private String criadoPor;
+
+    @Column(name = "atualizado_por")
+    private String atualizadoPor;
+
+    @Transient
+    private Integer qtdProdutos;
+
     @PrePersist
     public void prePersist() {
 
@@ -103,6 +112,18 @@ public class Marca {
         return atualizadoEm;
     }
 
+    public String getCriadoPor() {
+        return criadoPor;
+    }
+
+    public String getAtualizadoPor() {
+        return atualizadoPor;
+    }
+
+    public Integer getQtdProdutos() {
+        return qtdProdutos;
+    }
+
     // ===========================
     // SETTERS
     // ===========================
@@ -149,6 +170,18 @@ public class Marca {
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
+    }
+
+    public void setCriadoPor(String criadoPor) {
+        this.criadoPor = criadoPor;
+    }
+
+    public void setAtualizadoPor(String atualizadoPor) {
+        this.atualizadoPor = atualizadoPor;
+    }
+
+    public void setQtdProdutos(Integer qtdProdutos) {
+        this.qtdProdutos = qtdProdutos;
     }
 
 }

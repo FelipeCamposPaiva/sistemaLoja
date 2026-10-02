@@ -5,7 +5,6 @@ import {
     FaLock,
     FaEye,
     FaEyeSlash,
-    FaGoogle,
     FaWhatsapp,
     FaInstagram,
     FaGlobe,
@@ -45,13 +44,16 @@ const SELOS = [
 export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useAuth();
+    const { login, confirmar2fa } = useAuth();
     const [usuario, setUsuario] = useState(
         () => (import.meta.env.DEV ? "admin" : "")
     );
     const [senha, setSenha] = useState(
         () => (import.meta.env.DEV ? "123456" : "")
     );
+    const [codigo, setCodigo] = useState("");
+    const [codigoGerado, setCodigoGerado] = useState("");
+    const [etapa, setEtapa] = useState("senha");
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [lembrar, setLembrar] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -93,6 +95,14 @@ export default function Login() {
 
             const resultado = await login(usuario.trim(), senha.trim());
 
+            if (resultado.precisa2fa) {
+                setEtapa("2fa");
+                setCodigo("");
+                setCodigoGerado(resultado.codigo || "");
+                setErro("");
+                return;
+            }
+
             if (resultado.sucesso) {
                 const destino = location.state?.from?.pathname;
                 navigate(
@@ -106,6 +116,31 @@ export default function Login() {
         } catch (error) {
             console.error(error);
             setErro("Erro ao conectar com o servidor.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function confirmarCodigo() {
+        setErro("");
+        if (!codigo.trim()) {
+            setErro("Informe o código de 6 dígitos.");
+            return;
+        }
+        try {
+            setLoading(true);
+            const resultado = await confirmar2fa(usuario.trim(), codigo.trim());
+            if (resultado.sucesso) {
+                const destino = location.state?.from?.pathname;
+                navigate(
+                    destino && destino !== "/login" ? destino : "/index",
+                    { replace: true }
+                );
+                return;
+            }
+            setErro(resultado.mensagem || "Código inválido.");
+        } catch {
+            setErro("Erro ao validar o código.");
         } finally {
             setLoading(false);
         }
@@ -206,6 +241,60 @@ export default function Login() {
 
                         {erro && <div className="login-error">{erro}</div>}
 
+                        {etapa === "2fa" ? (
+                            <>
+                                <p className="login-subtitle">
+                                    Digite o código de 6 dígitos enviado para a sua conta.
+                                </p>
+                                {codigoGerado ? (
+                                    <p className="login-2fa-dica">Código de verificação: <strong>{codigoGerado}</strong></p>
+                                ) : null}
+                                <div className="form-group">
+                                    <label htmlFor="login-2fa">Código 2FA</label>
+                                    <div className="input-wrapper">
+                                        <FaLock className="input-icon" />
+                                        <input
+                                            id="login-2fa"
+                                            className="input-login"
+                                            inputMode="numeric"
+                                            autoComplete="one-time-code"
+                                            placeholder="000000"
+                                            value={codigo}
+                                            onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    confirmarCodigo();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-login"
+                                    onClick={confirmarCodigo}
+                                    disabled={loading}
+                                >
+                                    {loading ? "Validando..." : "Confirmar código"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-google"
+                                    onClick={entrar}
+                                    disabled={loading}
+                                >
+                                    Reenviar código
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-google"
+                                    onClick={() => { setEtapa("senha"); setCodigo(""); setErro(""); }}
+                                >
+                                    Voltar
+                                </button>
+                            </>
+                        ) : (
+                            <>
                         <div className="form-group">
                             <label htmlFor="login-usuario">Usuário ou E-mail</label>
                             <div className="input-wrapper">
@@ -279,21 +368,8 @@ export default function Login() {
                         >
                             {loading ? "Entrando..." : "Entrar"}
                         </button>
-
-                        <div className="separator">
-                            <span>OU</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="btn-google"
-                            onClick={() => {
-                                console.log("Google OAuth");
-                            }}
-                        >
-                            <FaGoogle />
-                            Entrar com Google
-                        </button>
+                            </>
+                        )}
 
                         <div className="login-bottom">
                             <p>Não possui acesso ao sistema?</p>

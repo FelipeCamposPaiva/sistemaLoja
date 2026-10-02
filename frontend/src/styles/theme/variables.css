@@ -26,6 +26,12 @@
 
     --border:#f3cfe0;
 
+    /* BUSCA FOCADA */
+
+    --search-focus-bg:#ffe8f4;
+    --search-focus-border:#f48fb1;
+    --search-focus-ring:rgba(255, 47, 146, 0.2);
+
     /* RAIO */
 
     --radius-sm:8px;

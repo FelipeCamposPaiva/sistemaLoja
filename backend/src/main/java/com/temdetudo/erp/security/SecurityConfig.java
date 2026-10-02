@@ -83,7 +83,13 @@ public class SecurityConfig {
 
                                         "/api/teste",
 
-                                        "/api/auth/**",
+                                        "/api/auth/login",
+
+                                        "/api/auth/verificar-2fa",
+
+                                        "/api/auth/recuperar",
+
+                                        "/api/auth/redefinir",
 
                                         "/api/whatsapp/webhook",
 

@@ -60,10 +60,10 @@ api.interceptors.response.use(
     (error) => {
         const status = error.response?.status;
         const url = String(error.config?.url || "");
-        const ehLogin = url.includes("/auth/login");
+        const ehAuthPublica = /\/auth\/(login|verificar-2fa|recuperar|redefinir|senha|2fa)/.test(url);
         const path = window.location.pathname;
         const vitrine = path === "/" || /^\/(loja|c|produto|carrinho|checkout|conta|desejos|p|busca)(\/|$)/.test(path);
-        if (status === 401 && !ehLogin && tokenAtual() && !vitrine) {
+        if (status === 401 && !ehAuthPublica && tokenAtual() && !vitrine) {
             encerrarSessao();
         }
         return Promise.reject(error);

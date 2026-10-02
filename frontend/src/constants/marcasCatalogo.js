@@ -383,7 +383,17 @@ export function nomesDeArquivoMarcas(texto) {
             return;
         }
         vistos.add(chave);
-        saida.push(nome);
+        const fabricante = partes[1] || "";
+        const descricao = partes[2] || "";
+        const telefone = partes[3] || "";
+        const situacao = String(partes[4] || "Ativo").toLowerCase();
+        saida.push({
+            nome,
+            fabricante,
+            descricao,
+            telefone,
+            ativo: !/^inativ/.test(situacao)
+        });
     });
     return saida;
 }

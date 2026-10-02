@@ -125,6 +125,13 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.02em;
+    overflow: hidden;
+}
+
+.rail-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .rail-bell em {
@@ -317,11 +324,13 @@
     font-size: 9px;
     font-style: normal;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
     background: #dbeafe;
     color: #1d4ed8;
     border-radius: 999px;
-    padding: 2px 6px;
+    padding: 2px 7px;
+    flex-shrink: 0;
 }
 
 .flyout-ver-loja {
@@ -563,6 +572,65 @@
 
 .dash-kpi .is-up { color: #4ade80; }
 .dash-kpi .is-down { color: #f87171; }
+.dash-kpi .is-flat { color: var(--muted); }
+
+.dash-pills button {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+}
+
+.dash-pills button.is-on,
+.dash-pills button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.dash-periodo-meta {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.dash-aviso,
+.dash-empty {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.dash-aviso {
+    color: #be123c;
+}
+
+.dash-tip {
+    background: #111827;
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.dash-tip strong {
+    display: block;
+}
+
+.dash-uf {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    flex: 1;
+}
+
+.dash-uf li strong {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 12px;
+}
 
 .dash-spark {
     height: 72px;
@@ -1049,17 +1117,6 @@
     border-color: #f3cfe0;
 }
 
-.erp-shell.is-loja .flyout-loja {
-    margin: 0 8px 12px;
-    padding: 12px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #ff7eb5, #ff4fa3);
-    color: #fff;
-    font-size: 12px;
-    line-height: 1.35;
-    font-weight: 600;
-}
-
 .erp-shell.is-loja .shell-top {
     display: none;
 }
@@ -1071,6 +1128,12 @@
 .erp-shell.is-loja .shell-search {
     background: #fff;
     border-color: #f3cfe0;
+}
+
+.erp-shell.is-loja .shell-search:focus-within,
+.erp-shell.is-loja .shell-search.is-on {
+    background: var(--search-focus-bg, #fff5fa);
+    border-color: var(--search-focus-border, #f4b6d2);
 }
 
 .erp-shell.is-loja .icon-btn {
@@ -1131,6 +1194,10 @@
     color: var(--text);
 }
 
+.erp-shell.is-loja .ctt-loja .fer-search:focus-within {
+    background: var(--search-focus-bg, #fff5fa);
+}
+
 .erp-shell.is-loja .fer-table th,
 .erp-shell.is-loja .fer-table td,
 .erp-shell.is-loja .dash-crumb {
@@ -1140,4 +1207,22 @@
 .erp-shell.is-loja .nfe-tabs button.is-active,
 .erp-shell.is-loja .fer-tabs button.is-active {
     color: var(--accent);
+}
+
+.erp-shell.is-escuro {
+    --bg: #1a1216;
+    --panel: #2a1c22;
+    --rail: #22161b;
+    --line: #4a3340;
+    --text: #f6eef2;
+    --muted: #c4a3b2;
+}
+
+.erp-shell.is-escuro .flyout,
+.erp-shell.is-escuro .erp-content,
+.erp-shell.is-escuro .mc-hero,
+.erp-shell.is-escuro .mc-card,
+.erp-shell.is-escuro .mc-kpis article {
+    background: var(--panel);
+    color: var(--text);
 }

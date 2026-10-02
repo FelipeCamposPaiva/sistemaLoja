@@ -37,7 +37,7 @@ import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
 import "../../styles/pages/localizacao.css";
 
-const POR_PAGINA = 8;
+const TAMANHOS = [10, 20, 50];
 
 function qtd(valor) {
     return Number(valor || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -121,6 +121,7 @@ export default function Localizacoes() {
     const [categoria, setCategoria] = useState("todas");
     const [ordem, setOrdem] = useState("nome");
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = useState(10);
     const [sel, setSel] = useState(() => new Set());
     const [menuId, setMenuId] = useState("");
     const [filtrosAberto, setFiltrosAberto] = useState(false);
@@ -163,7 +164,7 @@ export default function Localizacoes() {
         setParams(next, { replace: true });
         setPagina(1);
         setSel(new Set());
-    }, [localizacao, filtroEstoque, setParams]);
+    }, [localizacao, filtroEstoque, porPagina, setParams]);
 
     const filtrados = useMemo(() => {
         if (!localizacao.trim()) {
@@ -220,10 +221,10 @@ export default function Localizacoes() {
     }, [produtos, filtroEstoque]);
     const modoLocais = !localizacao.trim();
     const fonte = modoLocais ? resumoLocais : lista;
-    const paginas = Math.max(1, Math.ceil(fonte.length / POR_PAGINA));
+    const paginas = Math.max(1, Math.ceil(fonte.length / porPagina));
     const paginaAtual = Math.min(pagina, paginas);
-    const fatia = lista.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
-    const fatiaLocais = resumoLocais.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
+    const fatia = lista.slice((paginaAtual - 1) * porPagina, paginaAtual * porPagina);
+    const fatiaLocais = resumoLocais.slice((paginaAtual - 1) * porPagina, paginaAtual * porPagina);
     const imprimiveis = lista.filter((p) => !sel.size || sel.has(String(p.id)));
 
     function toggleSel(id) {
@@ -288,7 +289,7 @@ export default function Localizacoes() {
     const queryProdutos = `${ROTAS.PRODUTOS}?localizacao=${encodeURIComponent(localizacao.trim())}${filtroEstoque === "disponivel" ? "&estoque=disponivel" : filtroEstoque !== "todos" ? `&estoque=${filtroEstoque}` : ""}`;
 
     return (
-        <div className="loc-page">
+        <div className="loc-page has-pager">
             <nav className="dash-crumb">
                 <Link to="/index">início</Link>
                 <span>›</span>
@@ -518,10 +519,10 @@ export default function Localizacoes() {
                 <footer className="loc-pagina">
                     <span>
                         {fonte.length
-                            ? `Mostrando ${(paginaAtual - 1) * POR_PAGINA + 1} a ${Math.min(paginaAtual * POR_PAGINA, fonte.length)} de ${fonte.length} ${modoLocais ? "localizações" : "produtos"}`
+                            ? `Mostrando ${(paginaAtual - 1) * porPagina + 1} a ${Math.min(paginaAtual * porPagina, fonte.length)} de ${fonte.length} ${modoLocais ? "localizações" : "produtos"}`
                             : modoLocais ? "Nenhuma localização listada" : "Nenhum produto listado"}
                     </span>
-                    <div>
+                    <nav className="erp-pager-nav" aria-label="Páginas">
                         <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina((n) => n - 1)} aria-label="Página anterior">
                             <ChevronLeft size={16} />
                         </button>
@@ -533,7 +534,14 @@ export default function Localizacoes() {
                         <button type="button" disabled={paginaAtual >= paginas} onClick={() => setPagina((n) => n + 1)} aria-label="Próxima página">
                             <ChevronRight size={16} />
                         </button>
-                    </div>
+                    </nav>
+                    <label className="erp-pager-size">
+                        <select value={porPagina} onChange={(e) => { setPorPagina(Number(e.target.value)); setPagina(1); }} aria-label="Itens por página">
+                            {TAMANHOS.map((n) => (
+                                <option key={n} value={n}>{n} por página</option>
+                            ))}
+                        </select>
+                    </label>
                 </footer>
             </section>
             {modal?.produto ? (

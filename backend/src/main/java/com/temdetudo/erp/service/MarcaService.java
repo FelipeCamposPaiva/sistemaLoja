@@ -2,6 +2,8 @@ package com.temdetudo.erp.service;
 
 import com.temdetudo.erp.entity.Marca;
 import com.temdetudo.erp.repository.MarcaRepository;
+import com.temdetudo.erp.repository.ProdutoRepository;
+import com.temdetudo.erp.security.UsuarioAtual;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,9 @@ public class MarcaService {
     private MarcaRepository repository;
 
     @Autowired
+    private ProdutoRepository produtoRepository;
+
+    @Autowired
     private DataSource dataSource;
 
     @Value("${erp.uploads.dir:uploads}")
@@ -40,15 +45,42 @@ public class MarcaService {
     void ampliarLogo() {
         try (var conexao = dataSource.getConnection(); var stmt = conexao.createStatement()) {
             stmt.execute("ALTER TABLE marcas MODIFY COLUMN logo VARCHAR(500) NULL");
+            try {
+                stmt.execute("ALTER TABLE marcas ADD COLUMN criado_por VARCHAR(150) NULL");
+            } catch (Exception ignoredCol) {
+                /* coluna já existe */
+            }
+            try {
+                stmt.execute("ALTER TABLE marcas ADD COLUMN atualizado_por VARCHAR(150) NULL");
+            } catch (Exception ignoredCol) {
+                /* coluna já existe */
+            }
         } catch (Exception ignored) {
             /* coluna já pode ter o tamanho novo */
         }
     }
 
     public List<Marca> listar() {
-
-        return repository.findAll();
-
+        List<Marca> marcas = repository.findAll();
+        Map<Integer, Integer> contagens = new LinkedHashMap<>();
+        try {
+            for (Object[] linha : produtoRepository.contarPorMarcaId()) {
+                if (linha == null || linha[0] == null) {
+                    continue;
+                }
+                Integer id = ((Number) linha[0]).intValue();
+                Integer qtd = linha[1] == null ? 0 : ((Number) linha[1]).intValue();
+                contagens.put(id, qtd);
+            }
+        } catch (Exception ignored) {
+            /* tabela produtos pode não ter marca_id */
+        }
+        for (Marca marca : marcas) {
+            if (marca.getId() != null) {
+                marca.setQtdProdutos(contagens.getOrDefault(marca.getId().intValue(), 0));
+            }
+        }
+        return marcas;
     }
 
     public List<Marca> listarAtivas() {
@@ -76,6 +108,13 @@ public class MarcaService {
 
         }
 
+        String quem = primeiroNaoVazio(nomeUsuario(), marca.getAtualizadoPor(), marca.getCriadoPor());
+        if (marca.getId() == null) {
+            marca.setCriadoPor(primeiroNaoVazio(marca.getCriadoPor(), quem));
+        }
+        if (quem != null) {
+            marca.setAtualizadoPor(quem);
+        }
         return repository.save(marca);
 
     }
@@ -94,6 +133,10 @@ public class MarcaService {
         existente.setEmail(marca.getEmail());
         existente.setTelefone(marca.getTelefone());
         existente.setAtivo(marca.getAtivo());
+        String quem = primeiroNaoVazio(nomeUsuario(), marca.getAtualizadoPor());
+        if (quem != null) {
+            existente.setAtualizadoPor(quem);
+        }
 
         return repository.save(existente);
 
@@ -127,6 +170,10 @@ public class MarcaService {
                 marca.setFabricante(recebido.getFabricante());
                 marca.setDescricao(recebido.getDescricao());
                 marca.setAtivo(recebido.getAtivo() == null ? Boolean.TRUE : recebido.getAtivo());
+                marca.setTelefone(recebido.getTelefone());
+                String quem = nomeUsuario();
+                marca.setCriadoPor(quem);
+                marca.setAtualizadoPor(quem);
                 repository.save(marca);
                 novos += 1;
             }
@@ -159,6 +206,7 @@ public class MarcaService {
         String arquivoNome = UUID.randomUUID() + ext;
         arquivo.transferTo(pasta.resolve(arquivoNome).toFile());
         marca.setLogo("/uploads/marcas/" + id + "/" + arquivoNome);
+        marca.setAtualizadoPor(nomeUsuario());
         return repository.save(marca);
     }
 
@@ -181,6 +229,7 @@ public class MarcaService {
         String arquivoNome = UUID.randomUUID() + extensao("", tipo);
         Files.write(pasta.resolve(arquivoNome), bytes);
         marca.setLogo("/uploads/marcas/" + id + "/" + arquivoNome);
+        marca.setAtualizadoPor(nomeUsuario());
         return repository.save(marca);
     }
 
@@ -189,7 +238,28 @@ public class MarcaService {
         Marca marca = buscar(id);
         apagarArquivo(marca.getLogo());
         marca.setLogo(null);
+        marca.setAtualizadoPor(nomeUsuario());
         return repository.save(marca);
+    }
+
+    private String nomeUsuario() {
+        return UsuarioAtual.obter().map(usuario -> primeiroNaoVazio(
+                usuario.getNome(),
+                usuario.getUsuario(),
+                usuario.getEmail()
+        )).orElse(null);
+    }
+
+    private String primeiroNaoVazio(String... valores) {
+        if (valores == null) {
+            return null;
+        }
+        for (String valor : valores) {
+            if (valor != null && !valor.isBlank()) {
+                return valor.trim();
+            }
+        }
+        return null;
     }
 
     private void apagarArquivo(String logo) throws Exception {

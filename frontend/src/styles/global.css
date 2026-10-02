@@ -5,6 +5,8 @@
 @import "./theme/utilities.css";
 @import "./theme/scrollbar.css";
 @import "./theme/animations.css";
+@import "./theme/search-focus.css";
+@import "./theme/pager.css";
 
 @import "./components/Button/Button.css";
 @import "./components/Card/Card.css";

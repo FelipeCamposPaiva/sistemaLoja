@@ -5,6 +5,14 @@ function num(valor) {
     return Number.isFinite(n) ? n : 0;
 }
 
+export async function dashboardVendas(params = {}) {
+    const query = typeof params === "number"
+        ? { dias: params }
+        : (params.dias ? { dias: params.dias } : { periodo: params.periodo || "mes" });
+    const { data } = await api.get("/dashboard-vendas", { params: query });
+    return data || {};
+}
+
 export async function dashboardGeral() {
     const { data } = await api.get("/dashboard-geral");
     return {
@@ -25,14 +33,7 @@ export async function dashboardGeral() {
 
 export async function dashboardFinanceiro() {
     const { data } = await api.get("/dashboard-financeiro");
-    return {
-        saldoCaixa: num(data?.saldoCaixa),
-        contasReceber: num(data?.contasReceber),
-        contasPagar: num(data?.contasPagar),
-        entradasMes: num(data?.entradasMes),
-        saidasMes: num(data?.saidasMes),
-        resultado: num(data?.resultado)
-    };
+    return data || {};
 }
 
 export async function dashboardSuprimentos() {

@@ -17,13 +17,15 @@ import {
 } from "lucide-react";
 
 import { lerContatos } from "../../constants/contatos";
+import { listarFuncionarios } from "../../constants/rh";
+import { PONTO_PLANILHAS } from "../../constants/pontoPlanilhas";
 import ROTAS from "../../constants/rotas";
 import useAuth from "../../hooks/useAuth.jsx";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/ponto.css";
 
-const PONTO_KEY = "erp-ponto-v4";
+const PONTO_KEY = "erp-ponto-v5";
 const JORNADA_UTIL = 8 * 60;
 const JORNADA_SAB = 4 * 60;
 const SEMANA = JORNADA_UTIL * 5 + JORNADA_SAB;
@@ -135,23 +137,25 @@ function inicioSemana(data) {
 }
 
 function funcionarios() {
-    const lista = lerContatos().filter((c) => (c.tipos || []).includes("funcionario") && !c.excluido);
-    const comFicha = lista.map((c) => {
-        if (String(c.id) !== "32") {
-            return c;
-        }
-        return {
-            ...c,
-            matricula: c.matricula || "001",
-            profissao: c.profissao || "Vendedora",
-            ctps: c.ctps || "12063091/722",
-            depto: c.depto || "001 - GERAL"
-        };
-    });
-    if (comFicha.length) {
-        return comFicha;
+    const porId = new Map();
+    for (const f of listarFuncionarios()) {
+        porId.set(String(f.id), {
+            id: f.id,
+            nome: f.nome,
+            matricula: f.matricula,
+            profissao: f.cargo,
+            ctps: f.ctps,
+            depto: f.depto || "001 - GERAL",
+            celular: f.celular,
+            tipos: ["funcionario"],
+            ativo: f.situacao !== "desligado"
+        });
     }
-    return [{ id: 32, nome: "ELEN LACERDA CLARO", celular: "(24) 99984-6374", matricula: "001", profissao: "Vendedora", ctps: "12063091/722", depto: "001 - GERAL" }];
+    for (const c of lerContatos().filter((item) => (item.tipos || []).includes("funcionario") && !item.excluido)) {
+        const atual = porId.get(String(c.id)) || {};
+        porId.set(String(c.id), { ...atual, ...c });
+    }
+    return [...porId.values()].filter((f) => f.ativo !== false || PONTO_PLANILHAS[String(f.id)]);
 }
 
 function lerStore() {
@@ -400,6 +404,22 @@ export default function Ponto() {
         const hoje = new Date();
         setStore((atual) => {
             const atualBloco = atual[funcId] || { dias: {}, ajustes: [], statusMes: {} };
+            if (PONTO_PLANILHAS[String(funcId)]) {
+                if (atualBloco.origem === "planilha") {
+                    return atual;
+                }
+                const folha = PONTO_PLANILHAS[String(funcId)].dias || {};
+                const proximo = {
+                    ...atual,
+                    [funcId]: {
+                        ...atualBloco,
+                        origem: "planilha",
+                        dias: { ...(folha || {}) }
+                    }
+                };
+                gravarStore(proximo);
+                return proximo;
+            }
             if (Object.keys(atualBloco.dias || {}).length) {
                 return atual;
             }

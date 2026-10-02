@@ -60,7 +60,9 @@
 
 .loc-search-borda input:focus {
     outline: none;
-    border-color: var(--accent);
+    background: var(--search-focus-bg, #fff5fa);
+    border-color: var(--search-focus-border, #f4b6d2);
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.14));
 }
 
 .loc-search-borda .prd-limpar {
@@ -143,6 +145,12 @@
     min-height: 42px;
     background: #fff;
     color: var(--muted);
+}
+
+.loc-search:focus-within {
+    background: var(--search-focus-bg, #fff5fa);
+    border-color: var(--search-focus-border, #f4b6d2);
+    box-shadow: 0 0 0 3px var(--search-focus-ring, rgba(255, 47, 146, 0.14));
 }
 
 .loc-search input {
@@ -502,12 +510,6 @@
 }
 
 .loc-pagina {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 12px 16px;
     color: var(--muted);
     font-size: 13px;
 }

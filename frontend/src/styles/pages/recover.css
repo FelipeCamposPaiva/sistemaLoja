@@ -348,6 +348,9 @@
     color: #e8eefc;
     text-decoration: none;
     font-weight: 600;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
 }
 
 .recover-back:hover {
