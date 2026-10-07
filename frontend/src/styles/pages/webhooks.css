@@ -1,0 +1,29 @@
+.wh-page {
+    min-height: calc(100dvh - 48px);
+    display: flex;
+    flex-direction: column;
+    max-width: 820px;
+    padding-bottom: 16px;
+}
+
+.wh-page h2 {
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+}
+
+.wh-opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.wh-opcoes .env-opcao {
+    margin-top: 0;
+}
+
+.wh-page .emp-acoes {
+    margin-top: auto;
+    background: transparent;
+}

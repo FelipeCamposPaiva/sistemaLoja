@@ -1,0 +1,59 @@
+.iu-page {
+    min-height: calc(100dvh - 48px);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 16px;
+}
+
+.iu-grupo {
+    margin: 18px 0 0;
+    padding: 14px 0 4px;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+.iu-grupo legend {
+    padding: 0;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--muted);
+}
+
+.iu-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.iu-radio input {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 2px solid #c9b4be;
+    border-radius: 50%;
+    background: var(--panel);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.iu-radio input:checked {
+    border-color: #3b82f6;
+    background: radial-gradient(circle, #3b82f6 0 5px, transparent 6px);
+}
+
+.iu-lembrar {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.iu-page .emp-acoes {
+    margin-top: auto;
+    background: transparent;
+}

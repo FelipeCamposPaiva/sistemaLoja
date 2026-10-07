@@ -1,27 +1,35 @@
 import { EMPRESA_CONTA } from "./conta";
 
+export const UNIDADE_KEY = "erp-unidade-atual";
+export const UNIDADE_EVT = "erp-unidade-atual";
+export const UNIDADE_PRINCIPAL = "agua-limpa";
+
 export const UNIDADES = [
     {
         id: "agua-limpa",
-        nome: "Tem de Tudo – Água Limpa",
+        sigla: "AL",
+        nome: "Tem de Tudo — Água Limpa",
         cnpj: "40.424.076/0001-69",
         razao: "Tem de Tudo Papelaria, Presentes e Personalizados LTDA"
     },
     {
         id: "santo-agostinho",
-        nome: "Tem de Tudo – Santo Agostinho",
+        sigla: "STG",
+        nome: "Tem de Tudo — Santo Agostinho",
         cnpj: "49.635.218/0001-01",
         razao: "49.635.218 FELIPE CAMPOS PAIVA"
     },
     {
-        id: "deposito",
-        nome: "Tem de Tudo – Depósito Central",
+        id: "grafica",
+        sigla: "Gráfica",
+        nome: "Tem de Tudo — Gráfica",
         cnpj: "",
         razao: "Unidade operacional"
     },
     {
-        id: "grafica",
-        nome: "Tem de Tudo – Gráfica",
+        id: "deposito",
+        sigla: "Depósito Geral",
+        nome: "Tem de Tudo — Depósito Geral",
         cnpj: "",
         razao: "Unidade operacional"
     }
@@ -35,9 +43,40 @@ function digitos(valor) {
     return String(valor || "").replace(/\D/g, "");
 }
 
+export function empresasDaConta() {
+    return UNIDADES;
+}
+
+export function unidadePronta(id = unidadeAtual().id) {
+    return id === UNIDADE_PRINCIPAL;
+}
+
 export function unidadeAtual() {
+    try {
+        const id = localStorage.getItem(UNIDADE_KEY);
+        const salva = UNIDADES.find((unidade) => unidade.id === id);
+        if (salva) {
+            return salva;
+        }
+    } catch {
+        /* ignore */
+    }
     const cnpj = digitos(EMPRESA_CONTA.cnpj);
     return UNIDADES.find((unidade) => cnpj && digitos(unidade.cnpj) === cnpj) || UNIDADES[0];
+}
+
+export function definirUnidade(id) {
+    const unidade = UNIDADES.find((item) => item.id === id);
+    if (!unidade) {
+        return null;
+    }
+    try {
+        localStorage.setItem(UNIDADE_KEY, unidade.id);
+    } catch {
+        /* ignore */
+    }
+    window.dispatchEvent(new Event(UNIDADE_EVT));
+    return unidade;
 }
 
 export function unidadesDestino() {

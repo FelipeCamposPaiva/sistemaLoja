@@ -408,7 +408,11 @@ export default function DashboardSuprimentos({ embutido = false, secao }) {
                                     </td>
                                     <td>{item.marca}</td>
                                     <td>{item.fornecedor}</td>
-                                    <td>{item.localizacao || "—"}</td>
+                                    <td>
+                                        {item.localizacao ? (
+                                            <Link to={`${ROTAS.LOCALIZACOES}?localizacao=${encodeURIComponent(item.localizacao)}`}>{item.localizacao}</Link>
+                                        ) : "—"}
+                                    </td>
                                     <td>{qtd(item.estoque)}</td>
                                     <td>{brl(item.valorCusto)}</td>
                                     <td>{brl(item.valorVenda)}</td>

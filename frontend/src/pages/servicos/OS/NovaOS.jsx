@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
     ChevronLeft,
     Paperclip,
@@ -42,7 +42,9 @@ import { rotuloNatureza, sugerirNatureza } from "../../../constants/naturezasOpe
 import { listarClientes } from "../../../services/clientes.service";
 import { listarNaturezasOperacao } from "../../../services/naturezaOperacao.service";
 import { atualizarOS, buscarOS, salvarOS } from "../../../services/os.service";
+import { listarMaquinas } from "../../../services/maquina.service";
 import { listarProdutos } from "../../../services/produto.service";
+import { ouvirPrecos } from "../../../constants/precoPromocional";
 import { registrarOsCaixa } from "../../../services/caixa.service";
 import ROTAS from "../../../constants/rotas";
 import HistoricoAuditoria from "../../../components/HistoricoAuditoria";
@@ -100,12 +102,14 @@ export default function NovaOS({ id: idProp }) {
     const { hash } = useLocation();
     const id = idProp || (String(hash).match(/^#edit\/([^/?#]+)/)?.[1] ?? "");
     const navigate = useNavigate();
+    const [params] = useSearchParams();
     const fileRef = useRef(null);
     const [form, setForm] = useState(() => osVazia());
     const [item, setItem] = useState(() => itemServicoVazio());
     const [clientes, setClientes] = useState([]);
     const [naturezas, setNaturezas] = useState([]);
     const [produtos, setProdutos] = useState([]);
+    const [maquinas, setMaquinas] = useState([]);
     const [buscaCliente, setBuscaCliente] = useState("");
     const [buscaItem, setBuscaItem] = useState("");
     const [mostraCliente, setMostraCliente] = useState(false);
@@ -117,18 +121,35 @@ export default function NovaOS({ id: idProp }) {
     const [naoEncontrado, setNaoEncontrado] = useState(false);
     const [salvando, setSalvando] = useState(false);
     const [aviso, setAviso] = useState("");
+    const contatoAplicado = useRef(false);
 
     useEffect(() => {
         listarClientes().then(setClientes).catch(() => setClientes([]));
+        listarMaquinas().then(setMaquinas).catch(() => setMaquinas([]));
         listarNaturezasOperacao().then(setNaturezas).catch(() => setNaturezas([]));
-        listarProdutos()
-            .then((api) => setProdutos(mesclarCatalogo(api, produtosLoja())))
-            .catch(() => setProdutos(produtosLoja()));
+        function atualizarProdutos() {
+            listarProdutos()
+                .then((api) => setProdutos(mesclarCatalogo(api, produtosLoja())))
+                .catch(() => setProdutos(produtosLoja()));
+        }
+        atualizarProdutos();
+        return ouvirPrecos(atualizarProdutos);
     }, []);
 
     useEffect(() => {
         if (!id) {
-            setForm(osVazia());
+            const base = osVazia();
+            const equipamento = params.get("equipamento") || sessionStorage.getItem("erp-os-equipamento") || "";
+            const maquinaId = params.get("maquinaId") || sessionStorage.getItem("erp-os-maquina-id") || "";
+            if (equipamento) {
+                base.equipamento = equipamento;
+                sessionStorage.removeItem("erp-os-equipamento");
+            }
+            if (maquinaId) {
+                base.maquinaId = Number(maquinaId);
+                sessionStorage.removeItem("erp-os-maquina-id");
+            }
+            setForm(base);
             setCarregando(false);
             return;
         }
@@ -155,6 +176,19 @@ export default function NovaOS({ id: idProp }) {
             vivo = false;
         };
     }, [id]);
+
+    useEffect(() => {
+        const contatoId = params.get("contato");
+        if (!contatoId || id || contatoAplicado.current || !clientes.length) {
+            return;
+        }
+        const contato = clientes.find((item) => String(item.id) === String(contatoId));
+        if (!contato) {
+            return;
+        }
+        contatoAplicado.current = true;
+        escolherCliente(contato);
+    }, [clientes, id, params]);
 
     const clientesFiltrados = useMemo(() => {
         const t = buscaCliente.trim().toLowerCase();
@@ -217,7 +251,9 @@ export default function NovaOS({ id: idProp }) {
             clienteId: c.id,
             cliente: c.nome,
             fantasia: c.fantasia || "",
-            telefone: c.celular || c.telefone || ""
+            telefone: c.celular || c.telefone || "",
+            listaPreco: c.listaPreco || atual.listaPreco,
+            vendedor: c.vendedor || atual.vendedor
         }, c));
         setBuscaCliente(c.nome);
         setMostraCliente(false);
@@ -656,6 +692,24 @@ export default function NovaOS({ id: idProp }) {
             <section className="os-card">
                 <h3>Detalhes da ordem de serviço</h3>
                 <div className="os-grid-4">
+                    <label>
+                        Equipamento
+                        <input
+                            list="os-maquinas"
+                            value={form.equipamento || ""}
+                            placeholder="Máquina da produção"
+                            onChange={(e) => {
+                                const nome = e.target.value;
+                                const achou = maquinas.find((item) => item.nome === nome);
+                                setForm((atual) => ({ ...atual, equipamento: nome, maquinaId: achou?.id || null }));
+                            }}
+                        />
+                        <datalist id="os-maquinas">
+                            {maquinas.map((m) => (
+                                <option key={m.id} value={m.nome}>{m.tipo}</option>
+                            ))}
+                        </datalist>
+                    </label>
                     <label>
                         Data de início
                         <input type="date" value={form.dataAbertura} onChange={(e) => setCampo("dataAbertura", e.target.value)} />

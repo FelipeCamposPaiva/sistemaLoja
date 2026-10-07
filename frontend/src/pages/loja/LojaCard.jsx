@@ -14,12 +14,15 @@ import {
     urlProduto,
     visualProdutoLoja
 } from "../../constants/loja";
+import { emPromocao, pctOff } from "../../constants/precoPromocional";
 
 export default function LojaCard({ produto, cfg, compacto }) {
     const [qtd, setQtd] = useState(1);
     const [fav, setFav] = useState(() => lerDesejos().includes(String(produto.id)));
     const visual = visualProdutoLoja(produto);
     const preco = precoVenda(produto);
+    const promo = emPromocao(produto);
+    const off = promo ? Math.round(pctOff(produto.preco, produto.precoPromocional) || Number(produto.descontoPercentual) || 0) : 0;
     const pix = precoPix(produto, cfg);
     const t = cfg.textos || {};
 
@@ -52,7 +55,9 @@ export default function LojaCard({ produto, cfg, compacto }) {
                 {produto.nome}
             </Link>
             <div className="lj-card-preco">
+                {promo ? <s className="lj-preco-de">{brl(produto.preco)}</s> : null}
                 <strong>{brl(preco)}</strong>
+                {off ? <em className="lj-off">{off}% OFF</em> : null}
                 {cfg.pix?.ativo ? (
                     <small>{brl(pix)} {t.pixTxt || "no pix"}</small>
                 ) : null}

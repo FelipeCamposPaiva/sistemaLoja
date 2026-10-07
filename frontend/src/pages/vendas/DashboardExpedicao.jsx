@@ -43,6 +43,20 @@ function mensagemErro(error, padrao) {
     return error?.response?.data?.mensagem || padrao;
 }
 
+function destinoEtapa(pedido) {
+    const numero = encodeURIComponent(pedido?.numero || "");
+    if (pedido?.etapa === "EMBALAR") {
+        return `${ROTAS.EXPEDICAO}?filtro=embalar&q=${numero}`;
+    }
+    if (pedido?.etapa === "AGUARDANDO_COLETA") {
+        return `${ROTAS.EXPEDICAO}?q=${numero}`;
+    }
+    if (pedido?.etapa === "EM_TRANSPORTE") {
+        return `${ROTAS.EXPEDICAO}?filtro=despachados&q=${numero}`;
+    }
+    return `${ROTAS.SEPARACAO}/${pedido?.id || ""}`;
+}
+
 export default function DashboardExpedicao({ embutido = false }) {
     const [dados, setDados] = useState(null);
     const [aviso, setAviso] = useState("");
@@ -214,11 +228,11 @@ export default function DashboardExpedicao({ embutido = false }) {
 
             {prefs.kpis ? (
                 <div className="dash-kpis dash-kpis-4 dash-exp-kpis">
-                    <article className="dash-kpi"><small>Separar</small><strong>{kpis.separar}</strong><em>aguardando separação</em></article>
-                    <article className="dash-kpi"><small>Parciais</small><strong>{kpis.parciais}</strong><em>{kpis.separando} em andamento</em></article>
-                    <article className="dash-kpi"><small>Embalar / enviar</small><strong>{kpis.embalar}</strong><em>já separados</em></article>
-                    <article className="dash-kpi"><small>Aguardando coleta</small><strong>{kpis.aguardandoColeta}</strong><em>prontos para a transportadora</em></article>
-                    <article className="dash-kpi"><small>Em transporte</small><strong>{kpis.emTransporte}</strong><em>já despachados</em></article>
+                    <article className="dash-kpi"><small>Separar</small><strong>{kpis.separar}</strong><em><Link to={ROTAS.SEPARACAO}>aguardando separação</Link></em></article>
+                    <article className="dash-kpi"><small>Parciais</small><strong>{kpis.parciais}</strong><em><Link to={ROTAS.SEPARACAO}>{kpis.separando} em andamento</Link></em></article>
+                    <article className="dash-kpi"><small>Embalar / enviar</small><strong>{kpis.embalar}</strong><em><Link to={`${ROTAS.EXPEDICAO}?filtro=embalar`}>já separados</Link></em></article>
+                    <article className="dash-kpi"><small>Aguardando coleta</small><strong>{kpis.aguardandoColeta}</strong><em><Link to={`${ROTAS.EXPEDICAO}?filtro=fila`}>prontos para a transportadora</Link></em></article>
+                    <article className="dash-kpi"><small>Em transporte</small><strong>{kpis.emTransporte}</strong><em><Link to={`${ROTAS.EXPEDICAO}?filtro=despachados`}>já despachados</Link></em></article>
                     <article className="dash-kpi"><small>Entregues hoje</small><strong>{dados?.entreguesHoje || 0}</strong><em>concluídos no dia</em></article>
                 </div>
             ) : null}
@@ -227,7 +241,7 @@ export default function DashboardExpedicao({ embutido = false }) {
                 <div className="dash-grid-4">
                     {grupos.length ? grupos.map((g) => (
                         <article className="dash-box" key={g.nome}>
-                            <h4>{g.nome}</h4>
+                            <h4><Link to={`${ROTAS.EXPEDICAO}?envio=${encodeURIComponent(g.nome)}`}>{g.nome}</Link></h4>
                             <ul>
                                 <li><span>Aguardando retirada</span><strong>{g.aguardandoColeta}</strong></li>
                                 <li><span>Em transporte</span><strong>{g.emTransporte}</strong></li>
@@ -248,13 +262,15 @@ export default function DashboardExpedicao({ embutido = false }) {
                             <section key={col.id} className="dash-box dash-exp-col">
                                 <h4>
                                     <i style={{ background: col.cor }} />
-                                    {col.titulo}
+                                    <Link to={col.id === "EMBALAR" || col.id === "AGUARDANDO_COLETA" || col.id === "EM_TRANSPORTE"
+                                        ? `${ROTAS.EXPEDICAO}?filtro=${col.id === "EM_TRANSPORTE" ? "despachados" : col.id === "EMBALAR" ? "embalar" : "fila"}`
+                                        : ROTAS.SEPARACAO}>{col.titulo}</Link>
                                     <b>{cards.length}</b>
                                 </h4>
                                 <ul>
                                     {cards.map((p) => (
                                         <li key={p.id}>
-                                            <Link to={`/separacao/${p.id}`}>
+                                            <Link to={destinoEtapa(p)}>
                                                 <strong>{p.numero}</strong>
                                                 <span>{p.cliente}</span>
                                             </Link>
@@ -292,7 +308,7 @@ export default function DashboardExpedicao({ embutido = false }) {
                             <tbody>
                                 {pedidos.filter((p) => p.etapa === "AGUARDANDO_COLETA" || p.etapa === "EM_TRANSPORTE").map((p) => (
                                     <tr key={p.id}>
-                                        <td>{p.numero}</td>
+                                        <td><Link to={`${ROTAS.EXPEDICAO}?q=${encodeURIComponent(p.numero || "")}`}>{p.numero}</Link></td>
                                         <td>{p.cliente}</td>
                                         <td>{p.formaEnvio}</td>
                                         <td>{p.rastreio || "—"}</td>

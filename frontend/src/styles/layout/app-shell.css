@@ -221,10 +221,36 @@
     text-align: left;
 }
 
-.flyout-empresa {
+.flyout-empresas {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin: 4px 12px 12px;
+}
+
+.flyout-empresa {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
     padding: 10px 12px;
+    border: 0;
     border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+}
+
+.flyout-empresa svg {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.flyout-empresa.is-on,
+.flyout-empresa:hover {
     background: var(--accent-soft);
 }
 
@@ -239,20 +265,6 @@
     font-size: 12px;
 }
 
-.rail-pin {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    color: var(--muted);
-    cursor: pointer;
-}
-
-.rail-pin input {
-    accent-color: var(--accent);
-}
-
 .flyout {
     width: 228px;
     min-width: 228px;
@@ -264,6 +276,10 @@
 }
 
 .flyout-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     padding: 20px 16px 12px;
 }
 
@@ -272,6 +288,69 @@
     color: var(--muted);
     letter-spacing: 0.04em;
     text-transform: uppercase;
+}
+
+.flyout-head-acoes {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.flyout-pin {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.flyout-pin.is-on,
+.flyout-pin:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.flyout-dica {
+    margin: 0 8px 6px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.flyout-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 8px;
+}
+
+.flyout-row.is-drag {
+    opacity: 0.45;
+}
+
+.flyout-grip {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0 0 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: grab;
+}
+
+.flyout-row .flyout-link {
+    flex: 1;
+    min-width: 0;
+}
+
+.flyout-nome {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.25;
 }
 
 .flyout-list {

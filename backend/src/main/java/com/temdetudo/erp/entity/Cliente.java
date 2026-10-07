@@ -57,6 +57,12 @@ public class Cliente {
     @Column(length = 30)
     private String ie;
 
+    @Column(name = "inscricao_municipal", length = 30)
+    private String inscricaoMunicipal;
+
+    @Column(name = "inscricao_suframa", length = 20)
+    private String inscricaoSuframa;
+
     @Column(name = "consumidor_final")
     private Boolean consumidorFinal;
 
@@ -68,6 +74,36 @@ public class Cliente {
 
     @Column(name = "natureza_operacao_id")
     private Long naturezaOperacaoId;
+
+    @Column(length = 150)
+    private String vendedor;
+
+    @Column(name = "vendedor_id")
+    private Long vendedorId;
+
+    @Column(name = "condicao_pagamento", length = 80)
+    private String condicaoPagamento;
+
+    @Column(name = "dia_pagamento")
+    private Integer diaPagamento;
+
+    @Column(name = "lista_preco", length = 80)
+    private String listaPreco;
+
+    @Column(length = 10)
+    private String fundacao;
+
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String foto;
+
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String anexos;
+
+    @Lob
+    @Column(name = "dados_pessoais", columnDefinition = "TEXT")
+    private String dadosPessoais;
 
     // GETTERS E SETTERS
 
@@ -223,6 +259,22 @@ public class Cliente {
         this.ie = ie;
     }
 
+    public String getInscricaoMunicipal() {
+        return inscricaoMunicipal;
+    }
+
+    public void setInscricaoMunicipal(String inscricaoMunicipal) {
+        this.inscricaoMunicipal = inscricaoMunicipal;
+    }
+
+    public String getInscricaoSuframa() {
+        return inscricaoSuframa;
+    }
+
+    public void setInscricaoSuframa(String inscricaoSuframa) {
+        this.inscricaoSuframa = inscricaoSuframa;
+    }
+
     public Boolean getConsumidorFinal() {
         return consumidorFinal;
     }
@@ -253,5 +305,77 @@ public class Cliente {
 
     public void setNaturezaOperacaoId(Long naturezaOperacaoId) {
         this.naturezaOperacaoId = naturezaOperacaoId;
+    }
+
+    public String getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(String vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public Long getVendedorId() {
+        return vendedorId;
+    }
+
+    public void setVendedorId(Long vendedorId) {
+        this.vendedorId = vendedorId;
+    }
+
+    public String getCondicaoPagamento() {
+        return condicaoPagamento;
+    }
+
+    public void setCondicaoPagamento(String condicaoPagamento) {
+        this.condicaoPagamento = condicaoPagamento;
+    }
+
+    public Integer getDiaPagamento() {
+        return diaPagamento;
+    }
+
+    public void setDiaPagamento(Integer diaPagamento) {
+        this.diaPagamento = diaPagamento;
+    }
+
+    public String getListaPreco() {
+        return listaPreco;
+    }
+
+    public void setListaPreco(String listaPreco) {
+        this.listaPreco = listaPreco;
+    }
+
+    public String getFundacao() {
+        return fundacao;
+    }
+
+    public void setFundacao(String fundacao) {
+        this.fundacao = fundacao;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+
+    public String getAnexos() {
+        return anexos;
+    }
+
+    public void setAnexos(String anexos) {
+        this.anexos = anexos;
+    }
+
+    public String getDadosPessoais() {
+        return dadosPessoais;
+    }
+
+    public void setDadosPessoais(String dadosPessoais) {
+        this.dadosPessoais = dadosPessoais;
     }
 }

@@ -1,0 +1,226 @@
+.api-page h2 {
+    margin: 8px 0 8px;
+    font-size: 20px;
+}
+
+.api-head,
+.api-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.api-head p {
+    margin: 0;
+    max-width: 760px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.api-head .emp-salvar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.api-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.api-cards article {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 280px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+}
+
+.api-cards i {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f3d7a1;
+    color: #6b4b16;
+}
+
+.api-cards strong {
+    display: block;
+    font-size: 14px;
+}
+
+.api-cards small,
+.api-campo small,
+.api-tabela small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.api-campo {
+    display: grid;
+    grid-template-columns: minmax(220px, 420px) 1fr;
+    gap: 6px 16px;
+    align-items: center;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.api-campo input {
+    grid-column: 1;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0 10px;
+    font: inherit;
+    font-weight: 500;
+}
+
+.api-campo small {
+    grid-column: 2;
+    grid-row: 2;
+    font-weight: 500;
+}
+
+.api-chaves {
+    margin-top: 22px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+}
+
+.api-chaves h3,
+.api-page section h3 {
+    margin: 12px 0;
+    font-size: 16px;
+}
+
+.api-chave-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 640px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.api-chave-box p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.api-todos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.api-todos span {
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: #d7c3cd;
+    position: relative;
+}
+
+.api-todos span::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.api-todos span.is-on {
+    background: #3b82f6;
+}
+
+.api-todos span.is-on::after {
+    transform: translateX(16px);
+}
+
+.api-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.api-tabela th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+}
+
+.api-tabela th:not(:first-child),
+.api-tabela td:not(:first-child) {
+    width: 120px;
+    text-align: center;
+}
+
+.api-tabela td {
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.api-tabela td label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.api-tabela strong {
+    display: block;
+    font-size: 14px;
+}
+
+.api-page .emp-acoes {
+    position: sticky;
+    bottom: 0;
+    margin-top: 18px;
+    padding: 12px 0;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+}
+
+@media (max-width: 800px) {
+    .api-head,
+    .api-top,
+    .api-campo {
+        display: block;
+    }
+
+    .api-campo small {
+        margin-top: 4px;
+    }
+}

@@ -20,6 +20,7 @@ export function produtoDaApi(raw) {
         precoPromocional: Number(raw?.precoPromocional || 0),
         descontoPercentual: Number(raw?.descontoPercentual || 0),
         custo: Number(raw?.custo || 0),
+        custoCompra: Number(raw?.custoCompra || 0),
         estoque: Number(raw?.estoque || 0),
         estoqueMinimo: Number(raw?.estoqueMinimo || 0),
         estoqueMaximo: Number(raw?.estoqueMaximo || 0),
@@ -117,8 +118,13 @@ export async function excluirProduto(id) {
     await produtos.remove(id);
 }
 
-export async function reajustarPrecos(ids, percentualReajuste) {
-    const { data } = await api.post("/produtos/reajustar", { ids, percentualReajuste });
+export async function reajustarPrecos(ids, percentualReajuste, opcoes = {}) {
+    const { data } = await api.post("/produtos/reajustar", {
+        ids,
+        percentualReajuste,
+        reajustarVenda: opcoes.reajustarVenda !== false,
+        reajustarAtacado: opcoes.reajustarAtacado !== false
+    });
     return data;
 }
 

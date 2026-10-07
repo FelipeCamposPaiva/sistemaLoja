@@ -436,7 +436,6 @@ export default function MinhaConta() {
                             <dt>Filiais</dt>
                             <dd>
                                 {EMPRESA_CONTA.filiais} filiais cadastradas
-                                <Link to={ROTAS.LOCALIZACOES} className="mc-link">Ver filiais →</Link>
                             </dd>
                         </div>
                     </dl>

@@ -17,6 +17,7 @@ import {
     toggleDesejo,
     visualProdutoLoja
 } from "../../constants/loja";
+import { emPromocao, pctOff } from "../../constants/precoPromocional";
 import LojaCard from "./LojaCard";
 
 export default function LojaProduto() {
@@ -51,6 +52,8 @@ export default function LojaProduto() {
     }
 
     const preco = precoVenda(produto);
+    const promo = emPromocao(produto);
+    const off = promo ? Math.round(pctOff(produto.preco, produto.precoPromocional) || Number(produto.descontoPercentual) || 0) : 0;
     const pix = precoPix(produto, cfg);
     const m2 = cfg.calculadoraM2?.ativo && ehMetroQuadrado(produto);
     const perso = cfg.personalizador?.ativo && ehPersonalizado(produto);
@@ -81,7 +84,11 @@ export default function LojaProduto() {
                         {produto.marca ? ` · ${produto.marca}` : ""}
                     </p>
                     <h1>{produto.nome}</h1>
-                    <p className="lj-produto-preco">{brl(preco)}</p>
+                    <p className="lj-produto-preco">
+                        {promo ? <s className="lj-preco-de">{brl(produto.preco)}</s> : null}
+                        {brl(preco)}
+                        {off ? <em className="lj-off">{off}% OFF</em> : null}
+                    </p>
                     {cfg.pix?.ativo ? (
                         <p className="lj-pix">{brl(pix)} {t.pixTxt || "no pix"} ({cfg.pix.desconto}%)</p>
                     ) : null}

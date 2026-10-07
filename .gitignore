@@ -37,6 +37,10 @@ data/*.json
 *.mv.db
 *.trace.db
 
+# Executável Windows (ops/empacotar-exe.ps1)
+desktop/.build/
+desktop/saida/
+
 # Maven / Java
 .mvn/wrapper/maven-wrapper.jar
 *.class

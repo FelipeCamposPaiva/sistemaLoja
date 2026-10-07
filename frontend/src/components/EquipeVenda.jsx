@@ -32,7 +32,7 @@ function catalogoVendedores() {
             });
         }
     }
-    return [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    return [...mapa.values()].sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
 }
 
 export default function EquipeVenda({

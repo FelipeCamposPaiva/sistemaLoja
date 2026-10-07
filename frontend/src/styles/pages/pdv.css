@@ -2,13 +2,27 @@
     display: none;
 }
 
+.erp-shell.is-pdv .erp-main {
+    height: 100%;
+    min-height: 0;
+}
+
 .erp-shell.is-pdv .erp-content,
 .erp-shell.is-pdv .shell-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
     padding: 0;
     background: #fffafc;
 }
 
 .erp-shell.is-pdv .erp-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
     max-width: none;
     height: 100%;
 }
@@ -23,12 +37,16 @@
     --pdv-muted: #9a7384;
     --pdv-accent: #ff2f92;
     --pdv-link: #2563eb;
-    min-height: 100%;
+    flex: 1;
+    min-height: 0;
     height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     color: var(--pdv-text);
-    background: var(--pdv-bg);
+    background:
+        radial-gradient(circle at 100% 0%, #ffe4f1 0, transparent 28%),
+        var(--pdv-bg);
     position: relative;
 }
 
@@ -38,10 +56,13 @@
 
 .pdv-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 18px 32px 6px;
+    flex-shrink: 0;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--pdv-line);
+    background: rgba(255, 255, 255, 0.72);
 }
 
 .pdv-head h1 {
@@ -153,7 +174,7 @@
 
 .pdv-mais-menu {
     position: absolute;
-    top: 58px;
+    top: 72px;
     right: 28px;
     z-index: 40;
     width: 300px;
@@ -192,10 +213,71 @@
 
 .pdv-busca-row {
     display: grid;
-    grid-template-columns: 1fr 140px;
+    grid-template-columns: minmax(0, 1fr) 160px;
     gap: 16px;
-    padding: 4px 32px 0;
+    padding: 16px 28px 0;
     align-items: end;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 20;
+}
+
+.pdv-field.is-busca {
+    position: relative;
+}
+
+.pdv-sugestoes {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 28;
+    background: #fff;
+    border: 1px solid var(--pdv-line);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(61, 42, 52, 0.14);
+    max-height: min(360px, 46vh);
+    overflow: auto;
+}
+
+.pdv-sugestoes button {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border: 0;
+    border-bottom: 1px solid #f6e4ec;
+    background: #fff;
+    color: var(--pdv-text);
+    padding: 12px 14px;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+
+.pdv-sugestoes button:hover {
+    background: #fff3f7;
+}
+
+.pdv-sugestoes strong {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pdv-sugestoes span,
+.pdv-sugestoes p {
+    color: var(--pdv-muted);
+    font-size: 13px;
+}
+
+.pdv-sugestoes span {
+    white-space: nowrap;
+}
+
+.pdv-sugestoes p {
+    margin: 0;
+    padding: 14px;
 }
 
 .pdv-field label,
@@ -339,13 +421,15 @@
 }
 
 .pdv-hint {
-    margin: 8px 32px 0;
+    margin: 8px 28px 0;
     color: var(--pdv-muted);
     font-size: 13px;
+    flex-shrink: 0;
 }
 
 .pdv-centro {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -356,10 +440,7 @@
 }
 
 .pdv-centro.is-aberto {
-    flex: 1;
-    min-height: 180px;
-    padding: 28px 32px 8px;
-    justify-content: center;
+    padding: 12px 28px;
 }
 
 .pdv-relogio-wrap {
@@ -371,7 +452,7 @@
 }
 
 .pdv-relogio {
-    font-size: 92px;
+    font-size: clamp(64px, 9vh, 120px);
     font-weight: 500;
     letter-spacing: -3px;
     line-height: 0.9;
@@ -419,7 +500,7 @@
 
 .pdv-cart {
     flex: 1;
-    padding: 18px 32px 0;
+    padding: 12px 28px 0;
     min-height: 0;
     overflow: auto;
 }
@@ -430,12 +511,24 @@
 }
 
 .pdv-cart th {
+    position: sticky;
+    top: 0;
+    background: #fffafc;
     text-align: left;
     color: var(--pdv-muted);
     font-weight: 500;
     font-size: 13px;
     padding: 8px 8px 10px;
     border-bottom: 1px solid var(--pdv-line);
+}
+
+.pdv-cart tbody tr {
+    cursor: pointer;
+}
+
+.pdv-cart tbody tr:hover td,
+.pdv-cart tbody tr.is-on td {
+    background: #fff3f7;
 }
 
 .pdv-cart td {
@@ -454,7 +547,10 @@
 }
 
 .pdv-atalhos {
-    padding: 8px 32px 4px;
+    flex-shrink: 0;
+    max-height: 168px;
+    overflow: auto;
+    padding: 8px 28px 4px;
 }
 
 .pdv-atalhos h3 {
@@ -507,8 +603,12 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px 32px 20px;
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 12px 28px 16px;
     flex-wrap: wrap;
+    border-top: 1px solid var(--pdv-line);
+    background: #fff;
 }
 
 .pdv-foot-sel {
@@ -739,6 +839,8 @@
 
 .pdv-done {
     flex: 1;
+    min-height: 0;
+    overflow: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -794,12 +896,57 @@
     font-size: 13px;
 }
 
+.pdv-erro {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 80;
+    width: min(380px, calc(100vw - 32px));
+    background: #b91c1c;
+    color: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 16px 40px rgba(185, 28, 28, 0.35);
+}
+
+.pdv-erro strong {
+    display: block;
+    font-size: 14px;
+}
+
+.pdv-erro p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.pdv-erro small {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.88;
+}
+
+.pdv-erro button {
+    margin-top: 10px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+
 .pdv-checkout {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     gap: 28px;
-    padding: 8px 32px 20px;
+    padding: 20px 28px;
     flex: 1;
+    min-height: 0;
+    overflow: auto;
 }
 
 .pdv-muted {
@@ -808,9 +955,573 @@
 }
 
 .pdv-item-mini {
+    display: block;
+    width: 100%;
     margin-top: 12px;
     padding: 12px 0;
+    border: 0;
     border-top: 1px solid var(--pdv-line);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.pdv-item-mini:hover {
+    background: #fff3f7;
+}
+
+.pdv-head-loja {
+    align-items: center;
+    padding: 12px 20px;
+}
+
+.pdv-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pdv-marca h1 {
+    font-size: 22px;
+}
+
+.pdv-marca-ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffe4f1;
+    color: var(--pdv-accent);
+}
+
+.pdv-caixa-pill {
+    margin-left: 6px;
+    background: #e8f8ee;
+    color: #15803d;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pdv-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--pdv-line);
+    background: #fff;
+    color: var(--pdv-text);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+}
+
+.pdv-chip-btn small,
+.pdv-acoes-rapidas small,
+.pdv-atalhos-venda small,
+.pdv-pay-foot small {
+    color: var(--pdv-muted);
+    font-size: 11px;
+}
+
+.pdv-mais {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pdv-busca-loja {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    align-items: center;
+    padding-top: 14px;
+}
+
+.pdv-qtd-step {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--pdv-line);
+    border-radius: 12px;
+    overflow: hidden;
+    height: 46px;
+}
+
+.pdv-qtd-step input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: center;
+    font: inherit;
+    color: var(--pdv-text);
+    outline: none;
+}
+
+.pdv-qtd-step span {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--pdv-line);
+}
+
+.pdv-qtd-step button {
+    border: 0;
+    background: #fff;
+    color: var(--pdv-muted);
+    width: 28px;
+    height: 22px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.pdv-qtd-step button + button {
+    border-top: 1px solid var(--pdv-line);
+}
+
+.pdv-cats {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px 0;
+    overflow: auto;
+    flex-shrink: 0;
+}
+
+.pdv-cats button {
+    border: 0;
+    background: #fff;
+    color: var(--pdv-text);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px var(--pdv-line);
+}
+
+.pdv-cats button.is-on {
+    background: var(--pdv-accent);
+    color: #fff;
+    box-shadow: none;
+}
+
+.pdv-palco {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 12px;
+    padding: 12px 20px 0;
+}
+
+.pdv-vitrine {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    gap: 12px;
+    min-height: 0;
+    overflow: auto;
+    align-content: start;
+    padding: 0;
+}
+
+.pdv-sacola {
+    background: #fff;
+    border: 1px solid var(--pdv-line);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.pdv-sacola header,
+.pdv-sacola footer {
+    padding: 12px 14px;
+}
+
+.pdv-sacola header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid var(--pdv-line);
+}
+
+.pdv-sacola header span,
+.pdv-sacola footer p,
+.pdv-sacola footer small {
+    color: var(--pdv-muted);
+    font-size: 12px;
+}
+
+.pdv-sacola-lista {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.pdv-sacola-lista button {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    width: 100%;
+    gap: 2px 8px;
+    border: 0;
+    border-bottom: 1px solid #f6e4ec;
+    background: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--pdv-text);
+}
+
+.pdv-sacola-lista button small {
+    grid-column: 1;
+    color: var(--pdv-muted);
+}
+
+.pdv-sacola-lista button.is-on,
+.pdv-sacola-lista button:hover {
+    background: #fff3f7;
+}
+
+.pdv-sacola footer {
+    border-top: 1px solid var(--pdv-line);
+}
+
+.pdv-sacola footer strong {
+    display: block;
+    font-size: 22px;
+    margin: 2px 0 10px;
+}
+
+.pdv-sacola footer .pdv-btn {
+    width: 100%;
+}
+
+.pdv-sacola .pdv-vazio {
+    padding: 24px 16px;
+}
+
+.pdv-sacola .pdv-vazio strong {
+    font-size: 15px;
+}
+
+.pdv-card {
+    background: #fff;
+    border: 1px solid #f6e4ec;
+    border-radius: 16px;
+    padding: 10px;
+    min-width: 0;
+}
+
+.pdv-card-midia {
+    position: relative;
+    height: 112px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff 0%, #fff5f9 100%);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.pdv-card-midia em {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--pdv-accent);
+    color: #fff;
+    border-radius: 999px;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 7px;
+}
+
+.pdv-card-foto {
+    width: 100%;
+    height: 112px;
+    object-fit: contain;
+}
+
+.pdv-card-foto.is-vazia {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: #ffe4f1;
+    color: var(--pdv-accent);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.pdv-card strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.3;
+    min-height: 34px;
+}
+
+.pdv-card small {
+    display: block;
+    margin-top: 4px;
+    color: var(--pdv-muted);
+    font-size: 11px;
+}
+
+.pdv-card-preco {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.pdv-card-preco b {
+    font-size: 16px;
+}
+
+.pdv-card-preco button {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--pdv-accent);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.pdv-miolo {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.pdv-miolo .pdv-cart,
+.pdv-miolo .pdv-vazio {
+    width: 100%;
+}
+
+.pdv-vazio {
+    margin: auto;
+    text-align: center;
+    max-width: 420px;
+    padding: 12px 20px 20px;
+}
+
+.pdv-vazio-arte {
+    width: 92px;
+    height: 72px;
+    margin: 0 auto 12px;
+    border-radius: 40px 40px 28px 28px;
+    background: radial-gradient(circle at 50% 40%, #ffe4f1 0, #fff 70%);
+    color: var(--pdv-accent);
+    display: grid;
+    place-items: center;
+}
+
+.pdv-vazio strong {
+    display: block;
+    font-size: 20px;
+}
+
+.pdv-vazio p {
+    margin: 6px 0 0;
+    color: var(--pdv-muted);
+    font-size: 13px;
+}
+
+.pdv-acoes-rapidas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding: 8px 20px;
+    flex-shrink: 0;
+}
+
+.pdv-acoes-rapidas button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    background: #fff;
+    color: var(--pdv-text);
+    border-radius: 14px;
+    min-height: 48px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    box-shadow: inset 0 0 0 1px var(--pdv-line);
+}
+
+.pdv-atalhos-venda {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px 12px;
+    flex-shrink: 0;
+    overflow: auto;
+}
+
+.pdv-atalhos-venda > span {
+    color: var(--pdv-muted);
+    font-size: 12px;
+    white-space: nowrap;
+    margin-right: 4px;
+}
+
+.pdv-atalhos-venda button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: #fff;
+    color: var(--pdv-text);
+    border-radius: 14px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font: inherit;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px var(--pdv-line);
+}
+
+.pdv-atalhos-venda em {
+    font-style: normal;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 13px;
+}
+
+.pdv-ir-pagamento {
+    margin-left: auto;
+    box-shadow: none !important;
+    color: #fff;
+}
+
+.pdv-ir-pagamento small {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.pdv-field textarea {
+    width: 100%;
+    min-height: 96px;
+    background: var(--pdv-field);
+    border: 0;
+    color: var(--pdv-text);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font: inherit;
+    resize: vertical;
+}
+
+.pdv-pay {
+    width: min(440px, 100%);
+    background: #fff;
+}
+
+.pdv-pay-x {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: #f7eef2;
+    color: var(--pdv-text);
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.pdv-pay-total {
+    margin: 0 0 14px;
+    color: var(--pdv-muted);
+}
+
+.pdv-pay-total strong {
+    color: var(--pdv-text);
+}
+
+.pdv-pay .pdv-forma {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 64px;
+    background: #fff;
+}
+
+.pdv-pay .pdv-forma b {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    border-radius: 999px;
+    background: #f7eef2;
+    display: grid;
+    place-items: center;
+    color: var(--pdv-muted);
+}
+
+.pdv-pay .pdv-forma span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.pdv-pay .pdv-forma.is-on {
+    border-color: var(--pdv-accent);
+    box-shadow: inset 0 0 0 1px var(--pdv-accent);
+    color: var(--pdv-accent);
+}
+
+.pdv-pay .pdv-forma.is-on b,
+.pdv-pay .pdv-forma.is-on svg {
+    color: var(--pdv-accent);
+}
+
+.pdv-pay .pdv-forma.is-full {
+    grid-column: 1 / -1;
+}
+
+.pdv-pay-foot {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.pdv-pay-foot .pdv-btn,
+.pdv-pay-cancel {
+    min-height: 64px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.pdv-pay-foot .pdv-btn {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pdv-pay-cancel {
+    border: 1px solid var(--pdv-line);
+    background: #fff;
+    color: var(--pdv-text);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
 }
 
 @media (max-width: 900px) {
@@ -839,6 +1550,11 @@
     }
 
     .pdv-busca-row {
+        grid-template-columns: 1fr;
+    }
+
+    .pdv-palco,
+    .pdv-acoes-rapidas {
         grid-template-columns: 1fr;
     }
 }

@@ -1,5 +1,6 @@
 import api, { resource } from "./api";
-import { contatoVazio } from "../constants/contatos";
+import { contatoVazio, normalizarTipoPessoa } from "../constants/contatos";
+import { formatarLimite } from "../constants/mascarasContato";
 
 const clientes = resource("/clientes");
 
@@ -22,21 +23,91 @@ export function contatoDaApi(raw) {
         municipio: raw?.cidade || "",
         uf: raw?.estado || "",
         cep: raw?.cep || "",
-        limiteCredito: raw?.limiteCredito == null ? "0" : String(raw.limiteCredito),
+        limiteCredito: formatarLimite(raw?.limiteCredito),
+        inscricaoSuframa: raw?.inscricaoSuframa || "",
         observacoes: raw?.observacoes || "",
         ativo: raw?.ativo !== false,
         excluido: false,
         tipos: tipos.length ? tipos : ["cliente"],
-        tipoPessoa: raw?.tipoPessoa || (String(raw?.cpfCnpj || "").replace(/\D/g, "").length > 11 ? "juridica" : "fisica"),
+        tipoPessoa: normalizarTipoPessoa(raw?.tipoPessoa) || (String(raw?.cpfCnpj || "").replace(/\D/g, "").length > 11 ? "PJ" : "PF"),
         contribuinte: raw?.contribuinte || "9",
         ie: raw?.ie || "",
+        inscricaoMunicipal: raw?.inscricaoMunicipal || "",
         consumidorFinal: raw?.consumidorFinal !== false && raw?.consumidorFinal !== 0,
         finalidade: raw?.finalidade || (String(raw?.contribuinte) === "1" ? "REVENDA" : "CONSUMO"),
         regimeTributario: raw?.regimeTributario || "",
         naturezaOperacaoId: raw?.naturezaOperacaoId || "",
+        vendedor: raw?.vendedor || "",
+        vendedorId: raw?.vendedorId || "",
+        condicaoPagamento: raw?.condicaoPagamento || "",
+        diaPagamento: raw?.diaPagamento ? String(raw.diaPagamento) : "",
+        listaPreco: raw?.listaPreco || "",
+        fundacao: raw?.fundacao || "",
+        foto: raw?.foto || "",
+        anexos: lerAnexos(raw?.anexos),
+        ...dadosPessoaisDe(raw?.dadosPessoais),
         dataCadastro: raw?.dataCadastro || new Date().toISOString(),
         tinyId: raw?.tinyId || null
     };
+}
+
+function dadosPessoaisDe(valor) {
+    const vazio = {
+        estadoCivil: "",
+        profissao: "",
+        sexo: "",
+        nascimento: "",
+        naturalidade: "",
+        nomePai: "",
+        cpfPai: "",
+        nomeMae: "",
+        cpfMae: "",
+        rg: "",
+        bairro: "",
+        numero: "",
+        complemento: "",
+        telefone2: "",
+        website: "",
+        emailNfe: "",
+        cobrancaDif: false,
+        cepCobranca: "",
+        municipioCobranca: "",
+        ufCobranca: "",
+        enderecoCobranca: "",
+        bairroCobranca: "",
+        numeroCobranca: "",
+        complementoCobranca: "",
+        pessoasContato: []
+    };
+    if (!valor) {
+        return vazio;
+    }
+    try {
+        const dados = typeof valor === "string" ? JSON.parse(valor) : valor;
+        return {
+            ...vazio,
+            ...dados,
+            cobrancaDif: Boolean(dados?.cobrancaDif),
+            pessoasContato: Array.isArray(dados?.pessoasContato) ? dados.pessoasContato : []
+        };
+    } catch {
+        return vazio;
+    }
+}
+
+function lerAnexos(valor) {
+    if (Array.isArray(valor)) {
+        return valor;
+    }
+    if (!valor) {
+        return [];
+    }
+    try {
+        const lista = JSON.parse(valor);
+        return Array.isArray(lista) ? lista : [];
+    } catch {
+        return [];
+    }
 }
 
 function texto(valor, max) {
@@ -47,14 +118,23 @@ function texto(valor, max) {
     return max && s.length > max ? s.slice(0, max) : s;
 }
 
+function numeroMoeda(valor) {
+    const texto = String(valor ?? "0").trim();
+    const normalizado = texto.includes(",")
+        ? texto.replace(/\./g, "").replace(",", ".")
+        : texto;
+    const numero = Number(normalizado.replace(/[^\d.-]/g, ""));
+    return Number.isFinite(numero) ? numero : 0;
+}
+
 export function contatoParaApi(contato) {
-    const limite = Number(String(contato.limiteCredito ?? "0").replace(",", "."));
+    const limite = numeroMoeda(contato.limiteCredito);
     const tiny = Number(contato.tinyId);
     return {
         id: contato.id || null,
         nome: texto(contato.nome, 150) || "",
         cpfCnpj: texto(contato.cpfCnpj, 20),
-        telefone: texto(contato.celular || contato.telefone, 20),
+        telefone: texto(contato.celular || contato.telefone || contato.telefone2, 20),
         email: texto(contato.email, 150),
         endereco: contato.endereco || null,
         tipo: (contato.tipos || ["cliente"]).join(","),
@@ -66,14 +146,58 @@ export function contatoParaApi(contato) {
         observacoes: contato.observacoes || null,
         ativo: contato.ativo !== false,
         tinyId: Number.isInteger(tiny) && tiny > 0 ? tiny : null,
-        tipoPessoa: texto(contato.tipoPessoa, 20),
+        tipoPessoa: texto(normalizarTipoPessoa(contato.tipoPessoa) || "PF", 20),
         contribuinte: texto(contato.contribuinte, 2) || "9",
         ie: texto(contato.ie, 30),
+        inscricaoMunicipal: texto(contato.inscricaoMunicipal, 30),
+        inscricaoSuframa: texto(contato.inscricaoSuframa, 20),
         consumidorFinal: contato.consumidorFinal !== false,
         finalidade: texto(contato.finalidade, 20) || "CONSUMO",
         regimeTributario: texto(contato.regimeTributario, 30),
-        naturezaOperacaoId: contato.naturezaOperacaoId ? Number(contato.naturezaOperacaoId) : null
+        naturezaOperacaoId: contato.naturezaOperacaoId ? Number(contato.naturezaOperacaoId) : null,
+        vendedor: texto(contato.vendedor, 150),
+        vendedorId: contato.vendedorId ? Number(contato.vendedorId) : null,
+        condicaoPagamento: texto(contato.condicaoPagamento, 80),
+        diaPagamento: diaValido(contato.diaPagamento),
+        listaPreco: texto(contato.listaPreco, 80),
+        fundacao: texto(contato.fundacao, 10),
+        foto: contato.foto || null,
+        anexos: (contato.anexos || []).length ? JSON.stringify(contato.anexos) : null,
+        dadosPessoais: JSON.stringify({
+            estadoCivil: contato.estadoCivil || "",
+            profissao: contato.profissao || "",
+            sexo: contato.sexo || "",
+            nascimento: contato.nascimento || "",
+            naturalidade: contato.naturalidade || "",
+            nomePai: contato.nomePai || "",
+            cpfPai: contato.cpfPai || "",
+            nomeMae: contato.nomeMae || "",
+            cpfMae: contato.cpfMae || "",
+            rg: contato.rg || "",
+            bairro: contato.bairro || "",
+            numero: contato.numero || "",
+            complemento: contato.complemento || "",
+            telefone: contato.telefone || "",
+            telefone2: contato.telefone2 || "",
+            celular: contato.celular || "",
+            website: contato.website || "",
+            emailNfe: contato.emailNfe || "",
+            cobrancaDif: Boolean(contato.cobrancaDif),
+            cepCobranca: contato.cepCobranca || "",
+            municipioCobranca: contato.municipioCobranca || "",
+            ufCobranca: contato.ufCobranca || "",
+            enderecoCobranca: contato.enderecoCobranca || "",
+            bairroCobranca: contato.bairroCobranca || "",
+            numeroCobranca: contato.numeroCobranca || "",
+            complementoCobranca: contato.complementoCobranca || "",
+            pessoasContato: Array.isArray(contato.pessoasContato) ? contato.pessoasContato : []
+        })
     };
+}
+
+function diaValido(valor) {
+    const dia = Number(valor);
+    return Number.isInteger(dia) && dia >= 1 && dia <= 31 ? dia : null;
 }
 
 export async function listarClientes() {

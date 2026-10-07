@@ -1,0 +1,93 @@
+.erp-erro-pilha {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(380px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.erp-erro {
+    pointer-events: auto;
+    background: #b91c1c;
+    color: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 16px 40px rgba(185, 28, 28, 0.35);
+    animation: erp-erro-in 180ms ease-out;
+}
+
+.erp-erro.is-alerta {
+    background: #b45309;
+    box-shadow: 0 16px 40px rgba(180, 83, 9, 0.35);
+}
+
+.erp-erro.is-ok {
+    background: #15803d;
+    box-shadow: 0 16px 40px rgba(21, 128, 61, 0.35);
+}
+
+.erp-erro strong {
+    display: block;
+    font-size: 14px;
+}
+
+.erp-erro p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.erp-erro small {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.88;
+}
+
+.erp-erro button {
+    margin-top: 10px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+
+.erp-erro-queda {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 12px;
+    padding: 32px;
+    color: #3d2a34;
+    background: #fffafc;
+}
+
+.erp-erro-queda button {
+    border: 0;
+    background: #b91c1c;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font: inherit;
+}
+
+@keyframes erp-erro-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}

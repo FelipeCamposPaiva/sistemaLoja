@@ -77,12 +77,15 @@ export function rotuloStatusConta(status, tipo = "receber") {
     if (s === "CANCELADO") {
         return "Cancelada";
     }
+    if (s === "CREDITO") {
+        return "Crédito";
+    }
     return "Em aberto";
 }
 
 export function contaAberta(conta, tipo = "receber") {
     const s = String(conta?.status || "ABERTO").toUpperCase();
-    if (s === "AGRUPADO" || s === "CANCELADO") {
+    if (s === "AGRUPADO" || s === "CANCELADO" || s === "CREDITO") {
         return false;
     }
     if (tipo === "pagar") {

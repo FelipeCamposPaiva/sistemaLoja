@@ -1,16 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+    ArrowRight,
     Banknote,
+    Barcode,
+    Check,
+    ChevronDown,
+    ChevronUp,
     CreditCard,
     Landmark,
     Link2,
+    List,
+    MessageSquare,
+    Percent,
+    Plus,
     Printer,
     QrCode,
     Receipt,
     Search,
     Share2,
+    ShoppingCart,
     Smartphone,
+    Star,
+    UserRound,
     Wallet
 } from "lucide-react";
 
@@ -36,17 +48,20 @@ import {
     vendedoresPdv
 } from "../../constants/pdv";
 import { CONSUMIDOR_FINAL, rotuloNatureza, sugerirNatureza } from "../../constants/naturezasOperacao";
-import { precoVigente, rotuloOff } from "../../constants/precoPromocional";
+import { emPromocao, pctOff, precoVigente, rotuloOff, ouvirPrecos } from "../../constants/precoPromocional";
 import { osVazia } from "../../constants/ordensServico";
 import ROTAS from "../../constants/rotas";
+import { registrarVendaCaixa, salvarMovimento } from "../../services/caixa.service";
 import { listarClientes } from "../../services/clientes.service";
+import { listarContasReceber, receberConta, salvarContaReceber } from "../../services/contaReceber.service";
 import { listarNaturezasOperacao } from "../../services/naturezaOperacao.service";
 import { salvarOS } from "../../services/os.service";
-import { salvarPedidoVenda } from "../../services/pedidoVenda.service";
-import { listarProdutos } from "../../services/produto.service";
+import { lancarEstoquePedido, salvarPedidoVenda } from "../../services/pedidoVenda.service";
+import { buscarProdutos as buscarProdutosApi, listarProdutos } from "../../services/produto.service";
 import EquipeVenda from "../../components/EquipeVenda";
 import { produtosLoja } from "../../constants/catalogoLoja";
 import { PCT_COMISSAO_PADRAO, linhaVendedor, rotuloEquipe } from "../../constants/vendaVendedores";
+import { motivoErro, mostrarAlerta as publicarAlerta, mostrarErro as publicarErro } from "../../components/avisoErro";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/pdv.css";
@@ -82,8 +97,60 @@ function dataHoraCaixa(iso) {
     return `${d.toLocaleDateString("pt-BR")} às ${hora(d).replace(":", "h")}`;
 }
 
+function descreverClique(ev) {
+    const bruto = ev.target;
+    const alvo = bruto?.closest?.("button, a, input, textarea, select, label, [role='button']") || bruto;
+    const tag = String(alvo?.tagName || "área").toLowerCase();
+    const classe = typeof alvo?.className === "string"
+        ? alvo.className.split(/\s+/).filter(Boolean).slice(0, 2).join(".")
+        : "";
+    const texto = String(
+        alvo?.getAttribute?.("aria-label")
+        || (["button", "a", "input", "textarea", "select", "label"].includes(tag) ? alvo?.innerText || alvo?.placeholder : "")
+        || ""
+    ).replace(/\s+/g, " ").trim().slice(0, 72);
+    const onde = texto ? `${tag} “${texto}”` : (classe ? `${tag}.${classe}` : tag);
+    return {
+        x: Math.round(ev.clientX),
+        y: Math.round(ev.clientY),
+        quando: Date.now(),
+        onde
+    };
+}
+
+function idServidor(valor) {
+    const id = Number(valor);
+    return Number.isFinite(id) && id > 0 && id < 1e11 ? id : null;
+}
+
+function contaEmAberto(conta) {
+    const status = String(conta?.status || "ABERTO").toUpperCase();
+    return status === "ABERTO" || status === "PARCIAL";
+}
+
+function vencimentoCrediario() {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+function FotoProduto({ produto }) {
+    const [falhou, setFalhou] = useState(false);
+    const src = produto?.imagem;
+    if (!src || falhou) {
+        return <span className="pdv-card-foto is-vazia">{String(produto?.nome || "?").trim().slice(0, 1)}</span>;
+    }
+    return <img className="pdv-card-foto" src={src} alt="" onError={() => setFalhou(true)} />;
+}
+
 export default function PDV() {
     const navigate = useNavigate();
+    const [params] = useSearchParams();
+    const pageRef = useRef(null);
+    const ultimoClique = useRef(null);
+    const mostrarErroRef = useRef(() => {});
     const buscaRef = useRef(null);
     const buscaAvancadaRef = useRef(null);
     const clienteRef = useRef(null);
@@ -91,9 +158,17 @@ export default function PDV() {
     const crediarioRef = useRef(null);
     const devolucaoRef = useRef(null);
     const livreRef = useRef(null);
+    const descontoRef = useRef(null);
+    const obsRef = useRef(null);
+    const itemQtdRef = useRef(null);
+    const ultimoItemId = useRef(null);
     const [agora, setAgora] = useState(() => new Date());
     const [store, setStore] = useState(lerPdv);
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(() => params.get("sku") || params.get("q") || "");
+    const [categoriaPdv, setCategoriaPdv] = useState(() => (params.get("vitrine") === "promocoes" ? "promocoes" : "todos"));
+    const [observacao, setObservacao] = useState("");
+    const [sugestoesApi, setSugestoesApi] = useState([]);
+    const [buscandoProduto, setBuscandoProduto] = useState(false);
     const [buscaAvancada, setBuscaAvancada] = useState("");
     const [qtd, setQtd] = useState("1,00");
     const [itens, setItens] = useState([]);
@@ -112,6 +187,7 @@ export default function PDV() {
     const [aviso, setAviso] = useState("");
     const [movDraft, setMovDraft] = useState({ valor: "", obs: "" });
     const [livre, setLivre] = useState({ nome: "", preco: "" });
+    const [editando, setEditando] = useState(null);
     const [vendaOk, setVendaOk] = useState(null);
     const [filtroCliente, setFiltroCliente] = useState("");
     const [filtroVendedor, setFiltroVendedor] = useState("");
@@ -124,6 +200,9 @@ export default function PDV() {
     const [soEstoque, setSoEstoque] = useState(false);
     const [clientes, setClientes] = useState([]);
     const [naturezas, setNaturezas] = useState([]);
+    const [contasCrediario, setContasCrediario] = useState([]);
+    const [preVendas, setPreVendas] = useState([]);
+    const [pedidoVinculo, setPedidoVinculo] = useState(null);
 
     const vendedores = useMemo(vendedoresPdv, [store]);
     const rotuloVendedores = rotuloEquipe(equipe);
@@ -131,8 +210,53 @@ export default function PDV() {
     const quant = qtdItens(itens);
     const caixa = store.caixa;
     const formasResumo = resumoFormas(caixa, store.vendas);
-    const atalhos = (store.atalhos || []).map((id) => produtoPorId(id) || catalogo.find((p) => String(p.id) === String(id))).filter(Boolean);
+    const atalhos = useMemo(() => {
+        const escolhidos = (store.atalhos || [])
+            .map((id) => produtoPorId(id) || catalogo.find((p) => String(p.id) === String(id)))
+            .filter(Boolean);
+        if (escolhidos.length) {
+            return escolhidos;
+        }
+        return catalogo.filter((p) => p && p.ativo !== false && p.nome).slice(0, 8);
+    }, [store.atalhos, catalogo]);
+    const baseAtalhos = (catalogo.length ? catalogo : PRODUTOS_PDV).slice(0, 80);
     const encontradosAvancados = buscarProdutos(buscaAvancada, refino, { catalogo, soEstoque });
+    const sugestoes = useMemo(() => {
+        const q = busca.trim();
+        if (!q) {
+            return [];
+        }
+        const locais = buscarProdutos(q, "nao", { catalogo, soEstoque: false });
+        const mapa = new Map();
+        for (const produto of [...sugestoesApi, ...locais]) {
+            if (produto && produto.id != null && produto.nome) {
+                mapa.set(String(produto.id), produto);
+            }
+        }
+        return [...mapa.values()].slice(0, 12);
+    }, [busca, catalogo, sugestoesApi]);
+    const categoriasVitrine = useMemo(() => {
+        const nomes = new Set();
+        for (const produto of catalogo) {
+            const nome = String(produto?.grupo || produto?.categoria || "").trim();
+            if (nome) {
+                nomes.add(nome);
+            }
+        }
+        return [...nomes].sort((a, b) => a.localeCompare(b, "pt-BR")).slice(0, 6);
+    }, [catalogo]);
+    const vitrine = useMemo(() => {
+        let lista = catalogo.filter((p) => p && p.ativo !== false && p.nome);
+        if (categoriaPdv === "promocoes") {
+            lista = lista.filter(emPromocao);
+        } else if (categoriaPdv !== "todos") {
+            lista = lista.filter((p) => String(p.grupo || p.categoria || "") === categoriaPdv);
+        }
+        if (busca.trim()) {
+            lista = buscarProdutos(busca, "nao", { catalogo: lista });
+        }
+        return lista.slice(0, 8);
+    }, [catalogo, categoriaPdv, busca]);
     const liquido = Number((total - parseBr(desconto) + parseBr(frete)).toFixed(2));
     const pago = parseBr(recebido || numBr(liquido));
     const troco = Number(Math.max(0, pago - liquido).toFixed(2));
@@ -140,6 +264,12 @@ export default function PDV() {
         () => sugerirNatureza(cliente?.id ? cliente : CONSUMIDOR_FINAL, naturezas),
         [cliente, naturezas]
     );
+
+    function mostrarErro(motivo, clique) {
+        publicarErro(motivo, clique || ultimoClique.current);
+    }
+
+    mostrarErroRef.current = mostrarErro;
 
     useEffect(() => {
         document.title = "ERP Tem de Tudo - PDV";
@@ -150,16 +280,120 @@ export default function PDV() {
                     setCatalogo(lista);
                 }
             })
-            .catch(() => null);
+            .catch((erro) => mostrarErroRef.current(motivoErro(erro)));
+        const pararPrecos = ouvirPrecos(() => {
+            listarProdutos()
+                .then((lista) => {
+                    if (Array.isArray(lista) && lista.length) {
+                        setCatalogo(lista);
+                    }
+                })
+                .catch(() => {});
+        });
         listarClientes()
-            .then((lista) => setClientes((lista || []).filter((c) => c.ativo !== false)))
-            .catch(() => setClientes(clientesPdv()));
-        listarNaturezasOperacao().then(setNaturezas).catch(() => setNaturezas([]));
+            .then((lista) => {
+                const ativos = (lista || []).filter((c) => c.ativo !== false);
+                setClientes(ativos);
+                const contatoId = params.get("contato");
+                const contato = ativos.find((c) => String(c.id) === String(contatoId));
+                if (!contato) {
+                    return;
+                }
+                setCliente(contato);
+                if (contato.vendedor) {
+                    setEquipe([linhaVendedor({ funcId: contato.vendedorId || contato.vendedor, nome: contato.vendedor })]);
+                }
+            })
+            .catch((erro) => {
+                setClientes(clientesPdv());
+                mostrarErroRef.current(motivoErro(erro));
+            });
+        listarNaturezasOperacao()
+            .then(setNaturezas)
+            .catch((erro) => {
+                setNaturezas([]);
+                mostrarErroRef.current(motivoErro(erro));
+            });
         return () => {
             clearInterval(t);
             document.title = "ERP Tem de Tudo";
+            pararPrecos();
         };
     }, []);
+
+    useEffect(() => {
+        function noClique(ev) {
+            ultimoClique.current = descreverClique(ev);
+        }
+        document.addEventListener("click", noClique, true);
+        return () => {
+            document.removeEventListener("click", noClique, true);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (painel !== "crediario") {
+            return undefined;
+        }
+        let vivo = true;
+        listarContasReceber()
+            .then((lista) => {
+                if (vivo) {
+                    setContasCrediario((lista || []).filter(contaEmAberto));
+                }
+            })
+            .catch((erro) => mostrarErroRef.current(motivoErro(erro), ultimoClique.current));
+        return () => {
+            vivo = false;
+        };
+    }, [painel]);
+
+    useEffect(() => {
+        const q = busca.trim();
+        if (q.length < 1) {
+            setSugestoesApi([]);
+            setBuscandoProduto(false);
+            return undefined;
+        }
+        let vivo = true;
+        setBuscandoProduto(true);
+        const t = window.setTimeout(() => {
+            buscarProdutosApi(q)
+                .then((lista) => {
+                    if (!vivo) {
+                        return;
+                    }
+                    const achados = Array.isArray(lista) ? lista.filter((p) => p && p.nome) : [];
+                    setSugestoesApi(achados);
+                    if (achados.length) {
+                        setCatalogo((atual) => {
+                            const ids = new Set(atual.map((p) => String(p.id)));
+                            const novos = achados.filter((p) => !ids.has(String(p.id)));
+                            return novos.length ? [...novos, ...atual] : atual;
+                        });
+                    }
+                })
+                .catch((erro) => {
+                    if (!vivo) {
+                        return;
+                    }
+                    setSugestoesApi([]);
+                    const locais = buscarProdutos(q, "nao", { catalogo, soEstoque: false });
+                    if (!locais.length) {
+                        mostrarErroRef.current(motivoErro(erro));
+                    }
+                })
+                .finally(() => {
+                    if (vivo) {
+                        setBuscandoProduto(false);
+                    }
+                });
+        }, 180);
+        return () => {
+            vivo = false;
+            window.clearTimeout(t);
+        };
+    }, [busca]);
 
     useEffect(() => {
         const mapa = {
@@ -167,7 +401,10 @@ export default function PDV() {
             clientes: clienteRef,
             vendedores: vendedorRef,
             crediario: crediarioRef,
-            livre: livreRef
+            livre: livreRef,
+            item: itemQtdRef,
+            desconto: descontoRef,
+            obs: obsRef
         };
         const alvo = mapa[painel];
         const id = window.requestAnimationFrame(() => {
@@ -208,8 +445,17 @@ export default function PDV() {
             const alvo = ev.target;
             const digitando = alvo && ["INPUT", "TEXTAREA", "SELECT"].includes(alvo.tagName);
 
+            if (ev.shiftKey && k === "Enter") {
+                ev.preventDefault();
+                editarUltimo();
+                return;
+            }
             if (ctrl && k === "Enter") {
                 ev.preventDefault();
+                if (painel === "item") {
+                    salvarEdicao();
+                    return;
+                }
                 if (painel === "busca") {
                     if (encontradosAvancados[0]) {
                         adicionar(encontradosAvancados[0]);
@@ -257,24 +503,36 @@ export default function PDV() {
                 setPainel("livre");
                 return;
             }
-            if (k === "F9") {
+            if (k === "F11" || k === "F9") {
                 ev.preventDefault();
                 setPainel("vendedores");
                 return;
             }
-            if (k === "F8" || (ctrl && (k === "q" || k === "Q"))) {
+            if (k === "F10" || k === "F8" || (ctrl && (k === "q" || k === "Q"))) {
                 ev.preventDefault();
                 setPainel("clientes");
                 return;
             }
-            if (k === "F10") {
+            if (k === "F12") {
                 ev.preventDefault();
-                salvarDepois();
+                setPainel("desconto");
+                return;
+            }
+            if (k === "F3") {
+                ev.preventDefault();
+                setBuscaAvancada(busca);
+                setPainel("busca");
                 return;
             }
             if (k === "F2" && etapa === "checkout") {
                 ev.preventDefault();
                 concluir();
+                return;
+            }
+            if (k === "F2") {
+                ev.preventDefault();
+                buscaRef.current?.focus();
+                buscaRef.current?.select();
                 return;
             }
             if (etapa === "pagamento" && !digitando) {
@@ -301,6 +559,20 @@ export default function PDV() {
         setStore(gravarPdv(proximo));
     }
 
+    async function ligarCaixa(movimento) {
+        const clique = ultimoClique.current;
+        try {
+            await salvarMovimento({
+                origem: "PDV",
+                categoria: CATEGORIA,
+                ...movimento,
+                valor: Number(movimento.valor || 0)
+            });
+        } catch (erro) {
+            mostrarErro(motivoErro(erro), clique);
+        }
+    }
+
     function abrirCaixa() {
         const proximo = {
             ...store,
@@ -318,6 +590,11 @@ export default function PDV() {
         persist(proximo);
         setPainel(null);
         setEtapa("venda");
+        void ligarCaixa({
+            tipo: "ENTRADA",
+            valor: Number(store.caixa.trocoInicial || 0),
+            descricao: `Abertura de caixa PDV · ${OPERADOR_PADRAO.nome}`
+        });
     }
 
     function fecharCaixa() {
@@ -328,18 +605,30 @@ export default function PDV() {
         setPainel(null);
         setItens([]);
         setEtapa("venda");
+        void ligarCaixa({
+            tipo: "SAIDA",
+            valor: 0,
+            descricao: "Fechamento de caixa PDV"
+        });
     }
 
     function adicionar(produto, quantidade = parseBr(qtd) || 1) {
         if (!produto) {
             return;
         }
+        const semEstoque = produto.consomeEstoque !== false
+            && !String(produto.id).startsWith("livre")
+            && Number(produto.estoque || 0) <= 0;
+        if (semEstoque) {
+            publicarAlerta(`${produto.nome} está sem estoque. O item entra na venda, mas o lançamento no estoque pode falhar.`);
+        }
+        ultimoItemId.current = produto.id;
         setItens((atual) => {
             const idx = atual.findIndex((i) => i.id === produto.id);
             if (idx >= 0) {
                 return atual.map((i, n) => (n === idx ? { ...i, qtd: i.qtd + quantidade } : i));
             }
-            return [...atual, { id: produto.id, nome: produto.nome, qtd: quantidade, preco: precoVigente(produto), unidade: produto.unidade || "UN" }];
+            return [...atual, { id: produto.id, nome: produto.nome, qtd: quantidade, preco: precoVigente(produto), unidade: produto.unidade || "UN", sku: produto.sku || "" }];
         });
         setBusca("");
         setQtd("1,00");
@@ -347,15 +636,86 @@ export default function PDV() {
         buscaRef.current?.focus();
     }
 
-    function confirmarBusca(ev) {
-        ev?.preventDefault();
-        const lista = buscarProdutos(busca, "nao", { catalogo, soEstoque: false });
-        if (lista.length === 1) {
-            adicionar(lista[0]);
+    function abrirEdicao(item) {
+        if (!item) {
+            publicarAlerta("Não há produto na venda para editar.");
             return;
         }
-        setBuscaAvancada(busca);
-        setPainel("busca");
+        ultimoItemId.current = item.id;
+        setEditando({
+            id: item.id,
+            nome: item.nome || "",
+            qtd: numBr(item.qtd, 4),
+            preco: numBr(item.preco, 2),
+            unidade: item.unidade || "UN"
+        });
+        setPainel("item");
+    }
+
+    function editarUltimo() {
+        const atual = itens.find((i) => i.id === ultimoItemId.current) || itens[itens.length - 1];
+        abrirEdicao(atual);
+    }
+
+    function salvarEdicao(ev) {
+        ev?.preventDefault();
+        if (!editando) {
+            return;
+        }
+        const nome = editando.nome.trim();
+        const qtdNova = parseBr(editando.qtd);
+        const precoNovo = parseBr(editando.preco);
+        if (!nome) {
+            publicarAlerta("Informe a descrição do produto.");
+            return;
+        }
+        if (!qtdNova) {
+            publicarAlerta("Informe a quantidade do produto.");
+            return;
+        }
+        setItens((atual) => atual.map((i) => (
+            i.id === editando.id
+                ? { ...i, nome, qtd: qtdNova, preco: precoNovo }
+                : i
+        )));
+        setPainel(null);
+        buscaRef.current?.focus();
+    }
+
+    function removerEditando() {
+        if (!editando) {
+            return;
+        }
+        setItens((atual) => atual.filter((i) => i.id !== editando.id));
+        setEditando(null);
+        setPainel(null);
+        buscaRef.current?.focus();
+    }
+
+    function ajustarQtd(delta) {
+        const proxima = Math.max(1, (parseBr(qtd) || 1) + delta);
+        setQtd(numBr(proxima, 2));
+    }
+
+    function confirmarBusca(ev) {
+        ev?.preventDefault();
+        const q = busca.trim().toLowerCase();
+        if (!q) {
+            return;
+        }
+        const exato = sugestoes.find((p) => {
+            const sku = String(p.sku || "").toLowerCase();
+            const gtin = String(p.gtin || p.codigoBarras || "").toLowerCase();
+            return sku === q || gtin === q;
+        });
+        if (exato || sugestoes.length === 1) {
+            adicionar(exato || sugestoes[0]);
+            return;
+        }
+        if (!sugestoes.length && !buscandoProduto) {
+            setBuscaAvancada(busca);
+            setPainel("busca");
+        }
     }
 
     function continuar() {
@@ -396,15 +756,23 @@ export default function PDV() {
         });
     }
 
-    function concluir() {
+    async function concluir() {
         if (!itens.length) {
+            publicarAlerta("Não há itens na venda para finalizar.");
             return;
         }
+        if (forma === "crediario" && !clientePdvId()) {
+            publicarAlerta("Selecione um cliente cadastrado para vender no crediário.");
+            return;
+        }
+        const clique = ultimoClique.current;
+        const vendidos = itens;
+        const formaNome = FORMAS.find((f) => f.id === forma)?.nome || "Dinheiro";
         const { store: proximo, registro } = finalizarVendaPdv(store, {
             itens,
             total: liquido,
             forma,
-            formaNome: FORMAS.find((f) => f.id === forma)?.nome || "Dinheiro",
+            formaNome,
             recebido: pago,
             troco,
             vendedorId: equipe[0]?.funcId || "",
@@ -425,19 +793,66 @@ export default function PDV() {
         setVendaOk(registro);
         setEtapa("ok");
         setItens([]);
-        void salvarPedidoVenda({
-            cliente: cliente.nome,
-            clienteId: clientePdvId(),
-            origem: "PDV",
-            vendedor: rotuloVendedores,
-            vendedores: equipe,
-            poolPct,
-            valor: liquido,
-            status: "FATURADO",
-            estoqueLancado: false,
-            contasLancadas: true,
-            itens: itensDoCarrinho()
-        });
+        const falhas = [];
+        try {
+            const pedido = await salvarPedidoVenda({
+                cliente: cliente.nome,
+                clienteId: clientePdvId(),
+                origem: "PDV",
+                vendedor: rotuloVendedores,
+                vendedores: equipe,
+                poolPct,
+                valor: liquido,
+                status: "FATURADO",
+                formaPagamento: formaNome,
+                pagamento: formaNome,
+                estoqueLancado: false,
+                contasLancadas: false,
+                itens: itensDoCarrinho(vendidos),
+                observacoes: [observacao, parseBr(desconto) ? `Desconto ${brl(parseBr(desconto))}` : "", parseBr(frete) ? `Frete ${brl(parseBr(frete))}` : ""].filter(Boolean).join(" · ")
+            });
+            const pedidoId = idServidor(pedido?.id);
+            setPedidoVinculo({ id: pedido?.id || null, numero: pedido?.numero || registro.numero });
+            if (!pedidoId) {
+                falhas.push("O pedido ficou só neste computador. O servidor de vendas não confirmou a gravação.");
+            } else {
+                const estoque = await lancarEstoquePedido(pedidoId);
+                if (estoque?.ok === false) {
+                    falhas.push(estoque.mensagem || "O estoque da venda não foi lançado.");
+                }
+                if (forma === "crediario") {
+                    await salvarContaReceber({
+                        clienteId: clientePdvId(),
+                        descricao: `Venda PDV ${registro.numero} · ${cliente.nome}`,
+                        valor: liquido,
+                        vencimento: vencimentoCrediario(),
+                        status: "ABERTO",
+                        categoria: CATEGORIA
+                    });
+                } else {
+                    await registrarVendaCaixa({
+                        valor: liquido,
+                        descricao: `Venda PDV ${registro.numero} · ${formaNome} · ${cliente.nome}`,
+                        referenciaId: pedidoId
+                    });
+                }
+                await marcarFlagsPedido(pedidoId, { contasLancadas: true });
+                const atual = lerPdv();
+                persist({
+                    ...atual,
+                    vendas: (atual.vendas || []).map((v) => (
+                        String(v.numero) === String(registro.numero) && v.data === registro.data
+                            ? { ...v, pedidoId: pedido.id, pedidoNumero: pedido.numero }
+                            : v
+                    ))
+                });
+            }
+        } catch (erro) {
+            falhas.push(motivoErro(erro));
+        }
+        if (falhas.length) {
+            mostrarErro(falhas.join(" "), clique);
+        }
     }
 
     function novaVenda() {
@@ -449,6 +864,8 @@ export default function PDV() {
         setRecebido("");
         setDesconto("0,00");
         setFrete("0,00");
+        setObservacao("");
+        setPedidoVinculo(null);
     }
 
     function cancelarVenda() {
@@ -487,6 +904,7 @@ export default function PDV() {
     function lancarMovimento(tipo) {
         const valor = parseBr(movDraft.valor);
         if (!valor) {
+            publicarAlerta("Informe o valor da sangria ou do reforço.");
             return;
         }
         const item = { id: Date.now(), valor, obs: movDraft.obs, data: new Date().toISOString() };
@@ -500,10 +918,16 @@ export default function PDV() {
         setMovDraft({ valor: "", obs: "" });
         setPainel("caixa");
         setCaixaTab("mov");
+        void ligarCaixa({
+            tipo: tipo === "sangria" ? "SAIDA" : "ENTRADA",
+            valor,
+            descricao: movDraft.obs || (tipo === "sangria" ? "Sangria de caixa PDV" : "Reforço de caixa PDV")
+        });
     }
 
     function itemLivre() {
         if (!livre.nome.trim() || !parseBr(livre.preco)) {
+            publicarAlerta("Informe a descrição e o preço do item não cadastrado.");
             return;
         }
         adicionar({
@@ -524,8 +948,8 @@ export default function PDV() {
         return id > 0 ? id : null;
     }
 
-    function itensDoCarrinho() {
-        return itens.map((item) => ({
+    function itensDoCarrinho(lista = itens) {
+        return lista.map((item) => ({
             sku: item.sku || item.id,
             descricao: item.nome,
             produtoId: item.id,
@@ -564,8 +988,8 @@ export default function PDV() {
             cancelarVenda();
             setAviso(`orçamento ${salvo.numero || ""} gerado`);
             navigate(`${ROTAS.PEDIDO_VENDA}?filtro=todas#list`);
-        } catch {
-            setAviso("não foi possível gerar o orçamento");
+        } catch (erro) {
+            mostrarErro(motivoErro(erro));
         }
     }
 
@@ -591,16 +1015,70 @@ export default function PDV() {
             cancelarVenda();
             setAviso(`OS ${salvo.numero || salvo.id} gerada`);
             navigate({ pathname: ROTAS.ORDEM_SERVICO, hash: `edit/${salvo.id}` });
-        } catch {
-            setAviso("não foi possível gerar a OS");
+        } catch (erro) {
+            mostrarErro(motivoErro(erro));
+        }
+    }
+
+    async function abrirPreVendas() {
+        setPainel("prevenda");
+        try {
+            const lista = await listarPedidosVenda();
+            setPreVendas((lista || []).filter((p) => String(p.status || "").toUpperCase() === "ORCAMENTO"));
+        } catch (erro) {
+            mostrarErro(motivoErro(erro));
+        }
+    }
+
+    function aplicarPreVenda(pedido) {
+        const linhas = (pedido.itens || []).map((item) => ({
+            id: item.produtoId || item.sku || item.codigo || `prev-${item.descricao}`,
+            nome: item.descricao || item.nome || "Item",
+            qtd: Number(item.quantidade || item.qtd || 1),
+            preco: Number(item.valorUnitario || item.preco || 0),
+            unidade: item.unidade || "UN",
+            sku: item.sku || ""
+        })).filter((item) => item.nome);
+        if (!linhas.length) {
+            publicarAlerta("Esse orçamento não tem itens para faturar.");
+            return;
+        }
+        setItens(linhas);
+        ultimoItemId.current = linhas[linhas.length - 1].id;
+        if (pedido.cliente) {
+            setCliente({ id: pedido.clienteId, nome: pedido.cliente });
+        }
+        setPainel(null);
+        setAviso(`pré-venda ${pedido.numero || ""} carregada no PDV`);
+    }
+
+    async function baixarCrediario(conta) {
+        const clique = ultimoClique.current;
+        try {
+            await receberConta(conta.id);
+            setContasCrediario((atual) => atual.filter((c) => c.id !== conta.id));
+            setCliente(clientes.find((c) => String(c.id) === String(conta.clienteId)) || cliente);
+            setAviso(`crediário ${conta.descricao || conta.id} recebido`);
+            setPainel(null);
+        } catch (erro) {
+            mostrarErro(motivoErro(erro), clique);
         }
     }
 
     const sangriaTotal = (caixa.sangrias || []).reduce((s, x) => s + x.valor, 0);
     const reforcoTotal = (caixa.reforcos || []).reduce((s, x) => s + x.valor, 0);
 
+    const contasVisiveis = contasCrediario.filter((c) => {
+        const q = buscaCrediario.trim().toLowerCase();
+        if (!q) {
+            return true;
+        }
+        const dono = clientes.find((cli) => String(cli.id) === String(c.clienteId));
+        return [c.id, c.descricao, c.status, c.clienteId, dono?.nome, dono?.fantasia].join(" ").toLowerCase().includes(q);
+    });
+
     return (
-        <div className="pdv-page">
+        <div className="pdv-page" ref={pageRef}>
             {aviso ? <div className="pdv-aviso">{aviso}</div> : null}
 
             {etapa === "ok" && vendaOk ? (
@@ -610,10 +1088,9 @@ export default function PDV() {
                     <p>total recebido em {String(vendaOk.formaNome || "dinheiro").toLowerCase()} {brl(vendaOk.recebido)}</p>
                     <div className="pdv-done-grid">
                         <button type="button" onClick={imprimir}><Printer size={18} /><br />Imprimir recibo<br /><small>CTRL+1</small></button>
-                        <button type="button" onClick={imprimir}><Receipt size={18} /><br />Imprimir recibo para troca<br /><small>CTRL+2</small></button>
-                        <button type="button" onClick={() => setAviso("compartilhado com o vendedor do RH")}><Share2 size={18} /><br />Compartilhar<br /><small>CTRL+3</small></button>
-                        <button type="button" onClick={imprimir}><Printer size={18} /><br />Imprimir NFC-e<br /><small>CTRL+4</small></button>
-                        <button type="button" onClick={() => setAviso("NFe gerada no rascunho")}><Smartphone size={18} /><br />Gerar NFe<br /><small>CTRL+5</small></button>
+                        <button type="button" onClick={() => navigate(`${ROTAS.PEDIDO_VENDA}?filtro=todas#list`)}><Receipt size={18} /><br />Abrir pedido de venda<br /><small>{pedidoVinculo?.numero || "vendas"}</small></button>
+                        <button type="button" onClick={() => navigate("/financeiro")}><Share2 size={18} /><br />Abrir caixa<br /><small>financeiro</small></button>
+                        <button type="button" onClick={() => navigate(ROTAS.CONTAS_RECEBER)}><Smartphone size={18} /><br />Contas a receber<br /><small>crediário</small></button>
                     </div>
                     <button type="button" className="pdv-btn" onClick={novaVenda}>iniciar outra venda<small className="pdv-kbd">CTRL+ENTER</small></button>
                     <button type="button" className="pdv-link" onClick={novaVenda}>tudo pronto ESC</button>
@@ -655,10 +1132,10 @@ export default function PDV() {
                             </div>
                             <p className="pdv-muted">{itens.length} item, {numBr(quant, 4)} unidade · {brl(total)}</p>
                             {itens.map((i) => (
-                                <div key={i.id} className="pdv-item-mini">
+                                <button key={i.id} type="button" className="pdv-item-mini" onClick={() => abrirEdicao(i)}>
                                     <strong>{i.nome}</strong>
                                     <p className="pdv-muted">{numBr(i.qtd, 4)} · {brl(i.preco)}</p>
-                                </div>
+                                </button>
                             ))}
                         </div>
                         <div>
@@ -704,116 +1181,169 @@ export default function PDV() {
 
             {caixa.aberto && (etapa === "venda" || etapa === "pagamento") ? (
                 <>
-                    <header className="pdv-head">
-                        <h1>PDV</h1>
+                    <header className="pdv-head pdv-head-loja">
+                        <div className="pdv-marca">
+                            <span className="pdv-marca-ico"><ShoppingCart size={18} /></span>
+                            <h1>PDV</h1>
+                            <span className="pdv-caixa-pill">Caixa aberto • {hora(new Date(caixa.abertoEm))}</span>
+                        </div>
                         <div className="pdv-head-acoes">
-                            <button type="button" className="pdv-head-link" onClick={() => setPainel("caixa")}>
-                                detalhes do caixa
+                            <button type="button" className="pdv-chip-btn" onClick={() => setPainel("caixa")}>
+                                Detalhes do caixa
                                 <small>CTRL+Y</small>
                             </button>
-                            <button type="button" className="pdv-head-link" onClick={() => { setBuscaAvancada(busca); setPainel("busca"); }}>
-                                busca avançada
+                            <button type="button" className="pdv-chip-btn" onClick={() => { setBuscaAvancada(busca); setPainel("busca"); }}>
+                                <Search size={15} />
+                                Busca avançada
                                 <small>CTRL+B</small>
                             </button>
-                            <button type="button" className="pdv-mais" onClick={() => setPainel(painel === "acoes" ? null : "acoes")}>mais ações</button>
+                            <button type="button" className="pdv-mais" onClick={() => setPainel(painel === "acoes" ? null : "acoes")}>
+                                Mais ações
+                                <ChevronDown size={16} />
+                            </button>
                         </div>
                     </header>
-                    <form className="pdv-busca-row" onSubmit={confirmarBusca}>
-                        <div className="pdv-field">
-                            <label>Produto</label>
+                    <form className="pdv-busca-row pdv-busca-loja" onSubmit={confirmarBusca}>
+                        <div className="pdv-field is-busca">
                             <div className="pdv-field-busca">
                                 <Search size={16} />
                                 <input
                                     ref={buscaRef}
                                     value={busca}
                                     onChange={(e) => setBusca(e.target.value)}
-                                    placeholder="Pesquise por descrição, código (SKU) ou GTIN"
+                                    placeholder="Pesquise por descrição, código (SKU) ou GTIN..."
                                     autoComplete="off"
                                 />
                             </div>
+                            {busca.trim() ? (
+                                <div className="pdv-sugestoes" role="listbox">
+                                    {sugestoes.map((p) => (
+                                        <button key={p.id} type="button" onClick={() => adicionar(p)}>
+                                            <strong>{p.nome}</strong>
+                                            <span>{p.sku ? `${p.sku} · ` : ""}{brl(precoVigente(p))}</span>
+                                        </button>
+                                    ))}
+                                    {!sugestoes.length ? (
+                                        <p>{buscandoProduto ? "Buscando produtos…" : `Nenhum produto encontrado para “${busca.trim()}”`}</p>
+                                    ) : null}
+                                </div>
+                            ) : null}
                         </div>
-                        <div className="pdv-field">
-                            <label>Quantidade</label>
-                            <input value={qtd} onChange={(e) => setQtd(e.target.value)} />
+                        <div className="pdv-qtd-step">
+                            <input aria-label="Quantidade" value={qtd} onChange={(e) => setQtd(e.target.value)} />
+                            <span>
+                                <button type="button" aria-label="aumentar quantidade" onClick={() => ajustarQtd(1)}><ChevronUp size={14} /></button>
+                                <button type="button" aria-label="diminuir quantidade" onClick={() => ajustarQtd(-1)}><ChevronDown size={14} /></button>
+                            </span>
                         </div>
                     </form>
-                    <p className="pdv-hint">Experimente digitar sem clicar no campo de busca ou usar o leitor de código de barras</p>
-
-                    {itens.length ? (
-                        <div className="pdv-cart">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Quant.</th>
-                                        <th>Preço un.</th>
-                                        <th>Preço total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {itens.map((i) => (
-                                        <tr key={i.id}>
-                                            <td>{i.nome}</td>
-                                            <td>{numBr(i.qtd, 4)} {i.unidade}</td>
-                                            <td>{numBr(i.preco, 5)}</td>
-                                            <td>{numBr(i.qtd * i.preco)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <p className="pdv-muted">shift + enter para abrir a edição do último produto adicionado</p>
-                        </div>
-                    ) : (
-                        <div className="pdv-centro is-aberto">
-                            <div className="pdv-relogio-wrap">
-                                <div className="pdv-relogio">{hora(agora)}</div>
-                                <div className="pdv-relogio-meta">
-                                    <div className="pdv-data">{dataExtenso(agora)}</div>
-                                    <div className="pdv-status">caixa aberto às {hora(new Date(caixa.abertoEm))}</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="pdv-atalhos">
-                        <h3>Atalhos (toque para adicionar à venda)</h3>
-                        <div className="pdv-atalho-grid">
-                            {atalhos.map((p) => (
-                                <button key={p.id} type="button" className="pdv-atalho" onClick={() => adicionar(p)}>
+                    <div className="pdv-cats">
+                        <button type="button" className={categoriaPdv === "todos" ? "is-on" : ""} onClick={() => setCategoriaPdv("todos")}>Todos</button>
+                        {categoriasVitrine.map((nome) => (
+                            <button key={nome} type="button" className={categoriaPdv === nome ? "is-on" : ""} onClick={() => setCategoriaPdv(nome)}>{nome}</button>
+                        ))}
+                        <button type="button" className={categoriaPdv === "promocoes" ? "is-on" : ""} onClick={() => setCategoriaPdv("promocoes")}>Promoções</button>
+                    </div>
+                    <div className="pdv-palco">
+                    <div className="pdv-vitrine">
+                        {vitrine.map((p) => {
+                            const off = emPromocao(p) ? Math.round(pctOff(p.preco, p.precoPromocional) || Number(p.descontoPercentual) || 0) : 0;
+                            return (
+                                <article key={p.id} className="pdv-card">
+                                    <div className="pdv-card-midia">
+                                        {off > 0 ? <em>{off}% OFF</em> : null}
+                                        <FotoProduto produto={p} />
+                                    </div>
                                     <strong>{p.nome}</strong>
-                                    <span>{brl(precoVigente(p))}</span>
-                                </button>
-                            ))}
-                            <button type="button" className="pdv-atalho is-add" onClick={() => setPainel("atalhos")}>+ configurar atalhos</button>
-                        </div>
+                                    <small>{p.sku ? `SKU ${p.sku}` : "sem código"} · est. {Number(p.estoque || 0)}</small>
+                                    <div className="pdv-card-preco">
+                                        <b>{brl(precoVigente(p))}</b>
+                                        <button type="button" aria-label={`adicionar ${p.nome}`} onClick={() => adicionar(p)}><Plus size={16} /></button>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                        {!vitrine.length ? <p className="pdv-muted">Nenhum produto nesta categoria.</p> : null}
                     </div>
 
-                    <footer className="pdv-foot">
-                        <div className="pdv-foot-sel">
-                            <label>Vendedor</label>
-                            <button type="button" onClick={() => setPainel("vendedores")}>
-                                <span>{rotuloVendedores}</span>
-                                <small>F9</small>
-                            </button>
+                    <aside className="pdv-sacola">
+                        <header>
+                            <strong>Carrinho</strong>
+                            <span>{cliente.nome}</span>
+                        </header>
+                        <div className="pdv-sacola-lista">
+                            {itens.length ? itens.map((i) => (
+                                <button
+                                    key={i.id}
+                                    type="button"
+                                    className={editando?.id === i.id && painel === "item" ? "is-on" : ""}
+                                    onClick={() => abrirEdicao(i)}
+                                >
+                                    <strong>{i.nome}</strong>
+                                    <small>{numBr(i.qtd, 2)} {i.unidade} · {brl(i.preco)}</small>
+                                    <b>{brl(i.qtd * i.preco)}</b>
+                                </button>
+                            )) : (
+                                <div className="pdv-vazio">
+                                    <div className="pdv-vazio-arte" aria-hidden="true"><ShoppingCart size={32} /></div>
+                                    <strong>Adicione produtos ao carrinho</strong>
+                                    <p>Clique no + do card ou leia o código de barras.</p>
+                                </div>
+                            )}
                         </div>
-                        <div className="pdv-foot-sel">
-                            <label>Cliente</label>
-                            <button type="button" onClick={() => setPainel("clientes")}>
-                                <span>{cliente.nome}</span>
-                                <small>{sugestaoFiscal.cfop ? `CFOP ${sugestaoFiscal.cfop}` : "F8"}</small>
-                            </button>
-                        </div>
+                        <footer>
+                            <p>Desconto {brl(parseBr(desconto))} · {itens.length} item</p>
+                            <strong>{brl(liquido || total)}</strong>
+                            <button type="button" className="pdv-btn" disabled={!itens.length} onClick={continuar}>Continuar para recebimento</button>
+                            <small>Clique no item para editar · Shift+Enter no último</small>
+                        </footer>
+                    </aside>
+                    </div>
+                    <div className="pdv-acoes-rapidas">
+                        <button type="button" onClick={() => { setBuscaAvancada(busca); setPainel("busca"); }}>
+                            <Search size={16} />
+                            Buscar produto
+                            <small>CTRL + B</small>
+                        </button>
+                        <button type="button" onClick={() => { buscaRef.current?.focus(); buscaRef.current?.select(); }}>
+                            <Barcode size={16} />
+                            Ler código de barras
+                            <small>F2</small>
+                        </button>
+                        <button type="button" onClick={() => { setBuscaAvancada(""); setPainel("busca"); }}>
+                            <List size={16} />
+                            Selecionar da lista
+                            <small>F3</small>
+                        </button>
+                    </div>
+                    <footer className="pdv-atalhos-venda">
+                        <span>Atalhos da venda</span>
+                        <button type="button" onClick={() => setPainel("clientes")}>
+                            <UserRound size={16} />
+                            <em>Cliente<small>F10</small></em>
+                        </button>
+                        <button type="button" onClick={() => setPainel("vendedores")}>
+                            <UserRound size={16} />
+                            <em>Vendedor<small>F11</small></em>
+                        </button>
+                        <button type="button" onClick={() => setPainel("desconto")}>
+                            <Percent size={16} />
+                            <em>Desconto<small>F12</small></em>
+                        </button>
+                        <button type="button" onClick={() => setPainel("obs")}>
+                            <MessageSquare size={16} />
+                            <em>Observação</em>
+                        </button>
+                        <button type="button" onClick={() => setPainel("atalhos")}>
+                            <Star size={16} />
+                            <em>Atalhos personalizados</em>
+                        </button>
                         {itens.length ? (
-                            <div className="pdv-foot-acoes">
-                                <button type="button" className="pdv-btn" onClick={continuar}>continuar<small className="pdv-kbd">CTRL+ENTER</small></button>
-                                <button type="button" className="pdv-link" onClick={salvarDepois}>salvar para depois F10</button>
-                                <button type="button" className="pdv-link" onClick={cancelarVenda}>cancelar venda ESC</button>
-                            </div>
+                            <button type="button" className="pdv-btn pdv-ir-pagamento" onClick={continuar}>
+                                Continuar
+                                <small>{brl(liquido || total)} · CTRL+ENTER</small>
+                            </button>
                         ) : null}
-                        <div className="pdv-foot-totais">
-                            itens: {itens.length} · quant: {numBr(quant, 0)}
-                            <strong>total da venda: {brl(total)}</strong>
-                        </div>
                     </footer>
                 </>
             ) : null}
@@ -825,15 +1355,15 @@ export default function PDV() {
                         ["usar item não cadastrado", "CTRL+K", () => setPainel("livre")],
                         ["imprimir última venda", "", () => { setPainel(null); imprimir(); }],
                         ["informar cliente", "F8", () => setPainel("clientes")],
-                        ["gerar vale-presente", "", () => { setPainel(null); setAviso("vale-presente em breve"); }],
-                        ["gestão de vale-presente", "", () => { setPainel(null); setAviso("gestão de vale-presente em breve"); }],
-                        ["selecionar lista de preços", "CTRL+G", () => { setPainel(null); setAviso("lista padrão"); }],
+                        ["lista de preços", "", () => navigate(ROTAS.PRODUTOS)],
+                        ["pedidos de venda", "", () => navigate(ROTAS.PEDIDO_VENDA)],
+                        ["caixa financeiro", "", () => navigate("/financeiro")],
+                        ["contas a receber", "", () => navigate(ROTAS.CONTAS_RECEBER)],
                         ["devolver produtos", "", () => { setPainel("caixa"); setCaixaTab("dev"); }],
                         ["orçamento", "", gerarOrcamento],
                         ["gerar OS", "", gerarOs],
-                        ["faturar pré-venda", "", () => { setPainel(null); setAviso("sem pré-venda aberta"); }],
+                        ["faturar pré-venda", "", abrirPreVendas],
                         ["receber crediário", "", () => setPainel("crediario")],
-                        ["campanhas de cashback", "", () => { setPainel(null); setAviso("sem campanha ativa"); }],
                         ["mostrar atalhos", "CTRL+?", () => { setPainel(null); setAviso("F8 cliente · F9 vendedor · CTRL+Y caixa"); }],
                         ["detalhes do caixa", "CTRL+Y", () => setPainel("caixa")],
                         ["lançar sangria de caixa", "", () => { setPainel("sangria"); setCaixaTab("mov"); }],
@@ -902,6 +1432,7 @@ export default function PDV() {
                     ) : null}
                     {caixaTab === "dev" ? (
                         <div className="pdv-lista">
+                            <button type="button" className="pdv-link" onClick={() => navigate(ROTAS.DEVOLUCOES)}>abrir devoluções de venda</button>
                             <label className="pdv-drawer-busca">
                                 <Search size={16} />
                                 <input
@@ -911,6 +1442,12 @@ export default function PDV() {
                                     placeholder="Pesquise pelo cliente, nº do pedido ou chave de acesso"
                                 />
                             </label>
+                            {(store.caixa?.devolucoes || []).length ? (store.caixa.devolucoes || []).map((d) => (
+                                <button key={d.numero} type="button" onClick={() => navigate(`${ROTAS.DEVOLUCOES}?q=${encodeURIComponent(d.numero)}`)}>
+                                    {d.numero} · {d.cliente || "Consumidor final"}
+                                    <small>{brl(d.valor)}</small>
+                                </button>
+                            )) : null}
                             {(store.vendas || []).filter((v) => {
                                 if (v.rascunho) {
                                     return false;
@@ -919,9 +1456,9 @@ export default function PDV() {
                                 if (!q) {
                                     return true;
                                 }
-                                return [v.numero, v.clienteNome, v.vendedorNome].join(" ").toLowerCase().includes(q);
+                                return [v.numero, v.clienteNome, v.vendedorNome, v.pedidoNumero].join(" ").toLowerCase().includes(q);
                             }).length === 0 ? (
-                                <p>Sem devoluções de vendas</p>
+                                <p>Nenhuma venda deste caixa para devolver</p>
                             ) : (store.vendas || []).filter((v) => {
                                 if (v.rascunho) {
                                     return false;
@@ -930,10 +1467,14 @@ export default function PDV() {
                                 if (!q) {
                                     return true;
                                 }
-                                return [v.numero, v.clienteNome, v.vendedorNome].join(" ").toLowerCase().includes(q);
+                                return [v.numero, v.clienteNome, v.vendedorNome, v.pedidoNumero].join(" ").toLowerCase().includes(q);
                             }).map((v) => (
-                                <button key={v.numero + String(v.data)} type="button" onClick={() => setAviso(`devolução do pedido ${v.numero}`)}>
-                                    Pedido {v.numero} · {v.clienteNome || "Consumidor final"}
+                                <button
+                                    key={v.numero + String(v.data)}
+                                    type="button"
+                                    onClick={() => navigate(v.pedidoId ? `${ROTAS.DEVOLUCOES}?pedido=${v.pedidoId}` : `${ROTAS.DEVOLUCOES}?q=${encodeURIComponent(v.clienteNome || v.numero || "")}`)}
+                                >
+                                    Devolver pedido {v.pedidoNumero || v.numero} · {v.clienteNome || "Consumidor final"}
                                     <small>{brl(v.total)}</small>
                                 </button>
                             ))}
@@ -1019,7 +1560,7 @@ export default function PDV() {
                     </label>
                     <div className="pdv-lista">
                         <button type="button" onClick={() => { setEquipe([]); setPainel(null); setFiltroVendedor(""); }}>sem vendedor</button>
-                        {vendedores.filter((v) => v.nome.toLowerCase().includes(filtroVendedor.trim().toLowerCase())).map((v) => (
+                        {vendedores.filter((v) => String(v.nome || "").toLowerCase().includes(filtroVendedor.trim().toLowerCase())).map((v) => (
                             <button
                                 key={v.id}
                                 type="button"
@@ -1064,6 +1605,27 @@ export default function PDV() {
                 </aside>
             ) : null}
 
+            {painel === "prevenda" ? (
+                <aside className="pdv-drawer">
+                    <div className="pdv-drawer-head">
+                        <div>
+                            <h2>Faturar pré-venda</h2>
+                            <p>Orçamentos do pedido de venda. O clique carrega os itens neste caixa.</p>
+                        </div>
+                        <button type="button" className="pdv-fechar" onClick={() => setPainel(null)}>fechar ×</button>
+                    </div>
+                    <div className="pdv-lista">
+                        {!preVendas.length ? <p>Nenhum orçamento em aberto.</p> : null}
+                        {preVendas.map((p) => (
+                            <button key={p.id || p.numero} type="button" onClick={() => aplicarPreVenda(p)}>
+                                {p.numero || "Orçamento"} · {p.cliente || "Consumidor final"}
+                                <small>{brl(p.valor)} · {(p.itens || []).length} item</small>
+                            </button>
+                        ))}
+                    </div>
+                </aside>
+            ) : null}
+
             {painel === "crediario" ? (
                 <aside className="pdv-drawer">
                     <div className="pdv-drawer-head">
@@ -1080,17 +1642,53 @@ export default function PDV() {
                         />
                     </label>
                     <div className="pdv-lista">
-                        {clientes.filter((c) => [c.nome, c.fantasia, c.cpf, c.cnpj, c.documento].join(" ").toLowerCase().includes(buscaCrediario.trim().toLowerCase())).map((c) => (
-                            <button key={c.id} type="button" onClick={() => { setCliente(c); setAviso(`crediário de ${c.nome}`); setPainel(null); }}>
-                                {c.nome}
-                                <small>{c.fantasia || c.cpf || c.cnpj || ""}</small>
-                            </button>
-                        ))}
+                        {contasVisiveis.length === 0 ? <p>Nenhum crediário em aberto para esta busca.</p> : null}
+                        {contasVisiveis.map((c) => {
+                            const dono = clientes.find((cli) => String(cli.id) === String(c.clienteId));
+                            return (
+                                <button key={c.id} type="button" onClick={() => baixarCrediario(c)}>
+                                    {dono?.nome || c.descricao || `Conta ${c.id}`}
+                                    <small>{c.descricao || "Conta a receber"} · {brl(c.valor)} · {c.status || "ABERTO"}</small>
+                                </button>
+                            );
+                        })}
                     </div>
                     <div className="pdv-drawer-foot">
-                        <button type="button" className="pdv-btn" onClick={() => setAviso("informe o cliente para baixar o crediário")}>baixar por valor</button>
                         <button type="button" className="pdv-link" onClick={() => setPainel(null)}>cancelar ESC</button>
                     </div>
+                </aside>
+            ) : null}
+
+            {painel === "item" && editando ? (
+                <aside className="pdv-drawer">
+                    <div className="pdv-drawer-head">
+                        <div>
+                            <h2>Editar produto</h2>
+                            <p>Altere descrição, quantidade ou preço. Shift+Enter abre o último item.</p>
+                        </div>
+                        <button type="button" className="pdv-fechar" onClick={() => setPainel(null)}>fechar ×</button>
+                    </div>
+                    <form onSubmit={salvarEdicao}>
+                        <div className="pdv-field">
+                            <label>Descrição</label>
+                            <input value={editando.nome} onChange={(e) => setEditando({ ...editando, nome: e.target.value })} />
+                        </div>
+                        <div className="pdv-chk">
+                            <div className="pdv-field">
+                                <label>Quantidade</label>
+                                <input ref={itemQtdRef} value={editando.qtd} onChange={(e) => setEditando({ ...editando, qtd: e.target.value })} />
+                            </div>
+                            <div className="pdv-field">
+                                <label>Preço un.</label>
+                                <input value={editando.preco} onChange={(e) => setEditando({ ...editando, preco: e.target.value })} />
+                            </div>
+                        </div>
+                        <p className="pdv-muted">total da linha {brl(parseBr(editando.qtd) * parseBr(editando.preco))}</p>
+                        <div className="pdv-drawer-foot">
+                            <button type="submit" className="pdv-btn">salvar</button>
+                            <button type="button" className="pdv-link" onClick={removerEditando}>remover da venda</button>
+                        </div>
+                    </form>
                 </aside>
             ) : null}
 
@@ -1115,8 +1713,8 @@ export default function PDV() {
                         <button type="button" className="pdv-fechar" onClick={() => setPainel(null)}>fechar ×</button>
                     </div>
                     <div className="pdv-lista">
-                        {PRODUTOS_PDV.map((p) => {
-                            const on = store.atalhos.includes(p.id);
+                        {baseAtalhos.map((p) => {
+                            const on = (store.atalhos || []).some((id) => String(id) === String(p.id));
                             return (
                                 <button
                                     key={p.id}
@@ -1124,7 +1722,9 @@ export default function PDV() {
                                     className={on ? "is-on" : ""}
                                     onClick={() => persist({
                                         ...store,
-                                        atalhos: on ? store.atalhos.filter((id) => id !== p.id) : [...store.atalhos, p.id]
+                                        atalhos: on
+                                            ? (store.atalhos || []).filter((id) => String(id) !== String(p.id))
+                                            : [...(store.atalhos || []), p.id]
                                     })}
                                 >
                                     {p.nome}
@@ -1136,22 +1736,54 @@ export default function PDV() {
                 </aside>
             ) : null}
 
-            {etapa === "pagamento" ? (
+            {painel === "desconto" ? (
                 <aside className="pdv-drawer">
                     <div className="pdv-drawer-head">
-                        <div>
-                            <h2>Escolha uma forma de recebimento</h2>
-                            <p>total da venda {brl(total)}</p>
-                        </div>
-                        <button type="button" className="pdv-fechar" onClick={() => setEtapa("venda")}>fechar ×</button>
+                        <h2>Desconto</h2>
+                        <button type="button" className="pdv-fechar" onClick={() => setPainel(null)}>fechar ×</button>
                     </div>
+                    <div className="pdv-field">
+                        <label>Valor do desconto</label>
+                        <input ref={descontoRef} value={desconto} onChange={(e) => setDesconto(e.target.value)} />
+                    </div>
+                    <div className="pdv-drawer-foot">
+                        <button type="button" className="pdv-btn" onClick={() => setPainel(null)}>aplicar</button>
+                    </div>
+                </aside>
+            ) : null}
+
+            {painel === "obs" ? (
+                <aside className="pdv-drawer">
+                    <div className="pdv-drawer-head">
+                        <h2>Observação</h2>
+                        <button type="button" className="pdv-fechar" onClick={() => setPainel(null)}>fechar ×</button>
+                    </div>
+                    <div className="pdv-field">
+                        <label>Anotação da venda</label>
+                        <textarea ref={obsRef} rows={4} value={observacao} onChange={(e) => setObservacao(e.target.value)} />
+                    </div>
+                    <div className="pdv-drawer-foot">
+                        <button type="button" className="pdv-btn" onClick={() => setPainel(null)}>salvar</button>
+                    </div>
+                </aside>
+            ) : null}
+
+            {etapa === "pagamento" ? (
+                <aside className="pdv-drawer pdv-pay">
+                    <div className="pdv-drawer-head">
+                        <h2>Escolha uma forma de recebimento</h2>
+                        <button type="button" className="pdv-pay-x" aria-label="fechar" onClick={() => setEtapa("venda")}>×</button>
+                    </div>
+                    <p className="pdv-pay-total">Total da venda: <strong>{brl(liquido || total)}</strong></p>
                     <div className="pdv-formas">
                         {FORMAS.map((f) => {
                             const Icon = ICONE_FORMA[f.id];
+                            const ativo = forma === f.id;
                             return (
-                                <button key={f.id} type="button" className={`pdv-forma${forma === f.id ? " is-on" : ""}`} onClick={() => setForma(f.id)}>
+                                <button key={f.id} type="button" className={`pdv-forma${ativo ? " is-on" : ""}${f.id === "link" ? " is-full" : ""}`} onClick={() => setForma(f.id)}>
                                     <b>{f.atalho}</b>
-                                    {Icon ? <Icon size={18} /> : null} {f.nome}
+                                    <span>{Icon ? <Icon size={18} /> : null} {f.nome}</span>
+                                    {ativo ? <Check size={16} /> : null}
                                 </button>
                             );
                         })}
@@ -1162,14 +1794,22 @@ export default function PDV() {
                             checked={store.skipPagamento}
                             onChange={(e) => persist({ ...store, skipPagamento: e.target.checked })}
                         />
-                        não exibir esta janela novamente
+                        Não exibir esta janela novamente
                     </label>
-                    <div className="pdv-drawer-foot">
-                        <button type="button" className="pdv-btn" onClick={irCheckout}>continuar<small className="pdv-kbd">CTRL+ENTER</small></button>
-                        <button type="button" className="pdv-link" onClick={() => setEtapa("venda")}>cancelar ESC</button>
+                    <div className="pdv-pay-foot">
+                        <button type="button" className="pdv-btn" onClick={irCheckout}>
+                            <ArrowRight size={16} />
+                            Continuar
+                            <small>CTRL + ENTER</small>
+                        </button>
+                        <button type="button" className="pdv-pay-cancel" onClick={() => setEtapa("venda")}>
+                            Cancelar
+                            <small>ESC</small>
+                        </button>
                     </div>
                 </aside>
             ) : null}
         </div>
     );
 }
+

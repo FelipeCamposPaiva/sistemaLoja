@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -93,6 +95,12 @@ public class SecurityConfig {
 
                                         "/api/whatsapp/webhook",
 
+                                        "/api/publico/maquinas/**",
+
+                                        "/api/publico/vitrine",
+
+                                        "/api/publico/vitrine/**",
+
                                         "/uploads/**",
 
                                         "/h2-console/**",
@@ -102,6 +110,8 @@ public class SecurityConfig {
                                         "/v3/api-docs/**"
 
                                 ).permitAll()
+
+                                .requestMatchers(SecurityConfig::paginaDoSistema).permitAll()
 
                                 /*
                                  * DEMAIS ROTAS
@@ -153,6 +163,17 @@ public class SecurityConfig {
 
         return configuration.getAuthenticationManager();
 
+    }
+
+    private static boolean paginaDoSistema(HttpServletRequest request) {
+        String metodo = request.getMethod();
+        if (!"GET".equalsIgnoreCase(metodo) && !"HEAD".equalsIgnoreCase(metodo)) {
+            return false;
+        }
+        String caminho = request.getRequestURI();
+        return caminho != null
+                && !"/popular".equals(caminho)
+                && !caminho.startsWith("/api");
     }
 
 }

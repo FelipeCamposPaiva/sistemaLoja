@@ -72,7 +72,7 @@ export default function PedidoEcommerce() {
                 </tbody>
             </table>
             <p className="fer-ajuda">
-                A lista completa, com separação e expedição, está em <Link to={`${ROTAS.PEDIDO_VENDA}#list`}>Pedidos de Venda</Link>.
+                A lista completa está em <Link to={`${ROTAS.PEDIDO_VENDA}#list`}>Pedidos de Venda</Link>, a conferência em <Link to={ROTAS.SEPARACAO}>Separação</Link> e o despacho em <Link to={ROTAS.EXPEDICAO}>Expedição</Link>.
             </p>
         </div>
     );

@@ -1,13 +1,42 @@
 export const MAQUINAS_KEY = "erp-maquinas-v1";
 
-export const TIPOS_MAQUINA = [
-    "Impressora",
-    "Plotter",
-    "Impressora 3D",
-    "Laser",
-    "Prensa",
-    "Corte"
+export const GRUPOS_TIPO = [
+    {
+        grupo: "Impressão",
+        itens: ["Impressora", "Impressora fotográfica", "Plotter", "Impressora 3D", "Impressora 3D FDM"]
+    },
+    {
+        grupo: "Peças e suprimentos",
+        itens: ["Peça de impressora", "Cabeça de impressão", "Sistema de tinta", "Cartucho / tanque", "Placa ou fonte", "Outra peça"]
+    },
+    {
+        grupo: "Acabamento",
+        itens: ["Laser", "Prensa", "Corte", "Plastificadora", "Encadernadora", "Dobradeira", "Laminadora"]
+    },
+    {
+        grupo: "Apoio",
+        itens: ["Scanner", "Computador / RIP", "Outro"]
+    }
 ];
+
+export const TIPOS_MAQUINA = GRUPOS_TIPO.flatMap((grupo) => grupo.itens);
+
+export function perfilTipo(tipo) {
+    const nome = String(tipo || "");
+    if (/3d/i.test(nome) && /fdm|filamento/i.test(nome)) {
+        return { consumo: true, peca: false, energia: true, unidade: "g", rotulo: "filamento", titulo: "Consumo de filamento" };
+    }
+    if (/3d/i.test(nome)) {
+        return { consumo: true, peca: false, energia: true, unidade: "kg", rotulo: "resina", titulo: "Consumo de material (resina)" };
+    }
+    if (/^(impressora|plotter)/i.test(nome) || nome === "Sistema de tinta" || nome === "Cartucho / tanque") {
+        return { consumo: true, peca: false, energia: true, unidade: "ml", rotulo: "tinta", titulo: "Consumo de tinta" };
+    }
+    if (/peça|peca|cabeça|cabeca|placa|outra peça/i.test(nome)) {
+        return { consumo: false, peca: true, energia: false, unidade: "un", rotulo: "peça", titulo: "Peça de equipamento" };
+    }
+    return { consumo: false, peca: false, energia: true, unidade: "un", rotulo: "material", titulo: "Consumo" };
+}
 
 export const STATUS_MAQUINA = [
     { id: "operacao", label: "Em Operação" },

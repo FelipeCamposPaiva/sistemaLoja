@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
+import AvisoErro, { LimiteErro } from "./components/AvisoErro.jsx";
 
 import "./styles/global.css";
 
@@ -16,7 +17,13 @@ ReactDOM.createRoot(
 
         <BrowserRouter>
 
-            <App />
+            <AvisoErro />
+
+            <LimiteErro>
+
+                <App />
+
+            </LimiteErro>
 
         </BrowserRouter>
 

@@ -100,8 +100,26 @@ function springBootPlugin() {
 export default defineConfig({
   plugins: [react(), springBootPlugin()],
   server: {
+    host: true,
     port: 5173,
     strictPort: true,
+    allowedHosts: [".trycloudflare.com"],
+    proxy: {
+      "/api": {
+        target: `http://127.0.0.1:${BACKEND_PORT}`,
+        changeOrigin: true
+      },
+      "/uploads": {
+        target: `http://127.0.0.1:${BACKEND_PORT}`,
+        changeOrigin: true
+      }
+    }
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    strictPort: true,
+    allowedHosts: [".trycloudflare.com"],
     proxy: {
       "/api": {
         target: `http://127.0.0.1:${BACKEND_PORT}`,

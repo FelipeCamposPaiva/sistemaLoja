@@ -129,7 +129,7 @@ public class JurosMultaService {
 
     private boolean aberta(ContaReceber conta) {
         String status = conta.getStatus() == null ? "" : conta.getStatus().toUpperCase();
-        return !status.equals("RECEBIDO") && !status.equals("CANCELADO") && !status.equals("AGRUPADO");
+        return !status.equals("RECEBIDO") && !status.equals("CANCELADO") && !status.equals("AGRUPADO") && !status.equals("CREDITO");
     }
 
     private FinanceiroParametros padrao() {

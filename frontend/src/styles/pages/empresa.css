@@ -1,0 +1,291 @@
+.emp-page {
+    max-width: 920px;
+    padding-bottom: 72px;
+}
+
+.emp-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.emp-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 4px 10px 4px 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+}
+
+.emp-page h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+}
+
+.emp-sub,
+.emp-bloco p,
+.emp-campo small,
+.emp-bloco > small {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.emp-ok {
+    color: #16a34a;
+    font-size: 13px;
+}
+
+.emp-erro {
+    color: #dc2626;
+    font-size: 13px;
+}
+
+.emp-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 14px;
+    min-width: 0;
+}
+
+.emp-campo > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.emp-campo input,
+.emp-campo select,
+.emp-select,
+.emp-ie input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0 10px;
+    font: inherit;
+    font-size: 14px;
+}
+
+.emp-campo input:disabled {
+    opacity: 0.6;
+}
+
+.emp-linha {
+    display: grid;
+    gap: 12px 14px;
+}
+
+.emp-linha .emp-campo {
+    margin-top: 14px;
+}
+
+.emp-end {
+    grid-template-columns: minmax(0, 1fr) 140px;
+}
+
+.emp-bairro,
+.emp-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.emp-cidade {
+    grid-template-columns: minmax(0, 1.4fr) 150px 90px;
+}
+
+.emp-3,
+.emp-admin {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.emp-fiscal {
+    grid-template-columns: 1fr 1fr 1.3fr;
+}
+
+.emp-4 {
+    grid-template-columns: 1fr 1fr 0.8fr 1.2fr;
+}
+
+.emp-st {
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: end;
+}
+
+.emp-ie {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.emp-ie label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.emp-ajuda {
+    width: 15px;
+    height: 15px;
+    border: 1px solid var(--muted);
+    border-radius: 50%;
+    color: var(--muted);
+    font-style: normal;
+    font-size: 10px;
+    line-height: 13px;
+    text-align: center;
+    font-weight: 650;
+}
+
+.emp-bloco {
+    margin-top: 28px;
+}
+
+.emp-bloco h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.emp-bloco h3 .emp-link {
+    margin: 0 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.emp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.emp-link.is-muted {
+    color: var(--muted);
+}
+
+.emp-mais {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.emp-logo {
+    display: block;
+    width: 92px;
+    height: 92px;
+    margin: 12px 0;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.emp-logo.is-vazio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    font-size: 12px;
+    background: var(--panel);
+}
+
+.emp-logo-acoes {
+    display: flex;
+    gap: 14px;
+}
+
+.emp-select {
+    text-align: left;
+    cursor: pointer;
+}
+
+.emp-canais {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+}
+
+.emp-canais label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.emp-acoes {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    bottom: 0;
+    margin-top: 28px;
+    padding: 12px 0;
+    background: var(--bg);
+}
+
+.emp-salvar {
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    padding: 8px 22px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.emp-cancelar {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+}
+
+@media (max-width: 800px) {
+    .emp-end,
+    .emp-bairro,
+    .emp-2,
+    .emp-cidade,
+    .emp-3,
+    .emp-admin,
+    .emp-fiscal,
+    .emp-4,
+    .emp-st {
+        grid-template-columns: 1fr;
+    }
+}

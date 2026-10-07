@@ -110,9 +110,9 @@ export default function ProducaoGrafica() {
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>início</Link>
                 <span>›</span>
-                <Link to="/ordem_servicos">serviços</Link>
+                <Link to={ROTAS.PRODUCAO}>ordens de produção</Link>
                 <span>›</span>
-                <span>produção</span>
+                <span>calculadora</span>
             </nav>
             <header className="pg-head">
                 <div>

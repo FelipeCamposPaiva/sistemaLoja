@@ -1,3 +1,5 @@
+import { emPromocao, precoVigente } from "./precoPromocional";
+
 const KEY = "erp-tecnicos-v1";
 
 export const SETORES_OS = [
@@ -122,10 +124,13 @@ export function descontoDaForma(forma) {
 }
 
 export function precoPelaLista(produto, lista) {
-    const preco = Number(produto?.preco || 0);
     if (lista === "Atacado" && Number(produto?.precoAtacado) > 0) {
         return Number(produto.precoAtacado);
     }
+    if (lista !== "Atacado" && emPromocao(produto)) {
+        return precoVigente(produto);
+    }
+    const preco = Number(produto?.preco || 0);
     const fator = FATOR_LISTA[lista] || 1;
     return Math.round(preco * fator * 100) / 100;
 }

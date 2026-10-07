@@ -52,6 +52,8 @@ SEPARACAO:"/separacao",
 
 EXPEDICAO:"/expedicao",
 
+DEVOLUCOES:"/devolucoes",
+
 DASHBOARD_EXPEDICAO:"/dashboard#/expedicao",
 
 CONTAS_RECEBER:"/contas-receber",
@@ -66,23 +68,63 @@ JUROS_MULTA:"/configuracoes/juros-multa",
 
 COBRANCA_BANCARIA:"/cobranca-bancaria",
 
+ORCAMENTOS:"/orcamentos_servicos",
+
 ORDEM_SERVICO:"/ordem_servicos",
 
 TECNICOS:"/tecnicos",
 
 RELATORIO_TECNICOS:"/ordem_servicos/relatorio-tecnicos",
 
-NFS:"/nfs",
+RELATORIOS_SERVICOS:"/relatorios_servicos",
 
-PRODUCAO:"/producao",
+CONTRATOS_SERVICOS:"/contratos_servicos",
 
-PAINEL_PRODUCAO:"/painel-producao",
+COBRANCAS_SERVICOS:"/cobrancas_servicos",
+
+NFS:"/notas_servicos",
+
+PRODUCAO:"/ordem_producao",
+
+PAINEL_PRODUCAO:"/painel_ordem_servicos",
 
 FINANCEIRO:"/financeiro",
 
 AGENDA:"/home_agenda",
 
 MINHA_CONTA:"/dados_conta",
+
+EMPRESA:"/empresa",
+
+DADOS_USUARIO:"/dados_usuario",
+
+USUARIOS_SISTEMA:"/usuarios_sistema",
+
+SERVIDOR_EMAIL:"/configuracoes_servidor_email",
+
+ENVIO_DOCUMENTOS:"/parametros_envio_doc_geral",
+
+ETIQUETAS:"/configuracoes_etiquetas#list",
+
+AGENDA_CONFIG:"/configuracoes_agenda",
+
+INTERFACE_USUARIO:"/interface_usuario",
+
+NOTIFICACOES:"/configuracoes_notificacoes",
+
+PRINT_NODE:"/configuracoes_print_node",
+
+MULTI_EMPRESAS:"/multi_empresas",
+
+SISTEMA:"/sistema",
+
+APLICATIVOS_API:"/aplicativos_api",
+
+TOKEN_API:"/configuracoes_api_web_services",
+
+CONFIGURACOES_API:"/configuracoes_api",
+
+WEBHOOKS:"/configuracoes_webhooks_empresa",
 
 INTEGRACOES:"/integracoes",
 
@@ -116,7 +158,9 @@ CRM:"/crm",
 
 RELATORIOS:"/relatorios",
 
-CONFIGURACOES:"/configuracoes",
+RELATORIO_GRUPO:"/relatorio",
+
+CONFIGURACOES:"/preferencias_geral",
 
 INVENTARIO:"/inventario",
 

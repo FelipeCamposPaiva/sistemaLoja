@@ -27,7 +27,10 @@ export function eventoDaApi(raw) {
         status: raw?.tipo || extra.status || "pendente",
         empresas: extra.empresas ? normalizarEmpresas(extra.empresas) : [unidadeAtual().id],
         criadoPor: extra.criadoPor || "",
-        google: Boolean(extra.google)
+        google: Boolean(extra.google),
+        origem: extra.origem || "",
+        origemId: extra.origemId || null,
+        href: extra.href || ""
     };
 }
 
@@ -44,7 +47,10 @@ export function eventoParaApi(evento) {
             usuarios: evento.usuarios || [],
             empresas: evento.empresas || [],
             criadoPor: evento.criadoPor || "",
-            google: Boolean(evento.google)
+            google: Boolean(evento.google),
+            origem: evento.origem || "",
+            origemId: evento.origemId || null,
+            href: evento.href || ""
         }),
         cor: "#3b82f6"
     };

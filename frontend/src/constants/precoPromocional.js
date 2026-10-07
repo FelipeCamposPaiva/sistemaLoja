@@ -20,6 +20,19 @@ export function precoVigente(produto) {
     return emPromocao(produto) ? Number(produto.precoPromocional) : Number(produto?.preco) || 0;
 }
 
+export const EVENTO_PRECOS = "erp-precos-atualizados";
+
+export function avisarPrecosAtualizados(detalhe) {
+    const init = detalhe ? { detail: detalhe } : undefined;
+    window.dispatchEvent(new CustomEvent(EVENTO_PRECOS, init));
+    window.dispatchEvent(new CustomEvent("erp-promocoes-atualizadas", init));
+}
+
+export function ouvirPrecos(fn) {
+    window.addEventListener(EVENTO_PRECOS, fn);
+    return () => window.removeEventListener(EVENTO_PRECOS, fn);
+}
+
 export function pctOff(preco, promo) {
     const n = Number(preco) || 0;
     const p = Number(promo) || 0;
@@ -64,4 +77,43 @@ export function alinharPrecos(entrada, origem = "promocional") {
     }
     const alinhado = { preco, precoPromocional: promo, descontoPercentual: pct };
     return { ...alinhado, rotulo: rotuloOff(alinhado) };
+}
+
+function margemSobre(preco, custo) {
+    if (preco <= 0 || custo <= 0) {
+        return null;
+    }
+    return round2((1 - custo / preco) * 100);
+}
+
+export function simularReajuste(produto, percentual, opcoes = {}) {
+    const venda = opcoes.venda !== false;
+    const atacado = opcoes.atacado !== false;
+    const pct = Number(percentual);
+    const fator = Number.isFinite(pct) ? 1 + pct / 100 : 1;
+    const precoAtual = round2(produto?.preco);
+    const atacadoAtual = round2(produto?.precoAtacado);
+    const preco = venda ? round2(precoAtual * fator) : precoAtual;
+    const precoAtacado = atacado && atacadoAtual > 0 ? round2(atacadoAtual * fator) : atacadoAtual;
+    const desconto = round2(produto?.descontoPercentual);
+    const alinhado = alinharPrecos({
+        preco,
+        precoPromocional: produto?.precoPromocional,
+        descontoPercentual: desconto
+    }, desconto > 0 ? "preco" : "promocional");
+    const custo = round2(produto?.custo || produto?.custoCompra);
+    return {
+        precoAtual,
+        preco,
+        delta: round2(preco - precoAtual),
+        precoAtacadoAtual: atacadoAtual,
+        precoAtacado,
+        deltaAtacado: round2(precoAtacado - atacadoAtual),
+        precoPromocionalAtual: emPromocao(produto) ? round2(produto.precoPromocional) : 0,
+        precoPromocional: alinhado.precoPromocional,
+        descontoPercentual: alinhado.descontoPercentual,
+        custo,
+        margemAtual: margemSobre(precoAtual, custo),
+        margemNova: margemSobre(preco, custo)
+    };
 }

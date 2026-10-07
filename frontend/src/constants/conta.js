@@ -56,7 +56,7 @@ function padrao(usuario) {
         nome: usuario?.nome || "Administrador",
         email: usuario?.email || "admin@temdetudovr.com.br",
         telefone: "",
-        empresa: "Tem de Tudo — Volta Redonda",
+        empresa: "Tem de Tudo — Água Limpa",
         cargo: usuario?.perfil || "ADMIN",
         foto: "",
         ativo: true,

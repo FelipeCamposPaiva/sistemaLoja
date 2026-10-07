@@ -438,6 +438,7 @@ export default function Comissoes() {
                 <h2>comissões</h2>
                 <div className="ctt-acoes">
                     <Link className="ctt-ghost" to={ROTAS.RELATORIO_TECNICOS}>técnicos da OS</Link>
+                    <Link className="ctt-ghost" to={ROTAS.DEVOLUCOES}>devoluções</Link>
                     <button type="button" className="ctt-ghost" onClick={() => setAberto("share")}>
                         <Share2 size={15} />
                         compartilhar

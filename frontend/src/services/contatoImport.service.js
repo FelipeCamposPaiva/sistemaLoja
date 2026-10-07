@@ -205,18 +205,115 @@ export function mesclarContatos(leituras) {
     return { itens: deduparContatos(todos), origem: "contatos" };
 }
 
+export function preverImportacaoContatos(itens, atuais) {
+    const porTiny = new Set();
+    const porDoc = new Set();
+    (atuais || []).forEach((contato) => {
+        if (contato?.tinyId) {
+            porTiny.add(Number(contato.tinyId));
+        }
+        const doc = String(contato?.cpfCnpj || "").trim().toLowerCase();
+        if (doc) {
+            porDoc.add(doc);
+            const digitos = doc.replace(/\D/g, "");
+            if (digitos) {
+                porDoc.add(digitos);
+            }
+        }
+    });
+    let novos = 0;
+    let atualizados = 0;
+    (itens || []).forEach((item) => {
+        const doc = String(item?.cpfCnpj || "").trim().toLowerCase();
+        const digitos = doc.replace(/\D/g, "");
+        const existe = (item?.tinyId && porTiny.has(Number(item.tinyId)))
+            || (doc && porDoc.has(doc))
+            || (digitos && porDoc.has(digitos));
+        if (existe) {
+            atualizados += 1;
+        } else {
+            novos += 1;
+        }
+    });
+    return { novos, atualizados };
+}
+
+export function baixarModeloContatos() {
+    const cabecalho = [
+        "Nome",
+        "Nome Fantasia",
+        "CPF/CNPJ",
+        "Fone",
+        "Celular",
+        "E-mail",
+        "Endereço",
+        "Número",
+        "Complemento",
+        "Bairro",
+        "CEP",
+        "Cidade",
+        "Estado",
+        "Tipos de Contatos",
+        "Tipo Pessoa",
+        "Situação"
+    ];
+    const exemplo = [
+        "Maria Silva",
+        "Maria",
+        "123.456.789-09",
+        "",
+        "(21) 99999-0000",
+        "maria@email.com",
+        "Rua A",
+        "10",
+        "",
+        "Centro",
+        "22000-000",
+        "Rio de Janeiro",
+        "RJ",
+        "Cliente",
+        "Física",
+        "Ativo"
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([cabecalho, exemplo]);
+    ws["!cols"] = cabecalho.map((coluna) => ({ wch: Math.max(coluna.length + 2, 14) }));
+    XLSX.utils.book_append_sheet(wb, ws, "Contatos");
+    const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "modelo-contatos.xlsx";
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 export async function lerPlanilhaContatos(arquivo) {
     const buffer = await arquivo.arrayBuffer();
     const wb = XLSX.read(buffer, { type: "array" });
     const nomeFolha = (wb.SheetNames || []).find((n) => /contato/i.test(n)) || wb.SheetNames[0];
     const linhas = XLSX.utils.sheet_to_json(wb.Sheets[nomeFolha], { defval: "" });
     if (!linhas.length) {
-        return { itens: [], origem: "vazia", nomeFolha };
+        return { itens: [], erros: [], origem: "vazia", nomeFolha };
     }
     const mapa = mapaCabecalho(linhas[0]);
-    const brutos = linhas.map((linha) => linhaParaContato(linha, mapa)).filter(Boolean);
+    const brutos = [];
+    const erros = [];
+    linhas.forEach((linha, indice) => {
+        const contato = linhaParaContato(linha, mapa);
+        if (!contato) {
+            const vazio = Object.values(linha).every((valor) => String(valor || "").trim() === "");
+            if (!vazio) {
+                erros.push({ linha: indice + 2, motivo: "Sem nome" });
+            }
+            return;
+        }
+        brutos.push(contato);
+    });
     return {
         itens: deduparContatos(brutos),
+        erros,
         origem: "contatos",
         nomeFolha
     };

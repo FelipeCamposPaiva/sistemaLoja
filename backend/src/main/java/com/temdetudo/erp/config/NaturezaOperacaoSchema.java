@@ -47,6 +47,28 @@ public class NaturezaOperacaoSchema {
                     "ALTER TABLE clientes ADD COLUMN contribuinte VARCHAR(2) DEFAULT '9'");
             adicionar(conexao, stmt, "clientes", "ie",
                     "ALTER TABLE clientes ADD COLUMN ie VARCHAR(30) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "inscricao_municipal",
+                    "ALTER TABLE clientes ADD COLUMN inscricao_municipal VARCHAR(30) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "inscricao_suframa",
+                    "ALTER TABLE clientes ADD COLUMN inscricao_suframa VARCHAR(20) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "vendedor",
+                    "ALTER TABLE clientes ADD COLUMN vendedor VARCHAR(150) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "vendedor_id",
+                    "ALTER TABLE clientes ADD COLUMN vendedor_id BIGINT DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "condicao_pagamento",
+                    "ALTER TABLE clientes ADD COLUMN condicao_pagamento VARCHAR(80) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "dia_pagamento",
+                    "ALTER TABLE clientes ADD COLUMN dia_pagamento INT DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "lista_preco",
+                    "ALTER TABLE clientes ADD COLUMN lista_preco VARCHAR(80) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "fundacao",
+                    "ALTER TABLE clientes ADD COLUMN fundacao VARCHAR(10) DEFAULT NULL");
+            adicionar(conexao, stmt, "clientes", "foto",
+                    "ALTER TABLE clientes ADD COLUMN foto MEDIUMTEXT");
+            adicionar(conexao, stmt, "clientes", "anexos",
+                    "ALTER TABLE clientes ADD COLUMN anexos MEDIUMTEXT");
+            adicionar(conexao, stmt, "clientes", "dados_pessoais",
+                    "ALTER TABLE clientes ADD COLUMN dados_pessoais TEXT");
             adicionar(conexao, stmt, "clientes", "consumidor_final",
                     "ALTER TABLE clientes ADD COLUMN consumidor_final TINYINT(1) DEFAULT 1");
             adicionar(conexao, stmt, "clientes", "finalidade",
@@ -121,6 +143,10 @@ public class NaturezaOperacaoSchema {
                 }
             }
         }
-        stmt.execute(ddl);
+        try {
+            stmt.execute(ddl);
+        } catch (Exception ex) {
+            /* uma coluna que falhar não impede as seguintes */
+        }
     }
 }

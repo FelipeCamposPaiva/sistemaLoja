@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRightLeft, MapPinOff, X } from "lucide-react";
 
-import { catalogoLocalizacoes } from "../services/localizacao";
+import { catalogoLocalizacoes, sugerirLocalizacao } from "../services/localizacao";
 import { lojasDeposito, saldosProduto, transferirEntreLocais } from "../services/estoqueLocais";
 
 function qtd(valor) {
@@ -125,6 +125,13 @@ export default function ModalEstoqueLocal({
                             </datalist>
                         </label>
                         <div className="loc-modal-acoes">
+                            <button
+                                type="button"
+                                className="loc-btn"
+                                onClick={() => setPrateleira(sugerirLocalizacao(produto))}
+                            >
+                                Sugerir pelo grupo
+                            </button>
                             <button
                                 type="button"
                                 className="loc-btn"

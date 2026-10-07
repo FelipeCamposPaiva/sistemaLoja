@@ -10,6 +10,7 @@ import {
 import useAuth from "../../hooks/useAuth.jsx";
 import { listarAgenda, salvarAgenda } from "../../services/agenda.service";
 import { normalizarEmpresas, unidadeAtual, unidadesDestino } from "../../constants/empresas";
+import { equipeAtiva, mesmoNome } from "../../constants/rh";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
@@ -162,15 +163,34 @@ function formVazio(data, hora = "09") {
         descricao: "",
         status: "pendente",
         empresas: [unidadeAtual().id],
-        enviarGoogle: false
+        enviarGoogle: false,
+        origem: "",
+        origemId: null,
+        href: ""
     };
+}
+
+function dataInicial() {
+    const q = new URLSearchParams(window.location.search).get("data");
+    if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) {
+        const [y, m, d] = q.split("-").map(Number);
+        return new Date(y, m - 1, d);
+    }
+    return inicioDoDia(new Date());
+}
+
+function envolve(item, nome) {
+    if (mesmoNome(item.criadoPor, nome)) {
+        return true;
+    }
+    return (item.usuarios || []).some((usuario) => mesmoNome(usuario, nome));
 }
 
 export default function Agenda() {
     const { usuario } = useAuth();
     const meuNome = usuario?.nome || "Administrador";
     const hoje = useMemo(() => inicioDoDia(new Date()), []);
-    const [cursor, setCursor] = useState(hoje);
+    const [cursor, setCursor] = useState(dataInicial);
     const [vista, setVista] = useState("mensal");
     const [aba, setAba] = useState("meus");
     const [itens, setItens] = useState([]);
@@ -214,10 +234,10 @@ export default function Agenda() {
         localStorage.setItem(SYNC_KEY, JSON.stringify(sync));
     }, [sync]);
 
-    const usuariosBase = useMemo(
-        () => Array.from(new Set([meuNome, ...USUARIOS])),
-        [meuNome]
-    );
+    const usuariosBase = useMemo(() => {
+        const equipe = equipeAtiva().map((pessoa) => pessoa.nome);
+        return Array.from(new Set([meuNome, ...USUARIOS, ...equipe]));
+    }, [meuNome]);
 
     const visiveis = useMemo(() => {
         return itens.filter((item) => {
@@ -227,9 +247,9 @@ export default function Agenda() {
                 return false;
             }
             if (aba === "meus") {
-                return (item.usuarios || []).includes(meuNome) || item.criadoPor === meuNome;
+                return envolve(item, meuNome);
             }
-            return !(item.usuarios || []).includes(meuNome);
+            return !envolve(item, meuNome);
         });
     }, [aba, itens, meuNome, sync.empresas]);
 
@@ -271,7 +291,11 @@ export default function Agenda() {
             descricao: item.descricao || "",
             status: item.status || "pendente",
             empresas: item.empresas || [sync.empresaAtual],
-            enviarGoogle: false
+            enviarGoogle: false,
+            criadoPor: item.criadoPor || "",
+            origem: item.origem || "",
+            origemId: item.origemId || null,
+            href: item.href || ""
         });
         setPainel("compromisso");
         setListaUsuarios(false);
@@ -290,8 +314,11 @@ export default function Agenda() {
             usuarios: form.usuarios.length ? form.usuarios : [meuNome],
             status: form.id ? form.status : "pendente",
             empresas: normalizarEmpresas(form.empresas, { incluirAtual: true }),
-            criadoPor: meuNome,
-            google: Boolean(form.id && itens.find((i) => i.id === form.id)?.google) || form.enviarGoogle || sync.google
+            criadoPor: form.criadoPor || meuNome,
+            google: Boolean(form.id && itens.find((i) => i.id === form.id)?.google) || form.enviarGoogle || sync.google,
+            origem: form.origem || "",
+            origemId: form.origemId || null,
+            href: form.href || ""
         };
 
         try {
@@ -622,6 +649,13 @@ export default function Agenda() {
                             ))}
                         </ul>
                     </label>
+
+                    {form.href ? (
+                        <p className="agenda-hint">
+                            Este compromisso veio de uma ordem de produção.{" "}
+                            <Link to={form.href}>abrir ordem de produção</Link>
+                        </p>
+                    ) : null}
 
                     <label>
                         Descrição

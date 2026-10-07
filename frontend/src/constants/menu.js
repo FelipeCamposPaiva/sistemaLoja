@@ -34,6 +34,7 @@ import {
     Scale,
 
     FileText,
+    FileSignature,
     Printer,
 
     Globe,
@@ -120,6 +121,13 @@ const MENU = [
                 nome: "Sobre a versão",
                 rota: "/detalhes_versao",
                 icon: Info
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/inicio",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -173,6 +181,12 @@ const MENU = [
             },
 
             {
+                nome: "Técnicos",
+                rota: "/tecnicos",
+                icon: Users
+            },
+
+            {
                 nome: "Embalagens",
                 rota: "/embalagens#list",
                 icon: Box
@@ -188,6 +202,13 @@ const MENU = [
                 nome: "Localizações",
                 rota: "/localizacoes",
                 icon: MapPinned
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/cadastros",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -262,6 +283,13 @@ const MENU = [
                 nome: "FCI",
                 rota: "/fci",
                 icon: Boxes
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/suprimentos",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -328,6 +356,13 @@ const MENU = [
                 nome: "Devoluções",
                 rota: "/devolucoes",
                 icon: RotateCcw
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/vendas",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -388,6 +423,13 @@ const MENU = [
                 nome: "Extrato Bancário",
                 rota: "/extrato-bancario",
                 icon: FileText
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/financeiro",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -403,45 +445,52 @@ const MENU = [
         itens: [
 
             {
-                nome: "Orçamentos",
-                rota: "/orcamentos",
+                nome: "Painel Produção",
+                rota: "/painel_ordem_servicos",
+                icon: BarChart3
+            },
+
+            {
+                nome: "Orçamentos de Serviço",
+                rota: "/orcamentos_servicos#list",
                 icon: FileText
             },
 
             {
                 nome: "Ordens de Serviço",
-                rota: "/ordem_servicos",
+                rota: "/ordem_servicos#list",
                 icon: ClipboardList
             },
 
             {
-                nome: "Técnicos",
-                rota: "/tecnicos",
-                icon: Users
-            },
-
-            {
-                nome: "Relatório por técnico",
-                rota: "/ordem_servicos/relatorio-tecnicos",
-                icon: BarChart3
-            },
-
-            {
-                nome: "Produção",
-                rota: "/producao",
+                nome: "Ordens de Produção Interna",
+                rota: "/ordem_producao#list",
                 icon: Printer
             },
 
             {
-                nome: "Painel Produção",
-                rota: "/painel-producao",
-                icon: BarChart3
+                nome: "Contratos",
+                rota: "/contratos_servicos#list",
+                icon: FileSignature
+            },
+
+            {
+                nome: "Cobranças",
+                rota: "/cobrancas_servicos#list",
+                icon: Wallet
             },
 
             {
                 nome: "Nota Fiscal Serviço",
-                rota: "/nfs",
+                rota: "/notas_servicos#list",
                 icon: ReceiptText
+            },
+
+            {
+                nome: "Relatórios",
+                rota: "/relatorios_servicos#list",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -484,6 +533,13 @@ const MENU = [
                 nome: "Custos Ecommerce",
                 rota: "/custo-ecommerce",
                 icon: Wallet
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/ecommerce",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -510,8 +566,7 @@ const MENU = [
                 nome: "Visão de Negócio",
                 icon: BarChart3,
                 filhos: [
-                    { nome: "Diário de Bordo", rota: "/loja-admin/diario" },
-                    { nome: "Relatórios", rota: "/loja-admin/relatorios" }
+                    { nome: "Diário de Bordo", rota: "/loja-admin/diario" }
                 ]
             },
 
@@ -648,6 +703,14 @@ const MENU = [
                 rota: "/",
                 icon: ExternalLink,
                 externo: true
+            },
+
+            {
+                id: "li-relatorio",
+                nome: "Relatório",
+                rota: "/relatorio/loja-virtual",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -741,12 +804,6 @@ const MENU = [
             },
 
             {
-                nome: "Relatórios de Ponto",
-                rota: "/ponto/relatorios",
-                icon: Clock3
-            },
-
-            {
                 nome: "Comissões",
                 rota: "/comissoes",
                 icon: BadgeDollarSign
@@ -756,6 +813,13 @@ const MENU = [
                 nome: "Performance",
                 rota: "/performance-vendas",
                 icon: BarChart3
+            },
+
+            {
+                nome: "Relatórios de Ponto",
+                rota: "/ponto/relatorios",
+                icon: Clock3,
+                relatorio: true
             }
 
         ]
@@ -772,7 +836,7 @@ const MENU = [
 
             {
                 nome: "Configurações",
-                rota: "/configuracoes",
+                rota: "/preferencias_geral",
                 icon: Settings
             },
 
@@ -780,6 +844,13 @@ const MENU = [
                 nome: "Auditoria",
                 rota: "/auditoria",
                 icon: History
+            },
+
+            {
+                nome: "Relatório",
+                rota: "/relatorio/configuracoes",
+                icon: BarChart3,
+                relatorio: true
             }
 
         ]
@@ -788,8 +859,28 @@ const MENU = [
 
 ];
 
+export function ehRelatorio(item) {
+    return Boolean(item?.relatorio) || /^relat[oó]rios?\b/i.test(String(item?.nome || ""));
+}
+
+export function itensComRelatorioNoFim(itens) {
+    const lista = Array.isArray(itens) ? itens : [];
+    const relatorios = [];
+    const resto = [];
+    lista.forEach((item) => {
+        if (ehRelatorio(item)) {
+            relatorios.push(item);
+        } else {
+            resto.push(item);
+        }
+    });
+    return [...resto, ...relatorios];
+}
+
 export function itensPlanos(grupo) {
-    return (grupo?.itens || []).flatMap((item) => (item.filhos ? [item, ...item.filhos] : [item]));
+    return itensComRelatorioNoFim(grupo?.itens).flatMap((item) => (
+        item.filhos ? [item, ...itensComRelatorioNoFim(item.filhos)] : [item]
+    ));
 }
 
 export function acharItemMenu(pathname) {

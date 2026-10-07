@@ -1,3 +1,5 @@
+import { ehPessoaFisica } from "./contatos";
+
 export const EMPRESA_UF = "RJ";
 
 export const CONSUMIDOR_FINAL = {
@@ -87,11 +89,11 @@ function soDigitos(valor) {
     return String(valor || "").replace(/\D/g, "");
 }
 
-function tipoPessoaDe(contato) {
+function pessoaFisica(contato) {
     if (contato?.tipoPessoa) {
-        return String(contato.tipoPessoa).toLowerCase();
+        return ehPessoaFisica(contato.tipoPessoa);
     }
-    return soDigitos(contato?.cpfCnpj).length > 11 ? "juridica" : "fisica";
+    return soDigitos(contato?.cpfCnpj).length <= 11;
 }
 
 function contribuinteIcms(contato) {
@@ -102,7 +104,7 @@ function consumidorFinalDe(contato) {
     if (contato?.consumidorFinal === true || contato?.consumidorFinal === false) {
         return Boolean(contato.consumidorFinal);
     }
-    const pf = tipoPessoaDe(contato) === "fisica";
+    const pf = pessoaFisica(contato);
     return pf || !contribuinteIcms(contato);
 }
 
@@ -119,7 +121,7 @@ function operacaoInterna(uf, empresaUf = EMPRESA_UF) {
 }
 
 function pontos(n, contato) {
-    const pf = tipoPessoaDe(contato) === "fisica";
+    const pf = pessoaFisica(contato);
     const icms = contribuinteIcms(contato);
     const consumidor = consumidorFinalDe(contato);
     const finalidade = finalidadeDe(contato);
@@ -178,7 +180,7 @@ export function sugerirNatureza(contato, lista = NATUREZAS_OPERACAO, empresaUf =
         };
     }
 
-    const pf = tipoPessoaDe(contato) === "fisica";
+    const pf = pessoaFisica(contato);
     const icms = contribuinteIcms(contato);
     const uf = String(contato?.uf || empresaUf || EMPRESA_UF).toUpperCase();
     return {

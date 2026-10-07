@@ -167,13 +167,21 @@ public class ProdutoController {
 
     @PostMapping("/reajustar")
     public Map<String, Object> reajustar(@RequestBody PrecoLoteDTO lote) {
-        if (lote.getPercentualReajuste() == null) {
-            throw new IllegalArgumentException("Informe o percentual de reajuste.");
+        if (lote.getPercentualReajuste() == null || lote.getPercentualReajuste().compareTo(java.math.BigDecimal.ZERO) == 0) {
+            throw new IllegalArgumentException("Informe um percentual de reajuste diferente de zero.");
+        }
+        if (lote.getPercentualReajuste().compareTo(new java.math.BigDecimal("-100")) <= 0) {
+            throw new IllegalArgumentException("O reajuste precisa ser maior que -100%.");
+        }
+        boolean venda = lote.getReajustarVenda() == null || Boolean.TRUE.equals(lote.getReajustarVenda());
+        boolean atacado = lote.getReajustarAtacado() == null || Boolean.TRUE.equals(lote.getReajustarAtacado());
+        if (!venda && !atacado) {
+            throw new IllegalArgumentException("Marque o preço de venda ou o preço de atacado.");
         }
         int ok = 0;
         for (Produto produto : alvos(lote)) {
             var antes = auditoria.snapshot(produto);
-            PrecoPromocional.reajustar(produto, lote.getPercentualReajuste());
+            PrecoPromocional.reajustar(produto, lote.getPercentualReajuste(), venda, atacado);
             Produto salvo = repository.save(produto);
             auditoria.registrarAlteracao("PRODUTO", salvo.getId(), salvo.getNome(), antes, auditoria.snapshot(salvo));
             ok++;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
     ChevronDown,
     CloudUpload,
@@ -12,7 +12,7 @@ import {
     X
 } from "lucide-react";
 
-import { ESTADOS } from "../../constants/contatos";
+import { ESTADOS, lerContatos } from "../../constants/contatos";
 import { aplicarProdutosNfe } from "../../constants/catalogoLoja";
 import {
     CAMPOS_DATA,
@@ -99,10 +99,18 @@ function dentroDoPeriodo(iso, dias) {
 
 export default function NotasEntrada() {
     const navigate = useNavigate();
+    const [params] = useSearchParams();
     const raiz = useRef(null);
     const [lista, setLista] = useState(lerNotas);
     const [xmls, setXmls] = useState(lerXmlTerceiros);
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(() => params.get("q") || "");
+
+    useEffect(() => {
+        const q = params.get("q");
+        if (q) {
+            setBusca(q);
+        }
+    }, [params]);
     const [aba, setAba] = useState("todas");
     const [periodo, setPeriodo] = useState("30");
     const [campoData, setCampoData] = useState("emissao");
@@ -132,6 +140,17 @@ export default function NotasEntrada() {
     useEffect(() => {
         gravarNotas(lista);
     }, [lista]);
+
+    useEffect(() => {
+        const id = params.get("contato");
+        if (!id) {
+            return;
+        }
+        const contato = lerContatos().find((item) => String(item.id) === String(id));
+        if (contato?.nome) {
+            setBusca(contato.nome);
+        }
+    }, [params]);
 
     useEffect(() => {
         fetch("/data/nfe/31260871673990001904550010492420911208598360-nfe.xml")
@@ -195,7 +214,8 @@ export default function NotasEntrada() {
             if (!termo) {
                 return true;
             }
-            return [n.numero, n.remetente, n.cnpj, n.chave, String(n.valor)].join(" ").toLowerCase().includes(termo);
+            const itensTxt = (n.itens || []).map((item) => `${item.sku || ""} ${item.nome || item.descricao || ""} ${item.gtin || item.codigoBarras || ""}`).join(" ");
+            return [n.numero, n.remetente, n.cnpj, n.chave, String(n.valor), itensTxt].join(" ").toLowerCase().includes(termo);
         }).sort((a, b) => String(b.dataEmissao || "").localeCompare(String(a.dataEmissao || "")));
     }, [lista, busca, aba, periodo, campoData, filtros]);
 

@@ -1,17 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { ChevronLeft, ChevronRight, CreditCard, Lock, Truck } from "lucide-react";
+import { ChevronLeft, ChevronRight, CreditCard, Gift, Lock, Sparkles, Truck } from "lucide-react";
 
 import { catalogoVitrine, filtrarVitrine, marcasLoja, youtubeId } from "../../constants/loja";
 import LojaCard from "./LojaCard";
+import { ArteCaneca, ArteCanetas, ArteCategoria, ArteChaveiro } from "./LojaVitrineArte";
 
 const ICONE_SELO = {
     truck: Truck,
     card: CreditCard,
-    lock: Lock
+    lock: Lock,
+    gift: Gift
 };
 
-function Carrossel({ titulo, produtos, cfg }) {
+function linkVitrine(vitrine) {
+    if (vitrine.grupo) {
+        return `/c/${encodeURIComponent(vitrine.grupo)}`;
+    }
+    if (vitrine.busca) {
+        const termo = String(vitrine.busca).split("|")[0];
+        return `/busca?q=${encodeURIComponent(termo)}`;
+    }
+    return "/busca";
+}
+
+function Carrossel({ vitrine, produtos, cfg }) {
     const [ini, setIni] = useState(0);
     const visiveis = produtos.slice(ini, ini + 5);
     if (!produtos.length) {
@@ -20,18 +33,22 @@ function Carrossel({ titulo, produtos, cfg }) {
     return (
         <section className="lj-sec">
             <div className="lj-sec-head">
-                <h2>{titulo}</h2>
-                <div className="lj-arrows">
-                    <button type="button" disabled={ini <= 0} onClick={() => setIni((n) => Math.max(0, n - 1))}>
-                        <ChevronLeft size={18} />
-                    </button>
-                    <button
-                        type="button"
-                        disabled={ini + 5 >= produtos.length}
-                        onClick={() => setIni((n) => Math.min(produtos.length - 5, n + 1))}
-                    >
-                        <ChevronRight size={18} />
-                    </button>
+                <h2>{vitrine.titulo}</h2>
+                <div className="lj-sec-tools">
+                    <div className="lj-arrows">
+                        <button type="button" disabled={ini <= 0} onClick={() => setIni((n) => Math.max(0, n - 1))} aria-label="Anterior">
+                            <ChevronLeft size={18} />
+                        </button>
+                        <button
+                            type="button"
+                            disabled={ini + 5 >= produtos.length}
+                            onClick={() => setIni((n) => Math.min(produtos.length - 5, n + 1))}
+                            aria-label="Próximo"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
+                    <Link to={linkVitrine(vitrine)} className="lj-ver-todos">Ver todos</Link>
                 </div>
             </div>
             <div className="lj-track">
@@ -44,7 +61,7 @@ function Carrossel({ titulo, produtos, cfg }) {
 }
 
 export default function LojaHome() {
-    const { cfg, pronto } = useOutletContext();
+    const { cfg, pronto, revisao = 0 } = useOutletContext();
     const [lista, setLista] = useState([]);
     const [marcaIni, setMarcaIni] = useState(0);
 
@@ -52,7 +69,7 @@ export default function LojaHome() {
         if (pronto) {
             setLista(catalogoVitrine());
         }
-    }, [pronto]);
+    }, [pronto, revisao]);
 
     const vitrines = useMemo(
         () => (cfg.vitrines || []).map((v) => ({ ...v, itens: filtrarVitrine(v, lista) })),
@@ -71,24 +88,41 @@ export default function LojaHome() {
     return (
         <>
             {(cfg.banners || []).filter((b) => b.ativo).map((banner) => (
-                <Link key={banner.id} to={banner.link || "/"} className={`lj-hero lj-hero--${banner.estilo || "laser"}`}>
+                <Link
+                    key={banner.id}
+                    to={banner.link || "/"}
+                    className={`lj-hero lj-hero--${banner.estilo || "laser"}`}
+                    aria-label={`${banner.titulo}. Ver produtos`}
+                >
                     {banner.estilo === "laser" ? (
                         <>
-                            <div className="lj-hero-art lj-hero-left" aria-hidden>
-                                <span className="lj-pen is-a" />
-                                <span className="lj-pen is-b" />
-                                <span className="lj-pen is-c" />
-                                <span className="lj-key" />
+                            <div className="lj-hero-deco" aria-hidden="true">
+                                <span className="lj-blob is-a" />
+                                <span className="lj-blob is-b" />
+                                <span className="lj-float-heart is-h1" />
+                                <span className="lj-float-heart is-h2" />
+                                <span className="lj-float-heart is-h3" />
+                                <span className="lj-star is-s1" />
+                                <span className="lj-star is-s2" />
+                                <span className="lj-star is-s3" />
+                                <span className="lj-dash is-d1" />
+                                <span className="lj-dash is-d2" />
                             </div>
-                            <div className="lj-hero-copy">
-                                <em>{banner.titulo}</em>
-                                <strong>LASER</strong>
-                                <small>{banner.subtitulo}</small>
-                            </div>
-                            <div className="lj-hero-art lj-hero-right" aria-hidden>
-                                <span className="lj-cup is-a" />
-                                <span className="lj-cup is-b" />
-                                <span className="lj-cup is-c" />
+                            <div className="lj-hero-stage">
+                                <div className="lj-hero-side is-left">
+                                    <ArteCaneca />
+                                </div>
+                                <div className="lj-hero-copy">
+                                    <em>{banner.titulo}</em>
+                                    <strong>LASER</strong>
+                                    <b>com a sua marca</b>
+                                    <small>{banner.subtitulo}</small>
+                                    <span className="lj-hero-cta">Ver produtos <ChevronRight size={16} /></span>
+                                </div>
+                                <div className="lj-hero-side is-right">
+                                    <ArteChaveiro />
+                                    <ArteCanetas />
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -117,7 +151,11 @@ export default function LojaHome() {
             </ul>
 
             <section className="lj-sec">
-                <h2 className="lj-center">{t.escolhaCategorias || "Escolha por categorias"}</h2>
+                <h2 className="lj-center lj-spark">
+                    <Sparkles size={18} />
+                    {t.escolhaCategorias || "Escolha por categorias"}
+                    <Sparkles size={18} />
+                </h2>
                 <div className="lj-cats-grid">
                     {(cfg.categoriasDestaque || []).map((cat) => (
                         <Link
@@ -126,15 +164,18 @@ export default function LojaHome() {
                             className="lj-cat-tile"
                             style={{ background: cat.cor }}
                         >
-                            {cat.icone ? <img src={cat.icone} alt="" /> : null}
-                            {cat.nome}
+                            <ArteCategoria id={cat.id} />
+                            <span className="lj-cat-nome">{cat.nome}</span>
+                            <span className="lj-cat-go" aria-hidden="true">
+                                <ChevronRight size={16} />
+                            </span>
                         </Link>
                     ))}
                 </div>
             </section>
 
             {vitrines.map((v) => (
-                <Carrossel key={v.id} titulo={v.titulo} produtos={v.itens} cfg={cfg} />
+                <Carrossel key={v.id} vitrine={v} produtos={v.itens} cfg={cfg} />
             ))}
 
             {cfg.video?.ativo && yt ? (
@@ -149,7 +190,7 @@ export default function LojaHome() {
                                 allowFullScreen
                             />
                         </div>
-                        <div>
+                        <div className="lj-video-side">
                             <h3>{cfg.video.produtosTxt}</h3>
                             <div className="lj-video-prods">
                                 {noVideo.map((p) => <LojaCard key={p.id} produto={p} cfg={cfg} compacto />)}

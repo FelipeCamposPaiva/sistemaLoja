@@ -64,4 +64,11 @@ public interface ProdutoRepository
             BigDecimal estoque
     );
 
+    @Query("""
+            SELECT p.id, p.sku, p.nome, p.preco, p.precoPromocional, p.descontoPercentual,
+                   p.unidade, p.categoria, p.marcaId, p.estoque, p.imagem, p.ativo
+            FROM Produto p
+            """)
+    List<Object[]> listarResumoVitrine();
+
 }

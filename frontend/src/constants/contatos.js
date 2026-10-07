@@ -9,16 +9,71 @@ export const TIPOS = [
 ];
 
 export const TIPOS_PESSOA = [
-    { id: "juridica", nome: "Pessoa Jurídica" },
-    { id: "fisica", nome: "Pessoa Física" },
-    { id: "estrangeiro", nome: "Estrangeiro" },
-    { id: "estrangeiro_br", nome: "Estrangeiro no Brasil" }
+    { id: "PF", nome: "PF — Pessoa Física" },
+    { id: "PJ", nome: "PJ — Pessoa Jurídica" },
+    { id: "PFE", nome: "PFE — Pessoa Física Estrangeira" },
+    { id: "PJE", nome: "PJE — Pessoa Jurídica Estrangeira" },
+    { id: "PF no Brasil", nome: "PF no Brasil — Pessoa Física Estrangeira no Brasil" },
+    { id: "PJ no Brasil", nome: "PJ no Brasil — Pessoa Jurídica Estrangeira no Brasil" }
 ];
 
+const TIPOS_PESSOA_LEGADO = {
+    fisica: "PF",
+    pf: "PF",
+    juridica: "PJ",
+    pj: "PJ",
+    estrangeiro: "PFE",
+    pfe: "PFE",
+    estrangeiro_br: "PF no Brasil",
+    "pf no brasil": "PF no Brasil",
+    pje: "PJE",
+    "pj no brasil": "PJ no Brasil"
+};
+
+export function normalizarTipoPessoa(valor) {
+    const texto = String(valor || "").trim();
+    if (!texto) {
+        return "";
+    }
+    return TIPOS_PESSOA_LEGADO[texto.toLowerCase()] || texto;
+}
+
+export function ehPessoaFisica(tipo) {
+    const codigo = normalizarTipoPessoa(tipo);
+    return codigo === "PF" || codigo === "PFE" || codigo === "PF no Brasil";
+}
+
+export function usaCnpj(tipo) {
+    const codigo = normalizarTipoPessoa(tipo);
+    return codigo === "PJ" || codigo === "PJ no Brasil";
+}
+
+export function documentoEstrangeiro(tipo) {
+    const codigo = normalizarTipoPessoa(tipo);
+    return codigo === "PFE" || codigo === "PJE";
+}
+
 export const CONTRIBUINTES = [
+    { id: "0", nome: "0 - Não informado" },
     { id: "1", nome: "1 - Contribuinte ICMS" },
     { id: "2", nome: "2 - Contribuinte isento de Inscrição no cadastro de Contribuintes do ICMS" },
     { id: "9", nome: "9 - Não Contribuinte, que pode ou não possuir Inscrição Estadual no Cadastro de Contribuintes do ICMS" }
+];
+
+export const CONDICOES_PAGAMENTO = [
+    { id: "À vista", nome: "À vista" },
+    { id: "30", nome: "30" },
+    { id: "30 60", nome: "30 60" },
+    { id: "30 60 90", nome: "30 60 90" },
+    { id: "3x", nome: "3x" },
+    { id: "15 + 2x", nome: "15 + 2x" },
+    { id: "Crediário", nome: "Crediário" }
+];
+
+export const LISTAS_PRECO_CONTATO = [
+    { id: "Padrão", nome: "Padrão" },
+    { id: "Atacado", nome: "Atacado" },
+    { id: "Promocional", nome: "Promocional" }
 ];
 
 export const ESTADOS = [
@@ -32,10 +87,11 @@ const VR = { cidade: "Volta Redonda", uf: "RJ" };
 function item(parcial) {
     return {
         fantasia: "",
-        tipoPessoa: "fisica",
+        tipoPessoa: "PF",
         cpfCnpj: "",
         rg: "",
         ie: "",
+        inscricaoMunicipal: "",
         contribuinte: "9",
         tipos: ["cliente"],
         cep: "",
@@ -56,6 +112,10 @@ function item(parcial) {
         profissao: "",
         sexo: "",
         nascimento: "",
+        fundacao: "",
+        foto: "",
+        vendedorId: "",
+        diaPagamento: "",
         naturalidade: "",
         nomePai: "",
         cpfPai: "",
@@ -65,7 +125,8 @@ function item(parcial) {
         vendedor: "",
         condicaoPagamento: "",
         listaPreco: "",
-        limiteCredito: "0",
+        limiteCredito: "0,00",
+        inscricaoSuframa: "",
         consumidorFinal: true,
         finalidade: "CONSUMO",
         regimeTributario: "",

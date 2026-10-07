@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
     ArrowLeft,
     ArrowUpDown,
@@ -181,11 +181,19 @@ export default function Marcas() {
     const navigate = useNavigate();
     const { usuario } = useAuth();
     const { hash, pathname, state } = useLocation();
+    const [params] = useSearchParams();
     const [marcas, setMarcas] = useState([]);
     const [produtos, setProdutos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [aviso, setAviso] = useState("");
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(() => params.get("q") || "");
+
+    useEffect(() => {
+        const q = params.get("q");
+        if (q) {
+            setBusca(q);
+        }
+    }, [params]);
     const [situacao, setSituacao] = useState("todas");
     const [ordem, setOrdem] = useState({ campo: "nome", dir: 1 });
     const [pagina, setPagina] = useState(1);

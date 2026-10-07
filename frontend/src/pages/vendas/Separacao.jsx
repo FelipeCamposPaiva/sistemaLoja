@@ -340,7 +340,7 @@ function ConsoleBipagem({ pedidoId }) {
                         <p>{embalado ? "Volumes conferidos. Pode despachar na expedição." : "Conferiu todos os itens. Embale e marque o pedido."}</p>
                     </div>
                     {embalado ? (
-                        <button type="button" className="prd-btn prd-btn-primary" onClick={() => navigate(ROTAS.EXPEDICAO)}>
+                        <button type="button" className="prd-btn prd-btn-primary" onClick={() => navigate(`${ROTAS.EXPEDICAO}?filtro=fila&q=${encodeURIComponent(pedido.numero || "")}`)}>
                             ir para expedição
                         </button>
                     ) : (

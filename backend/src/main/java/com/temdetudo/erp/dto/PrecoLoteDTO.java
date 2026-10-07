@@ -10,6 +10,8 @@ public class PrecoLoteDTO {
     private BigDecimal descontoPercentual;
     private BigDecimal precoPromocional;
     private Boolean limparPromocao;
+    private Boolean reajustarVenda;
+    private Boolean reajustarAtacado;
 
     public List<Long> getIds() {
         return ids;
@@ -49,5 +51,21 @@ public class PrecoLoteDTO {
 
     public void setLimparPromocao(Boolean limparPromocao) {
         this.limparPromocao = limparPromocao;
+    }
+
+    public Boolean getReajustarVenda() {
+        return reajustarVenda;
+    }
+
+    public void setReajustarVenda(Boolean reajustarVenda) {
+        this.reajustarVenda = reajustarVenda;
+    }
+
+    public Boolean getReajustarAtacado() {
+        return reajustarAtacado;
+    }
+
+    public void setReajustarAtacado(Boolean reajustarAtacado) {
+        this.reajustarAtacado = reajustarAtacado;
     }
 }

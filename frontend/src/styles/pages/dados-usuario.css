@@ -1,0 +1,139 @@
+@import "./empresa.css";
+
+.du-page {
+    max-width: 720px;
+    padding-bottom: 32px;
+}
+
+.du-page h2 {
+    margin: 0 0 18px;
+    font-size: 20px;
+}
+
+.du-ident {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.du-avatar {
+    width: 112px;
+    height: 112px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 54px;
+    font-weight: 650;
+    overflow: hidden;
+}
+
+.du-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.du-campos {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.du-campos label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.du-campos input {
+    height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0 10px;
+    font: inherit;
+    font-weight: 500;
+}
+
+.du-foto {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 8px 134px;
+    position: relative;
+}
+
+.du-cor,
+.du-paleta button {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+}
+
+.du-paleta {
+    position: absolute;
+    left: 22px;
+    top: 22px;
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    z-index: 2;
+}
+
+.du-bloco {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.du-bloco h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+}
+
+.du-bloco p {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 560px;
+}
+
+.du-codigo {
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.du-senha {
+    margin-top: 28px;
+}
+
+@media (max-width: 700px) {
+    .du-ident {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .du-foto {
+        margin-left: 0;
+    }
+}

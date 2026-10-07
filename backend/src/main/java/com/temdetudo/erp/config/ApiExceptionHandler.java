@@ -2,6 +2,7 @@ package com.temdetudo.erp.config;
 
 import java.util.Map;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -40,6 +41,32 @@ public class ApiExceptionHandler {
                 .findFirst()
                 .map(erro -> erro.getDefaultMessage())
                 .orElse("Dados inválidos.");
+        return ResponseEntity.badRequest().body(Map.of("mensagem", mensagem));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<Map<String, String>> banco(DataAccessException ex) {
+        String bruto = "";
+        Throwable causa = ex;
+        while (causa.getCause() != null && causa.getCause() != causa) {
+            causa = causa.getCause();
+            if (causa.getMessage() != null && !causa.getMessage().isBlank()) {
+                bruto = causa.getMessage();
+            }
+        }
+        String texto = bruto.toLowerCase();
+        String mensagem;
+        if (texto.contains("duplicate") || texto.contains("uk_clientes_cpf_cnpj")) {
+            mensagem = "Já existe um contato com este CPF ou CNPJ.";
+        } else if (texto.contains("unknown column")) {
+            mensagem = "O banco ainda não tem uma coluna usada neste cadastro.";
+        } else if (texto.contains("data too long") || texto.contains("too long")) {
+            mensagem = "Um dos campos passou do tamanho permitido.";
+        } else if (bruto.isBlank()) {
+            mensagem = "Não foi possível gravar no banco.";
+        } else {
+            mensagem = bruto.length() > 240 ? bruto.substring(0, 240) : bruto;
+        }
         return ResponseEntity.badRequest().body(Map.of("mensagem", mensagem));
     }
 }

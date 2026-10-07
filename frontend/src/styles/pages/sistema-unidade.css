@@ -1,0 +1,59 @@
+.sis-page {
+    max-width: 640px;
+}
+
+.sis-kicker {
+    margin: 18px 0 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.sis-page h2 {
+    margin: 6px 0 8px;
+    font-size: 28px;
+}
+
+.sis-lead {
+    margin: 0 0 18px;
+    color: var(--muted);
+}
+
+.sis-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+}
+
+.sis-card svg {
+    color: var(--accent);
+}
+
+.sis-card strong {
+    font-size: 18px;
+}
+
+.sis-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.sis-card button {
+    margin-top: 8px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 14px;
+    cursor: pointer;
+}

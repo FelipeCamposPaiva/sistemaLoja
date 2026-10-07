@@ -1,5 +1,18 @@
-import { useMemo, useRef, useState } from "react";
-import { FileSpreadsheet, Upload, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+    AlertCircle,
+    ArrowUp,
+    Check,
+    Download,
+    File,
+    FileSpreadsheet,
+    Lightbulb,
+    RefreshCw,
+    Trash2,
+    Upload,
+    Users,
+    X
+} from "lucide-react";
 
 import { agregarItensNfe, parseXmlNota } from "../../constants/notasEntrada";
 import { importarProdutosLote } from "../../services/produto.service";
@@ -8,6 +21,7 @@ import { lerPlanilhaProdutos, mesclarLeituras } from "../../services/produtoImpo
 import "../../styles/pages/produtos.css";
 
 const ACEITOS = ".xls,.xlsx,.csv,.xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/xml,application/xml";
+const MAX_MB = 10;
 
 function tipoArquivo(arquivo) {
     const nome = String(arquivo?.name || "").toLowerCase();
@@ -18,6 +32,10 @@ function tipoArquivo(arquivo) {
         return "excel";
     }
     return "outro";
+}
+
+function chaveArquivo(arquivo) {
+    return `${arquivo.name}-${arquivo.size}-${arquivo.lastModified}`;
 }
 
 function itensDoXml(parsed) {
@@ -36,8 +54,26 @@ function itensDoXml(parsed) {
     })).filter((p) => p.nome);
 }
 
-function ordenarArquivos(lista) {
-    return [...lista].sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { numeric: true }));
+function ordenarEntradas(lista) {
+    return [...lista].sort((a, b) => a.arquivo.name.localeCompare(b.arquivo.name, "pt-BR", { numeric: true }));
+}
+
+function formatarTamanho(bytes) {
+    const n = Number(bytes) || 0;
+    if (n < 1024) {
+        return `${n} B`;
+    }
+    if (n < 1024 * 1024) {
+        return `${Math.max(1, Math.round(n / 1024)).toLocaleString("pt-BR")} KB`;
+    }
+    return `${(n / (1024 * 1024)).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MB`;
+}
+
+function textoNumero(valor) {
+    if (valor == null || Number.isNaN(Number(valor))) {
+        return "—";
+    }
+    return Number(valor).toLocaleString("pt-BR");
 }
 
 export default function ImportadorMassa({
@@ -46,121 +82,252 @@ export default function ImportadorMassa({
     onFechar,
     onConcluido,
     titulo = "Importador em massa",
-    descricao = "Selecione várias planilhas Tiny (.xls/.xlsx) ou XML de NF-e de uma vez.",
-    dica = "Vários Excel de uma vez: produtos_1-500.xls, produtos_501-1000.xls…",
+    descricao = "Selecione uma ou mais planilhas (.xls/.xlsx) de uma vez.",
     aceitos = ACEITOS,
+    formatosTexto = "",
     permitirXml = true,
+    maxMb = MAX_MB,
     rotuloItem = "produtos",
+    rotuloArquivo = "arquivo",
+    textoVazio = "",
+    avisoErro = "",
+    dicas = null,
+    onBaixarModelo = null,
+    classificar = null,
     lerExcel = lerPlanilhaProdutos,
     mesclar = mesclarLeituras,
     importarLote = importarProdutosLote
 }) {
     const inputRef = useRef(null);
-    const [arquivos, setArquivos] = useState([]);
+    const entradasRef = useRef([]);
+    const classificarRef = useRef(classificar);
+    classificarRef.current = classificar;
+    const [entradas, setEntradas] = useState([]);
     const [arrastando, setArrastando] = useState(false);
     const [rodando, setRodando] = useState(false);
     const [progresso, setProgresso] = useState(null);
+    const [resultado, setResultado] = useState(null);
+    const [previsao, setPrevisao] = useState(null);
+    const [detalhes, setDetalhes] = useState(false);
 
-    const resumo = useMemo(() => {
-        const excel = arquivos.filter((a) => tipoArquivo(a) === "excel").length;
-        const xml = arquivos.filter((a) => tipoArquivo(a) === "xml").length;
-        const outros = arquivos.length - excel - xml;
-        return { excel, xml, outros };
-    }, [arquivos]);
+    const formatos = formatosTexto || (permitirXml ? ".xls, .xlsx, .csv, .xml" : ".xls, .xlsx, .csv");
+    const dicasVisiveis = dicas || [
+        `Utilize arquivos do Excel (.xls ou .xlsx)${permitirXml ? " ou XML de NF-e" : ""}`,
+        "A primeira linha da planilha deve ser o cabeçalho",
+        `Cada arquivo é conferido antes de gravar os ${rotuloItem}`,
+        "Linhas sem identificação válida ficam de fora da importação",
+        "Registros duplicados são unidos antes de gravar"
+    ];
+    const vazioLabel = textoVazio || `Sem ${rotuloItem} válidos`;
+    const aviso = avisoErro || `Os ${rotuloItem} com erro não serão importados. Você pode corrigir a planilha e tentar novamente.`;
+    const feminino = /a$/i.test(rotuloArquivo);
+
+    useEffect(() => {
+        if (aberto) {
+            return;
+        }
+        setEntradas([]);
+        setArrastando(false);
+        setRodando(false);
+        setProgresso(null);
+        setResultado(null);
+        setPrevisao(null);
+        setDetalhes(false);
+    }, [aberto]);
+
+    const mesclado = useMemo(() => {
+        const leituras = entradas
+            .filter((entrada) => entrada.status === "pronto" && entrada.itens?.length)
+            .map((entrada) => ({ itens: entrada.itens, origem: entrada.origem }));
+        return mesclar(leituras);
+    }, [entradas, mesclar]);
+
+    const errosLista = useMemo(() => entradas.flatMap((entrada) => (
+        (entrada.erros || []).map((erro) => ({
+            arquivo: entrada.arquivo.name,
+            linha: erro.linha,
+            motivo: erro.motivo
+        }))
+    )), [entradas]);
+
+    const assinatura = entradas.map((entrada) => (
+        `${entrada.chave}:${entrada.status}:${entrada.itens?.length || 0}`
+    )).join("|");
+    const itensPreview = mesclado.itens || [];
+    const itensRef = useRef(itensPreview);
+    itensRef.current = itensPreview;
+    entradasRef.current = entradas;
+
+    useEffect(() => {
+        const fn = classificarRef.current;
+        const itens = itensRef.current;
+        if (!aberto || !fn || !itens.length) {
+            setPrevisao(null);
+            return undefined;
+        }
+        let vivo = true;
+        setPrevisao({ carregando: true, novos: null, atualizados: null });
+        fn(itens)
+            .then((resumo) => {
+                if (vivo) {
+                    setPrevisao({
+                        carregando: false,
+                        novos: Number(resumo?.novos || 0),
+                        atualizados: Number(resumo?.atualizados || 0)
+                    });
+                }
+            })
+            .catch(() => {
+                if (vivo) {
+                    setPrevisao({ carregando: false, novos: null, atualizados: null });
+                }
+            });
+        return () => {
+            vivo = false;
+        };
+    }, [aberto, assinatura]);
 
     if (!aberto) {
         return null;
     }
 
-    function adicionar(lista) {
-        const novos = Array.from(lista || []).filter((arq) => {
-            const tipo = tipoArquivo(arq);
-            if (tipo === "outro") {
-                return false;
+    const lendo = entradas.some((entrada) => entrada.status === "lendo");
+    const errosContagem = errosLista.length + Number(resultado?.erros || 0);
+    const processados = resultado
+        ? Number(resultado.novos || 0) + Number(resultado.atualizados || 0)
+        : itensPreview.length;
+    const novos = resultado ? resultado.novos : previsao?.novos;
+    const atualizados = resultado ? resultado.atualizados : previsao?.atualizados;
+
+    function aplicarLeitura(chave, parcial) {
+        setEntradas((atual) => {
+            if (!atual.some((entrada) => entrada.chave === chave)) {
+                return atual;
             }
-            if (tipo === "xml" && !permitirXml) {
-                return false;
-            }
-            return true;
+            const proxima = atual.map((entrada) => (entrada.chave === chave ? { ...entrada, ...parcial } : entrada));
+            entradasRef.current = proxima;
+            return proxima;
         });
-        setArquivos((atual) => {
-            const mapa = new Map(atual.map((a) => [`${a.name}-${a.size}-${a.lastModified}`, a]));
-            novos.forEach((arq) => mapa.set(`${arq.name}-${arq.size}-${arq.lastModified}`, arq));
-            return ordenarArquivos([...mapa.values()]);
-        });
-        setProgresso(null);
     }
 
-    function remover(indice) {
-        setArquivos((atual) => atual.filter((_, i) => i !== indice));
-        setProgresso(null);
-    }
-
-    async function iniciar() {
-        if (!arquivos.length || rodando) {
-            return;
-        }
-        setRodando(true);
-        const leituras = [];
-        const porArquivo = [];
+    async function lerEntrada(arquivo) {
+        const chave = chaveArquivo(arquivo);
         try {
-            for (let i = 0; i < arquivos.length; i++) {
-                const arquivo = arquivos[i];
-                setProgresso({
-                    etapa: "lendo",
-                    arquivo: arquivo.name,
-                    indice: i + 1,
-                    total: arquivos.length,
-                    porArquivo
-                });
-                try {
-                    if (permitirXml && tipoArquivo(arquivo) === "xml") {
-                        const parsed = parseXmlNota(await arquivo.text(), arquivo.name);
-                        const itens = itensDoXml(parsed);
-                        leituras.push({ itens, origem: "xml" });
-                        porArquivo.push({ nome: arquivo.name, itens: itens.length, origem: "xml", erro: itens.length ? "" : "sem itens" });
-                    } else {
-                        const lido = await lerExcel(arquivo);
-                        leituras.push(lido);
-                        porArquivo.push({
-                            nome: arquivo.name,
-                            itens: lido.itens.length,
-                            origem: lido.origem,
-                            erro: lido.itens.length ? "" : `sem ${rotuloItem}`
-                        });
-                    }
-                } catch (erro) {
-                    porArquivo.push({
-                        nome: arquivo.name,
-                        itens: 0,
-                        origem: tipoArquivo(arquivo),
-                        erro: erro?.message || "falha ao ler"
-                    });
-                }
-            }
-
-            const mesclado = mesclar(leituras);
-            if (!mesclado.itens.length) {
-                setProgresso({
-                    etapa: "erro",
-                    mensagem: `Nenhum ${rotuloItem.slice(0, -1)} encontrado nesses arquivos.`,
-                    porArquivo
+            if (permitirXml && tipoArquivo(arquivo) === "xml") {
+                const parsed = parseXmlNota(await arquivo.text(), arquivo.name);
+                const itens = itensDoXml(parsed);
+                aplicarLeitura(chave, {
+                    status: itens.length ? "pronto" : "vazio",
+                    itens,
+                    erros: itens.length ? [] : [{ linha: "—", motivo: "XML sem itens" }],
+                    origem: "xml"
                 });
                 return;
             }
-
-            setProgresso({
-                etapa: "gravando",
-                lidos: mesclado.itens.length,
-                indice: arquivos.length,
-                total: arquivos.length,
-                porArquivo
+            const lido = await lerExcel(arquivo);
+            const itens = lido?.itens || [];
+            const erros = Array.isArray(lido?.erros) ? lido.erros : [];
+            aplicarLeitura(chave, {
+                status: itens.length ? "pronto" : "vazio",
+                itens,
+                erros,
+                origem: lido?.origem || "excel"
             });
+        } catch (erro) {
+            aplicarLeitura(chave, {
+                status: "erro",
+                itens: [],
+                erros: [{ linha: "—", motivo: erro?.message || "Falha ao ler o arquivo" }],
+                origem: tipoArquivo(arquivo)
+            });
+        }
+    }
 
-            const gravacao = await importarLote(mesclado.itens, (lote) => {
+    function adicionar(lista) {
+        const recebidos = Array.from(lista || []);
+        const mapa = new Map(entradasRef.current.map((entrada) => [entrada.chave, entrada]));
+        const novas = [];
+        recebidos.forEach((arquivo) => {
+            const tipo = tipoArquivo(arquivo);
+            if (tipo === "outro" || (tipo === "xml" && !permitirXml)) {
+                return;
+            }
+            const chave = chaveArquivo(arquivo);
+            if (arquivo.size > maxMb * 1024 * 1024) {
+                mapa.set(chave, {
+                    chave,
+                    arquivo,
+                    status: "erro",
+                    itens: [],
+                    erros: [{ linha: "—", motivo: `Arquivo maior que ${maxMb}MB` }],
+                    origem: tipo
+                });
+                return;
+            }
+            const atual = mapa.get(chave);
+            if (atual && atual.status !== "erro") {
+                return;
+            }
+            novas.push(arquivo);
+            mapa.set(chave, {
+                chave,
+                arquivo,
+                status: "lendo",
+                itens: [],
+                erros: [],
+                origem: tipo
+            });
+        });
+        const proxima = ordenarEntradas([...mapa.values()]);
+        entradasRef.current = proxima;
+        setEntradas(proxima);
+        setResultado(null);
+        setProgresso(null);
+        setDetalhes(false);
+        novas.forEach((arquivo) => {
+            lerEntrada(arquivo);
+        });
+    }
+
+    function remover(chave) {
+        const proxima = entradasRef.current.filter((entrada) => entrada.chave !== chave);
+        entradasRef.current = proxima;
+        setEntradas(proxima);
+        setResultado(null);
+        setProgresso(null);
+    }
+
+    function limpar() {
+        if (rodando) {
+            return;
+        }
+        entradasRef.current = [];
+        setEntradas([]);
+        setResultado(null);
+        setProgresso(null);
+        setPrevisao(null);
+        setDetalhes(false);
+    }
+
+    async function iniciar() {
+        const prontas = entradas.filter((entrada) => entrada.status === "pronto" && entrada.itens?.length);
+        if (!prontas.length || rodando || lendo) {
+            return;
+        }
+        setRodando(true);
+        const porArquivo = entradas.map((entrada) => ({
+            nome: entrada.arquivo.name,
+            itens: entrada.itens?.length || 0,
+            origem: entrada.origem,
+            erro: entrada.status === "erro"
+                ? (entrada.erros?.[0]?.motivo || "falha ao ler")
+                : entrada.itens?.length ? "" : vazioLabel
+        }));
+        try {
+            const gravacao = await importarLote(itensPreview, (lote) => {
                 setProgresso({
                     etapa: "gravando",
-                    lidos: mesclado.itens.length,
+                    lidos: itensPreview.length,
                     lote: lote.parte,
                     lotes: lote.partes,
                     novos: lote.novos,
@@ -168,17 +335,23 @@ export default function ImportadorMassa({
                     erros: lote.erros,
                     porArquivo
                 });
+                setResultado({
+                    novos: lote.novos,
+                    atualizados: lote.atualizados,
+                    erros: lote.erros,
+                    total: lote.total
+                });
             });
-
             const falhas = gravacao.erros ? `, ${gravacao.erros} com erro` : "";
             const origem = mesclado.origem === "pedidos"
-                ? `${mesclado.itens.length} produtos únicos dos pedidos`
+                ? `${itensPreview.length} produtos únicos dos pedidos`
                 : `${gravacao.total} ${rotuloItem}`;
-            const mensagem = `${arquivos.length} arquivo(s): ${origem} gravados (${gravacao.novos} novos, ${gravacao.atualizados} atualizados${falhas}).`;
+            const mensagem = `${entradas.length} arquivo(s): ${origem} gravados (${gravacao.novos} novos, ${gravacao.atualizados} atualizados${falhas}).`;
+            setResultado(gravacao);
             setProgresso({
                 etapa: "ok",
                 mensagem,
-                lidos: mesclado.itens.length,
+                lidos: itensPreview.length,
                 ...gravacao,
                 porArquivo
             });
@@ -196,9 +369,20 @@ export default function ImportadorMassa({
 
     const pct = progresso?.lotes
         ? Math.round((progresso.lote / progresso.lotes) * 100)
-        : progresso?.total
-            ? Math.round((progresso.indice / progresso.total) * 100)
-            : 0;
+        : 0;
+
+    function selo(entrada) {
+        if (entrada.status === "lendo") {
+            return { classe: "is-lendo", texto: "Lendo…" };
+        }
+        if (entrada.status === "erro") {
+            return { classe: "is-erro", texto: entrada.erros?.[0]?.motivo || "Falha na leitura" };
+        }
+        if (entrada.status === "vazio" || !entrada.itens?.length) {
+            return { classe: "is-vazio", texto: vazioLabel };
+        }
+        return { classe: "is-pronto", texto: "Pronto para importar" };
+    }
 
     return (
         <div
@@ -209,35 +393,77 @@ export default function ImportadorMassa({
                 }
             }}
         >
-            <div className="produto-modal prd-massa">
+            <div className="produto-modal prd-massa" role="dialog" aria-modal="true" aria-labelledby="prd-massa-titulo">
                 <div className="produto-modal-header">
                     <div>
                         <span>IMPORTAÇÃO</span>
-                        <h2>{titulo}</h2>
+                        <h2 id="prd-massa-titulo">{titulo}</h2>
                         <p>{descricao}</p>
                     </div>
-                    <button type="button" className="modal-fechar" onClick={onFechar} disabled={rodando}>
-                        ×
+                    <button type="button" className="modal-fechar" onClick={onFechar} disabled={rodando} aria-label="Fechar">
+                        <X size={16} />
                     </button>
                 </div>
                 <div className="produto-modal-body">
-                    <button
-                        type="button"
-                        className={`prd-massa-drop${arrastando ? " is-on" : ""}`}
-                        disabled={rodando}
-                        onClick={() => inputRef.current?.click()}
-                        onDragOver={(e) => { e.preventDefault(); setArrastando(true); }}
-                        onDragLeave={() => setArrastando(false)}
-                        onDrop={(e) => {
-                            e.preventDefault();
-                            setArrastando(false);
-                            adicionar(e.dataTransfer.files);
-                        }}
-                    >
-                        <Upload size={22} />
-                        <strong>Solte os arquivos aqui ou clique para escolher</strong>
-                        <span>{dica}</span>
-                    </button>
+                    <div className="prd-massa-topo">
+                        <div
+                            className={`prd-massa-drop${arrastando ? " is-on" : ""}`}
+                            onClick={() => !rodando && inputRef.current?.click()}
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                setArrastando(true);
+                            }}
+                            onDragLeave={() => setArrastando(false)}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                setArrastando(false);
+                                if (!rodando) {
+                                    adicionar(e.dataTransfer.files);
+                                }
+                            }}
+                        >
+                            <div className="prd-massa-ilustra" aria-hidden="true">
+                                <span className="prd-massa-folha" />
+                                <span className="prd-massa-xls-tag">XLS</span>
+                                <span className="prd-massa-seta"><ArrowUp size={14} /></span>
+                            </div>
+                            <strong>Arraste e solte as planilhas aqui</strong>
+                            <span>ou clique para escolher no seu computador</span>
+                            <small>Formatos aceitos: {formatos} | Tamanho máximo por arquivo: {maxMb}MB</small>
+                            <button
+                                type="button"
+                                className="prd-massa-escolher"
+                                disabled={rodando}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    inputRef.current?.click();
+                                }}
+                            >
+                                <Upload size={16} />
+                                Escolher arquivos
+                            </button>
+                        </div>
+                        <aside className="prd-massa-dicas">
+                            <h3>
+                                <Lightbulb size={16} />
+                                Dicas para importação
+                            </h3>
+                            <ul>
+                                {dicasVisiveis.map((dica) => (
+                                    <li key={dica}>
+                                        <Check size={12} />
+                                        {dica}
+                                    </li>
+                                ))}
+                            </ul>
+                            {onBaixarModelo ? (
+                                <button type="button" onClick={onBaixarModelo}>
+                                    <Download size={15} />
+                                    Baixar modelo de planilha
+                                </button>
+                            ) : null}
+                        </aside>
+                    </div>
                     <input
                         ref={inputRef}
                         type="file"
@@ -250,57 +476,113 @@ export default function ImportadorMassa({
                         }}
                     />
 
-                    {arquivos.length > 80 ? (
-                        <p className="prd-massa-meta">Muitos arquivos: a leitura pode demorar alguns minutos.</p>
-                    ) : null}
-
-                    {arquivos.length ? (
+                    {entradas.length ? (
                         <>
-                            <p className="prd-massa-meta">
-                                {resumo.excel} planilha(s)
-                                {resumo.xml ? ` · ${resumo.xml} XML` : ""}
-                                {resumo.outros ? ` · ${resumo.outros} ignorado(s)` : ""}
-                            </p>
+                            <div className="prd-massa-lista-topo">
+                                <strong>
+                                    {entradas.length} {rotuloArquivo}(s) selecionada{feminino ? "" : "o"}(s)
+                                </strong>
+                                <button type="button" onClick={limpar} disabled={rodando}>
+                                    <Trash2 size={14} />
+                                    Limpar lista
+                                </button>
+                            </div>
                             <ul className="prd-massa-lista">
-                                {arquivos.map((arquivo, i) => {
-                                    const info = progresso?.porArquivo?.find((p) => p.nome === arquivo.name);
+                                {entradas.map((entrada) => {
+                                    const marca = selo(entrada);
                                     return (
-                                        <li key={`${arquivo.name}-${arquivo.size}-${i}`}>
-                                            <FileSpreadsheet size={16} />
-                                            <span>
-                                                {arquivo.name}
-                                                {info ? ` · ${info.itens} item(ns)${info.origem === "pedidos" ? " (pedidos)" : ""}${info.erro ? ` · ${info.erro}` : ""}` : ""}
+                                        <li key={entrada.chave}>
+                                            <span className="prd-massa-excel" aria-hidden="true">
+                                                <FileSpreadsheet size={16} />
                                             </span>
-                                            <button type="button" onClick={() => remover(i)} disabled={rodando} aria-label="Remover arquivo">
+                                            <div>
+                                                <strong>{entrada.arquivo.name}</strong>
+                                                <p>
+                                                    <span><File size={12} />{formatarTamanho(entrada.arquivo.size)}</span>
+                                                    <span><Users size={12} />{(entrada.itens?.length || 0).toLocaleString("pt-BR")} item(ns)</span>
+                                                </p>
+                                            </div>
+                                            <em className={marca.classe}>{marca.texto}</em>
+                                            <button
+                                                type="button"
+                                                onClick={() => remover(entrada.chave)}
+                                                disabled={rodando}
+                                                aria-label={`Remover ${entrada.arquivo.name}`}
+                                            >
                                                 <X size={14} />
                                             </button>
                                         </li>
                                     );
                                 })}
                             </ul>
+
+                            <div className="prd-massa-stats">
+                                <article className="is-rosa">
+                                    <Users size={18} />
+                                    <div>
+                                        <strong>{textoNumero(processados)}</strong>
+                                        <span>{rotuloItem === "contatos" ? "Contatos processados" : `${rotuloItem} processados`}</span>
+                                    </div>
+                                </article>
+                                <article className="is-verde">
+                                    <Check size={18} />
+                                    <div>
+                                        <strong>{previsao?.carregando && !resultado ? "…" : textoNumero(novos)}</strong>
+                                        <span>{rotuloItem === "contatos" ? "Novos contatos" : "Novos"}</span>
+                                    </div>
+                                </article>
+                                <article className="is-azul">
+                                    <RefreshCw size={18} />
+                                    <div>
+                                        <strong>{previsao?.carregando && !resultado ? "…" : textoNumero(atualizados)}</strong>
+                                        <span>{rotuloItem === "contatos" ? "Contatos atualizados" : "Atualizados"}</span>
+                                    </div>
+                                </article>
+                                <article className="is-vermelho">
+                                    <AlertCircle size={18} />
+                                    <div>
+                                        <strong>{textoNumero(errosContagem)}</strong>
+                                        <span>Com erro</span>
+                                    </div>
+                                </article>
+                            </div>
+
+                            {errosContagem > 0 ? (
+                                <div className="prd-massa-alerta">
+                                    <AlertCircle size={16} />
+                                    <p>{aviso}</p>
+                                    <button type="button" onClick={() => setDetalhes((atual) => !atual)}>
+                                        Ver detalhes dos erros
+                                        <span aria-hidden="true">{detalhes ? " ▾" : " ›"}</span>
+                                    </button>
+                                </div>
+                            ) : null}
+                            {detalhes && errosLista.length ? (
+                                <ul className="prd-massa-erros">
+                                    {errosLista.map((erro, indice) => (
+                                        <li key={`${erro.arquivo}-${erro.linha}-${indice}`}>
+                                            <strong>{erro.arquivo}</strong>
+                                            <span>{erro.linha === "—" ? erro.motivo : `Linha ${erro.linha}: ${erro.motivo}`}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : null}
                         </>
                     ) : null}
 
-                    {progresso ? (
+                    {progresso?.etapa === "gravando" ? (
                         <div className="prd-massa-status">
-                            {progresso.etapa === "lendo" ? (
-                                <p>Lendo {progresso.indice}/{progresso.total}: {progresso.arquivo}</p>
-                            ) : null}
-                            {progresso.etapa === "gravando" ? (
-                                <p>
-                                    Gravando no banco{progresso.lotes ? ` · lote ${progresso.lote}/${progresso.lotes}` : ""}
-                                    {progresso.lidos ? ` · ${progresso.lidos} ${rotuloItem}` : ""}
-                                </p>
-                            ) : null}
-                            {progresso.etapa === "ok" ? <p className="is-ok">{progresso.mensagem}</p> : null}
-                            {progresso.etapa === "erro" ? <p className="is-erro">{progresso.mensagem}</p> : null}
-                            {progresso.etapa === "lendo" || progresso.etapa === "gravando" ? (
-                                <div className="prd-massa-barra">
-                                    <span style={{ width: `${Math.max(pct, 4)}%` }} />
-                                </div>
-                            ) : null}
+                            <p>
+                                Gravando no banco{progresso.lotes ? ` · lote ${progresso.lote}/${progresso.lotes}` : ""}
+                                {progresso.lidos ? ` · ${progresso.lidos} ${rotuloItem}` : ""}
+                            </p>
+                            <div className="prd-massa-barra">
+                                <span style={{ width: `${Math.max(pct, 4)}%` }} />
+                            </div>
                         </div>
                     ) : null}
+                    {progresso?.etapa === "ok" ? <p className="prd-massa-status is-ok">{progresso.mensagem}</p> : null}
+                    {progresso?.etapa === "erro" ? <p className="prd-massa-status is-erro">{progresso.mensagem}</p> : null}
                 </div>
                 <div className="produto-modal-footer">
                     <button type="button" className="btn-secundario" onClick={onFechar} disabled={rodando}>
@@ -308,11 +590,12 @@ export default function ImportadorMassa({
                     </button>
                     <button
                         type="button"
-                        className="btn-primary"
-                        disabled={!arquivos.length || rodando}
+                        className="btn-primary prd-massa-importar"
+                        disabled={!itensPreview.length || rodando || lendo || ocupado}
                         onClick={iniciar}
                     >
-                        {rodando ? "Importando…" : `Importar ${arquivos.length || ""} arquivo(s)`}
+                        <Upload size={16} />
+                        {rodando ? "Importando…" : entradas.length ? `Importar ${entradas.length} arquivo(s)` : "Importar arquivo(s)"}
                     </button>
                 </div>
             </div>

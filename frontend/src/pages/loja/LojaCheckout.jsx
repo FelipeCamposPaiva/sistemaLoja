@@ -6,10 +6,9 @@ import {
     clienteLojaAtual,
     lerCarrinho,
     limparCarrinho,
-    proximoNumeroPedidoLoja,
     resumoCarrinho
 } from "../../constants/loja";
-import { salvarPedidoVenda } from "../../services/pedidoVenda.service";
+import api from "../../services/api";
 
 export default function LojaCheckout() {
     const { cfg } = useOutletContext();
@@ -51,45 +50,32 @@ export default function LojaCheckout() {
         }
         setSalvando(true);
         try {
-            const numero = proximoNumeroPedidoLoja();
-            const pix = /pix/i.test(form.pagamento);
-            const valor = pix ? resumo.pix : resumo.subtotal;
             const extras = itens
                 .filter((i) => i.personalizacao || i.medidas)
                 .map((i) => `${i.nome}: ${[i.personalizacao, i.medidas].filter(Boolean).join(" · ")}`)
                 .join(" | ");
-            const salvo = await salvarPedidoVenda({
-                numero,
-                cliente: form.nome.trim(),
-                origem: "Loja",
-                vendedor: "Loja virtual",
-                valor,
-                status: "APROVADO",
-                estoqueLancado: false,
-                contasLancadas: false,
-                separacao: "PENDENTE",
-                expedicao: "PENDENTE",
-                pagamento: form.pagamento,
-                formaEnvio: form.envio,
+            const { data } = await api.post("/publico/vitrine/pedido", {
+                nome: form.nome.trim(),
+                email: form.email.trim(),
+                telefone: form.telefone.trim(),
                 cidade: form.cidade,
                 uf: form.uf,
+                pagamento: form.pagamento,
+                envio: form.envio,
                 observacoes: [
-                    `Site · ${form.email} · ${form.telefone}`,
                     resumo.atual ? `Cupom ${resumo.atual.codigo} ${resumo.atual.desconto}%` : "",
                     extras
                 ].filter(Boolean).join(" · "),
-                data: new Date().toISOString(),
                 itens: itens.map((i) => ({
+                    id: i.id,
                     sku: i.sku,
-                    descricao: i.nome,
-                    quantidade: i.qtd,
-                    valorUnitario: i.preco
+                    qtd: i.qtd
                 }))
-            });
+            }, { aviso: false });
             limparCarrinho();
-            setOk(salvo.numero || numero);
-        } catch {
-            setErro("Não foi possível gravar o pedido. Tente de novo.");
+            setOk(data?.numero || "");
+        } catch (error) {
+            setErro(error.response?.data?.mensagem || "Não foi possível gravar o pedido no sistema. Tente de novo.");
         } finally {
             setSalvando(false);
         }

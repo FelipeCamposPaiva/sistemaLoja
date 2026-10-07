@@ -38,6 +38,7 @@ public class OrdemServicoController {
             executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN cliente_nome VARCHAR(255) NULL");
             executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN nome_fantasia VARCHAR(255) NULL");
             executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN equipamento VARCHAR(255) NULL");
+            executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN maquina_id BIGINT NULL");
             executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN marcadores VARCHAR(255) NULL");
             executar(stmt, "ALTER TABLE ordens_servico ADD COLUMN detalhes LONGTEXT NULL");
         } catch (Exception ignored) {
@@ -167,6 +168,9 @@ public class OrdemServicoController {
         destino.setCliente(origem.getCliente());
         destino.setNomeFantasia(origem.getNomeFantasia());
         destino.setEquipamento(origem.getEquipamento());
+        if (origem.getMaquinaId() != null) {
+            destino.setMaquinaId(origem.getMaquinaId());
+        }
         destino.setMarcadores(origem.getMarcadores());
         destino.setTelefone(origem.getTelefone());
         destino.setWhatsapp(origem.getWhatsapp());

@@ -1,0 +1,22 @@
+.ag-page {
+    min-height: calc(100dvh - 48px);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 16px;
+}
+
+.ag-opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.ag-opcoes .env-opcao {
+    margin-top: 0;
+}
+
+.ag-page .emp-acoes {
+    margin-top: auto;
+    background: transparent;
+}

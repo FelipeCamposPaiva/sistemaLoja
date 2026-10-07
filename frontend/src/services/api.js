@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { avisarErroSeAcao, avisarSucessoSeAcao } from "../components/avisoErro";
+
 export const API_URL =
     import.meta.env.VITE_API_URL ||
     (import.meta.env.DEV ? "/api" : "http://localhost:8080/api");
@@ -38,6 +40,7 @@ function encerrarSessao() {
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
         sessionStorage.removeItem("erp-sessao-ok");
+        document.cookie = "erp-sessao-ok=; Path=/; Max-Age=0; SameSite=Lax";
     } catch {
         /* ignore */
     }
@@ -56,15 +59,22 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        avisarSucessoSeAcao(response);
+        return response;
+    },
     (error) => {
         const status = error.response?.status;
         const url = String(error.config?.url || "");
         const ehAuthPublica = /\/auth\/(login|verificar-2fa|recuperar|redefinir|senha|2fa)/.test(url);
         const path = window.location.pathname;
-        const vitrine = path === "/" || /^\/(loja|c|produto|carrinho|checkout|conta|desejos|p|busca)(\/|$)/.test(path);
-        if (status === 401 && !ehAuthPublica && tokenAtual() && !vitrine) {
+        const vitrine = path === "/" || /^\/(loja|c|produto|carrinho|checkout|conta|desejos|p|busca)(\/|$)/.test(path) || path.startsWith("/m/");
+        const encerrouSessao = status === 401 && !ehAuthPublica && tokenAtual() && !vitrine;
+        const silencioso = error.config?.aviso === false || error.config?.headers?.["X-Silencioso"];
+        if (encerrouSessao) {
             encerrarSessao();
+        } else if (!ehAuthPublica && !silencioso) {
+            avisarErroSeAcao(error);
         }
         return Promise.reject(error);
     }

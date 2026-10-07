@@ -26,6 +26,9 @@ public class OrdemServico {
 
     private String equipamento;
 
+    @Column(name = "maquina_id")
+    private Long maquinaId;
+
     private String marcadores;
 
     private String telefone;
@@ -120,6 +123,14 @@ public class OrdemServico {
 
     public void setEquipamento(String equipamento) {
         this.equipamento = equipamento;
+    }
+
+    public Long getMaquinaId() {
+        return maquinaId;
+    }
+
+    public void setMaquinaId(Long maquinaId) {
+        this.maquinaId = maquinaId;
     }
 
     public String getMarcadores() {

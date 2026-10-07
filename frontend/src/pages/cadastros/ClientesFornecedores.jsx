@@ -25,12 +25,15 @@ import {
     MoreVertical,
     Plus,
     Printer,
+    Phone,
     Search,
     Send,
     Share2,
+    ShoppingCart,
     SlidersHorizontal,
     Tag,
     Trash2,
+    Truck,
     UserPlus,
     UserRound,
     UserRoundCheck,
@@ -55,7 +58,12 @@ import {
     importarClientesLote,
     listarClientes
 } from "../../services/clientes.service";
-import { lerPlanilhaContatos, mesclarContatos } from "../../services/contatoImport.service";
+import {
+    baixarModeloContatos,
+    lerPlanilhaContatos,
+    mesclarContatos,
+    preverImportacaoContatos
+} from "../../services/contatoImport.service";
 import { unidadeAtual, unidadesDestino } from "../../constants/empresas";
 import ROTAS from "../../constants/rotas";
 import ContatoForm from "./ContatoForm";
@@ -67,12 +75,12 @@ import "../../styles/pages/ferramentas.css";
 import "../../styles/pages/clientes.css";
 
 const ABAS = [
-    { id: "todos", label: "todos" },
-    { id: "cliente", label: "cliente" },
-    { id: "fornecedor", label: "fornecedor" },
-    { id: "transportador", label: "transportador" },
-    { id: "funcionario", label: "funcionário" },
-    { id: "outro", label: "outro" }
+    { id: "todos", label: "Todos", icon: Users, cor: "#ff2f92", fundo: "#ffe4f2" },
+    { id: "cliente", label: "Clientes", icon: UserRound, cor: "#7c3aed", fundo: "#efe6ff" },
+    { id: "fornecedor", label: "Fornecedores", icon: Truck, cor: "#2563eb", fundo: "#e7f0ff" },
+    { id: "transportador", label: "Transportadores", icon: Truck, cor: "#f59e0b", fundo: "#fff3d6" },
+    { id: "funcionario", label: "Funcionários", icon: UserRound, cor: "#16a34a", fundo: "#e5f8ec" },
+    { id: "outro", label: "Outros", icon: Share2, cor: "#9333ea", fundo: "#f4e8ff" }
 ];
 
 const REFINOS = [
@@ -463,7 +471,11 @@ function ordenarColunas(ids) {
     return ordem.length ? ordem : [...COLUNAS_PADRAO];
 }
 
-const LISTAS_PRECO = [];
+const LISTAS_PRECO = [
+    { id: "Padrão", nome: "Padrão" },
+    { id: "Atacado", nome: "Atacado" },
+    { id: "Promocional", nome: "Promocional" }
+];
 const POR_PAGINA = 10;
 const TAMANHOS = [10, 20, 50];
 const MESES = [
@@ -473,6 +485,32 @@ const MESES = [
 
 function soDigitos(valor) {
     return String(valor || "").replace(/\D/g, "");
+}
+
+function motivoErro(erro, fallback) {
+    const data = erro?.response?.data;
+    let detalhe = "";
+    if (typeof data === "string" && data.trim() && !data.trim().startsWith("<")) {
+        detalhe = data.trim();
+    } else if (data && typeof data === "object") {
+        const texto = data.mensagem || data.message || data.erro || data.error;
+        if (typeof texto === "string" && texto.trim()) {
+            detalhe = texto.trim();
+        }
+    }
+    if (!detalhe) {
+        const status = erro?.response?.status;
+        if (status === 403) detalhe = "Acesso negado (403).";
+        else if (status === 401) detalhe = "Sessão expirada (401).";
+        else if (status) detalhe = `O servidor respondeu ${status}.`;
+        else if (erro?.code === "ECONNABORTED") detalhe = "A requisição demorou demais.";
+        else if (erro?.message === "Network Error") detalhe = "Sem conexão com o servidor.";
+        else if (erro?.message) detalhe = erro.message;
+    }
+    if (fallback && detalhe && detalhe !== fallback) {
+        return `${fallback} ${detalhe}`;
+    }
+    return detalhe || fallback;
 }
 
 function textoDe(contato) {
@@ -530,21 +568,23 @@ function passaBusca(contato, termo, refino) {
 function gruposAcao(id) {
     return [
         [
-            { label: "incluir assunto no CRM", icon: UserPlus, to: `/crm?contato=${id}` },
-            { label: "fazer uma proposta", icon: Briefcase, aviso: "Propostas comerciais ainda não estão disponíveis neste cadastro." },
-            { label: "criar um pedido de venda", icon: Mail, to: `${ROTAS.PEDIDO_VENDA}?contato=${id}` },
-            { label: "cadastrar uma nota fiscal", icon: FileText, to: `${ROTAS.NFS}?contato=${id}` },
-            { label: "histórico de cashback", icon: History, aviso: "Histórico de cashback ainda não está disponível neste cadastro." }
+            { label: "incluir assunto no CRM", icon: UserPlus, to: `${ROTAS.CRM}?contato=${id}` },
+            { label: "vender no PDV", icon: ShoppingCart, to: `${ROTAS.PDV}?contato=${id}` },
+            { label: "fazer uma proposta", icon: Briefcase, to: `${ROTAS.PEDIDO_VENDA}?contato=${id}&novo=1` },
+            { label: "criar um pedido de venda", icon: Mail, to: `${ROTAS.PEDIDO_VENDA}?contato=${id}&novo=1` },
+            { label: "cadastrar uma nota fiscal", icon: FileText, to: `${ROTAS.ORDEM_SERVICO}?contato=${id}#add` },
+            { label: "histórico de cashback", icon: History, to: `${ROTAS.CONTAS_RECEBER}?contato=${id}` }
         ],
         [
-            { label: "tornar vendedor", icon: UserRound, to: ROTAS.VENDEDORES },
-            { label: "vincular a outro registro", icon: Link2, aviso: "Vínculo entre cadastros ainda não está disponível." },
+            { label: "tornar vendedor", icon: UserRound, to: `/vendedores?contato=${id}#list` },
+            { label: "vincular a outro registro", icon: Link2, to: `/contatos/${id}` },
             { label: "imprimir ficha cadastral", icon: Printer, to: `/contatos/${id}` },
             { label: "enviar cadastro para outras empresas", icon: Share2, acao: "empresas" }
         ],
         [
             { label: "consultar últimas vendas", icon: Info, to: `${ROTAS.PEDIDO_VENDA}?contato=${id}` },
             { label: "consultar últimas compras", icon: Info, to: `${ROTAS.NOTAS_ENTRADA}?contato=${id}` },
+            { label: "consultar últimas notas", icon: FileText, to: `${ROTAS.NFS}?contato=${id}` },
             { label: "consultar últimos serviços", icon: Info, to: `${ROTAS.ORDEM_SERVICO}?contato=${id}` }
         ]
     ];
@@ -716,7 +756,7 @@ function mesclarExcluidos(remotos, locais) {
 
 function ListaContatos() {
     const navigate = useNavigate();
-    const [lista, setLista] = useState([]);
+    const [lista, setLista] = useState(lerContatos);
     const [carregando, setCarregando] = useState(true);
     const [erroApi, setErroApi] = useState("");
     const [busca, setBusca] = useState("");
@@ -756,10 +796,44 @@ function ListaContatos() {
     const [empresasAberto, setEmpresasAberto] = useState(false);
     const [envioAviso, setEnvioAviso] = useState("");
     const [aviso, setAviso] = useState("");
+    const [erroToast, setErroToast] = useState("");
+    const erroTimer = useRef(null);
     const [importando, setImportando] = useState(false);
     const [importadorMassa, setImportadorMassa] = useState(false);
     const xlsRef = useRef(null);
     const raiz = useRef(null);
+
+    function mostrarErro(texto) {
+        setErroToast(texto);
+        if (erroTimer.current) {
+            clearTimeout(erroTimer.current);
+        }
+        erroTimer.current = setTimeout(() => setErroToast(""), 8000);
+    }
+
+    useEffect(() => () => {
+        if (erroTimer.current) {
+            clearTimeout(erroTimer.current);
+        }
+    }, []);
+
+    async function tentarLote(itens, fazer) {
+        const falhas = [];
+        await Promise.all(itens.map(async (item) => {
+            try {
+                await fazer(item);
+            } catch (erro) {
+                falhas.push(erro);
+            }
+        }));
+        if (falhas.length) {
+            const base = falhas.length === 1
+                ? "Não foi possível concluir a ação."
+                : `Não foi possível concluir ${falhas.length} itens.`;
+            mostrarErro(motivoErro(falhas[0], base));
+        }
+        return falhas.length === 0;
+    }
 
     async function carregarContatos() {
         setCarregando(true);
@@ -768,8 +842,9 @@ function ListaContatos() {
             setLista(dados);
             gravarContatos(dados);
             setErroApi("");
-        } catch {
-            setErroApi("Não foi possível carregar os cadastros do servidor.");
+        } catch (erro) {
+            mostrarErro(motivoErro(erro, "Não foi possível carregar os cadastros do servidor."));
+            setErroApi(motivoErro(erro, "Não foi possível carregar os cadastros do servidor."));
             setLista(lerContatos());
         } finally {
             setCarregando(false);
@@ -789,7 +864,7 @@ function ListaContatos() {
         try {
             const lido = await lerPlanilhaContatos(arquivo);
             if (!lido.itens.length) {
-                setAviso("A planilha não tem contatos com nome.");
+                mostrarErro("A planilha não tem contatos com nome.");
                 return;
             }
             const resumo = await importarClientesLote(lido.itens);
@@ -797,7 +872,7 @@ function ListaContatos() {
             setAviso(`${arquivo.name}: ${resumo.total} cadastros gravados (${resumo.novos} novos, ${resumo.atualizados} atualizados${falhas}).`);
             await carregarContatos();
         } catch (erro) {
-            setAviso(erro?.response?.data?.mensagem || erro?.message || "Não foi possível importar a planilha.");
+            mostrarErro(motivoErro(erro, "Não foi possível importar a planilha."));
         } finally {
             setImportando(false);
             if (xlsRef.current) {
@@ -1010,7 +1085,7 @@ function ListaContatos() {
             return { ...c, ativo: tipo === "ativar" };
         };
         if (tipo !== "excluir") {
-            await Promise.all(grupo.map((c) => atualizarCliente(c.id, patch(c)).catch(() => null)));
+            await tentarLote(grupo, (c) => atualizarCliente(c.id, patch(c)));
         }
         setLista((atual) => atual.map((c) => (ids.includes(c.id) ? patch(c) : c)));
         setMarcados([]);
@@ -1027,9 +1102,7 @@ function ListaContatos() {
         if (!window.confirm(`Excluir os anexos de ${grupo.length} contato(s)?`)) {
             return;
         }
-        await Promise.all(
-            grupo.map((c) => atualizarCliente(c.id, { ...c, anexos: [] }).catch(() => null))
-        );
+        await tentarLote(grupo, (c) => atualizarCliente(c.id, { ...c, anexos: [] }));
         setLista((atual) => atual.map((c) => (
             marcados.includes(c.id) ? { ...c, anexos: [] } : c
         )));
@@ -1069,7 +1142,7 @@ function ListaContatos() {
         const numero = (valor) => String(valor).padStart(2, "0");
         const janela = window.open("", "_blank");
         if (!janela) {
-            setAviso("O navegador bloqueou a janela de impressão.");
+            mostrarErro("O navegador bloqueou a janela de impressão.");
             return;
         }
         janela.document.write(`<!DOCTYPE html>
@@ -1159,7 +1232,7 @@ function ListaContatos() {
             }).join("");
         const janela = window.open("", "_blank");
         if (!janela) {
-            setAviso("O navegador bloqueou a janela de impressão.");
+            mostrarErro("O navegador bloqueou a janela de impressão.");
             return;
         }
         janela.document.write(`<!DOCTYPE html>
@@ -1240,7 +1313,7 @@ function ListaContatos() {
         }).join("");
         const janela = window.open("", "_blank");
         if (!janela) {
-            setAviso("O navegador bloqueou a janela de impressão.");
+            mostrarErro("O navegador bloqueou a janela de impressão.");
             return;
         }
         janela.document.write(`<!DOCTYPE html>
@@ -1285,9 +1358,7 @@ function ListaContatos() {
             return;
         }
         const nome = vendedorLote.trim();
-        await Promise.all(
-            selecionados().map((c) => atualizarCliente(c.id, { ...c, vendedor: nome }).catch(() => null))
-        );
+        await tentarLote(selecionados(), (c) => atualizarCliente(c.id, { ...c, vendedor: nome }));
         setLista((atual) => atual.map((c) => (
             marcados.includes(c.id) ? { ...c, vendedor: nome } : c
         )));
@@ -1297,9 +1368,7 @@ function ListaContatos() {
     }
 
     async function definirTipo() {
-        await Promise.all(
-            selecionados().map((c) => atualizarCliente(c.id, { ...c, tipos: [tipoLote] }).catch(() => null))
-        );
+        await tentarLote(selecionados(), (c) => atualizarCliente(c.id, { ...c, tipos: [tipoLote] }));
         setLista((atual) => atual.map((c) => (
             marcados.includes(c.id) ? { ...c, tipos: [tipoLote] } : c
         )));
@@ -1312,9 +1381,7 @@ function ListaContatos() {
         if (!lista) {
             return;
         }
-        await Promise.all(
-            selecionados().map((c) => atualizarCliente(c.id, { ...c, listaPreco: lista.nome }).catch(() => null))
-        );
+        await tentarLote(selecionados(), (c) => atualizarCliente(c.id, { ...c, listaPreco: lista.nome }));
         setLista((atual) => atual.map((c) => (
             marcados.includes(c.id) ? { ...c, listaPreco: lista.nome } : c
         )));
@@ -1332,7 +1399,7 @@ function ListaContatos() {
         }
         const restantes = grupo.slice(1);
         const ids = restantes.map((c) => c.id);
-        await Promise.all(ids.map((id) => excluirCliente(id).catch(() => null)));
+        await tentarLote(ids, (id) => excluirCliente(id));
         setLista((atual) => atual.filter((c) => !ids.includes(c.id)));
         setMarcados([]);
         setPainel(null);
@@ -1474,7 +1541,6 @@ function ListaContatos() {
                             ? "Carregando cadastros do servidor..."
                             : "Cadastre e gerencie clientes, fornecedores e parceiros comerciais da sua loja."}
                     </p>
-                    {erroApi ? <p className="ctt-sub ctt-erro">{erroApi}</p> : null}
                     {aviso ? <p className="ctt-sub ctt-ok">{aviso}</p> : null}
                 </div>
                 <div className="ctt-acoes">
@@ -1811,17 +1877,26 @@ function ListaContatos() {
 
                 <div className="ctt-tabs-linha">
                 <div className="ctt-tabs">
-                    {ABAS.map((tab) => (
-                        <button
-                            key={tab.id}
-                            type="button"
-                            className={aba === tab.id ? "is-active" : ""}
-                            onClick={() => setAba(tab.id)}
-                        >
-                            <span>{tab.label}</span>
-                            <strong>{qtdTab(contagens[tab.id])}</strong>
-                        </button>
-                    ))}
+                    {ABAS.map((tab) => {
+                        const Icone = tab.icon;
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                className={`ctt-card${aba === tab.id ? " is-active" : ""}`}
+                                style={{ "--card": tab.cor, "--card-bg": tab.fundo }}
+                                onClick={() => setAba(tab.id)}
+                            >
+                                <span className="ctt-card-ico" aria-hidden="true">
+                                    <Icone size={18} />
+                                </span>
+                                <span className="ctt-card-txt">
+                                    <strong>{carregando && !lista.length ? "…" : qtdTab(contagens[tab.id])}</strong>
+                                    <span>{tab.label}</span>
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
                 <div className="ctt-cols">
                     <button
@@ -1988,7 +2063,7 @@ function ListaContatos() {
                                                                                 setMenuLinha(null);
                                                                                 if (item.to) navigate(item.to);
                                                                                 else if (item.acao === "empresas") abrirEnvioEmpresas([c.id]);
-                                                                                else setAviso(item.aviso);
+                                                                                else mostrarErro(item.aviso);
                                                                             }}
                                                                         >
                                                                             <Icone size={16} />
@@ -2012,10 +2087,18 @@ function ListaContatos() {
                                     return <td key={col.id}>{c.cpfCnpj || "—"}</td>;
                                 }
                                 if (col.id === "contato") {
+                                    const fone = c.celular || c.telefone;
                                     return (
                                         <td key={col.id}>
-                                            {c.celular || c.telefone || "—"}
-                                            {c.email ? <small>{c.email}</small> : null}
+                                            {fone ? (
+                                                <a className="ctt-fone-num" href={`tel:${String(fone).replace(/\D/g, "")}`} onClick={(e) => e.stopPropagation()}>
+                                                    <Phone size={14} />
+                                                    {fone}
+                                                </a>
+                                            ) : "—"}
+                                            {c.email ? (
+                                                <a className="ctt-mail" href={`mailto:${c.email}`} onClick={(e) => e.stopPropagation()}>{c.email}</a>
+                                            ) : null}
                                         </td>
                                     );
                                 }
@@ -2050,11 +2133,17 @@ function ListaContatos() {
                     }) : (
                         <tr>
                             <td colSpan={1 + colunas.length} className="ctt-vazio">
-                                <strong>Nenhum cadastro encontrado.</strong>
-                                <button type="button" className="ctt-btn-incluir" onClick={() => navigate("/contatos#/add")}>
-                                    <Plus size={16} />
-                                    Incluir cadastro
-                                </button>
+                                {carregando ? (
+                                    <strong>Carregando cadastros...</strong>
+                                ) : (
+                                    <>
+                                        <strong>Nenhum cadastro encontrado.</strong>
+                                        <button type="button" className="ctt-btn-incluir" onClick={() => navigate("/contatos#/add")}>
+                                            <Plus size={16} />
+                                            Incluir cadastro
+                                        </button>
+                                    </>
+                                )}
                             </td>
                         </tr>
                     )}
@@ -2820,12 +2909,24 @@ function ListaContatos() {
                 aberto={importadorMassa}
                 ocupado={importando}
                 onFechar={() => setImportadorMassa(false)}
-                titulo="Importar contatos Tiny"
-                descricao="Selecione várias planilhas de contatos do Tiny (.xls/.xlsx) de uma vez."
-                dica="Vários Excel: contatos_1-500.xls, contatos_501-1000.xls…"
+                titulo="Importar Contatos"
+                descricao="Selecione uma ou mais planilhas de contatos do Tiny (.xls/.xlsx) de uma vez."
                 aceitos=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                formatosTexto=".xls, .xlsx"
                 permitirXml={false}
-                rotuloItem="cadastros"
+                rotuloItem="contatos"
+                rotuloArquivo="planilha"
+                textoVazio="Sem cadastros válidos"
+                avisoErro="Os contatos com erro não serão importados. Você pode corrigir a planilha e tentar novamente."
+                dicas={[
+                    "Utilize arquivos do Excel (.xls ou .xlsx)",
+                    "Cada planilha pode conter até 5.000 contatos",
+                    "As colunas devem ter um cabeçalho na primeira linha",
+                    "Campos recomendados: Nome, Telefone, E-mail",
+                    "Evite contatos duplicados (o sistema irá validar)"
+                ]}
+                onBaixarModelo={baixarModeloContatos}
+                classificar={async (itens) => preverImportacaoContatos(itens, await listarClientes())}
                 lerExcel={lerPlanilhaContatos}
                 mesclar={mesclarContatos}
                 importarLote={importarClientesLote}
@@ -2834,6 +2935,17 @@ function ListaContatos() {
                     await carregarContatos();
                 }}
             />
+            {erroToast ? (
+                <div className="ctt-toast" role="alert">
+                    <div>
+                        <strong>Erro</strong>
+                        <p>{erroToast}</p>
+                    </div>
+                    <button type="button" aria-label="Fechar aviso" onClick={() => setErroToast("")}>
+                        <X size={16} />
+                    </button>
+                </div>
+            ) : null}
         </div>
     );
 }

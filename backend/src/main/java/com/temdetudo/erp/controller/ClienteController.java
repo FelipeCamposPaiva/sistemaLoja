@@ -108,6 +108,7 @@ public class ClienteController {
             cliente.setAtivo(true);
         }
         preparar(cliente);
+        garantirDocumentoLivre(cliente);
         Cliente salvo = repository.save(cliente);
         auditoria.registrarCriacao("CLIENTE", salvo.getId(), salvo.getNome(), salvo);
         return salvo;
@@ -119,6 +120,7 @@ public class ClienteController {
         var antes = auditoria.snapshot(anterior);
         cliente.setId(id);
         preparar(cliente);
+        garantirDocumentoLivre(cliente);
         Cliente salvo = repository.save(cliente);
         auditoria.registrarAlteracao("CLIENTE", id, salvo.getNome(), antes, auditoria.snapshot(salvo));
         return salvo;
@@ -140,6 +142,13 @@ public class ClienteController {
         saida.put("total", novos + atualizados);
         saida.put("erros", erros);
         return saida;
+    }
+
+    private String emBranco(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+        return valor;
     }
 
     private String limpar(String valor, int max) {
@@ -167,6 +176,19 @@ public class ClienteController {
         cliente.setTipoPessoa(limpar(cliente.getTipoPessoa(), 20));
         cliente.setContribuinte(limpar(cliente.getContribuinte(), 2));
         cliente.setIe(limpar(cliente.getIe(), 30));
+        cliente.setInscricaoMunicipal(limpar(cliente.getInscricaoMunicipal(), 30));
+        cliente.setInscricaoSuframa(limpar(cliente.getInscricaoSuframa(), 20));
+        cliente.setVendedor(limpar(cliente.getVendedor(), 150));
+        cliente.setCondicaoPagamento(limpar(cliente.getCondicaoPagamento(), 80));
+        cliente.setListaPreco(limpar(cliente.getListaPreco(), 80));
+        cliente.setFundacao(limpar(cliente.getFundacao(), 10));
+        cliente.setFoto(emBranco(cliente.getFoto()));
+        cliente.setAnexos(emBranco(cliente.getAnexos()));
+        cliente.setDadosPessoais(emBranco(cliente.getDadosPessoais()));
+        Integer dia = cliente.getDiaPagamento();
+        if (dia == null || dia < 1 || dia > 31) {
+            cliente.setDiaPagamento(null);
+        }
         cliente.setFinalidade(limpar(cliente.getFinalidade(), 20));
         cliente.setRegimeTributario(limpar(cliente.getRegimeTributario(), 30));
         if (cliente.getConsumidorFinal() == null) {
@@ -175,6 +197,24 @@ public class ClienteController {
         if (cliente.getLimiteCredito() == null) {
             cliente.setLimiteCredito(BigDecimal.ZERO);
         }
+    }
+
+    private void garantirDocumentoLivre(Cliente cliente) {
+        String doc = cliente.getCpfCnpj();
+        if (doc == null || doc.isBlank()) {
+            return;
+        }
+        String digitos = doc.replaceAll("\\D", "");
+        if (digitos.length() < 11) {
+            return;
+        }
+        Cliente outro = repository.findByDocumentoDigitos(digitos).orElse(null);
+        if (outro == null || (cliente.getId() != null && outro.getId().equals(cliente.getId()))) {
+            return;
+        }
+        String rotulo = digitos.length() > 11 ? "CNPJ" : "CPF";
+        String nome = outro.getNome() == null || outro.getNome().isBlank() ? "outro contato" : outro.getNome();
+        throw new IllegalArgumentException("Este " + rotulo + " já está cadastrado para " + nome + ".");
     }
 
     private Cliente localizar(Cliente recebido) {
@@ -209,6 +249,17 @@ public class ClienteController {
         destino.setTipoPessoa(origem.getTipoPessoa());
         destino.setContribuinte(origem.getContribuinte());
         destino.setIe(origem.getIe());
+        destino.setInscricaoMunicipal(origem.getInscricaoMunicipal());
+        destino.setInscricaoSuframa(origem.getInscricaoSuframa());
+        destino.setVendedor(origem.getVendedor());
+        destino.setVendedorId(origem.getVendedorId());
+        destino.setCondicaoPagamento(origem.getCondicaoPagamento());
+        destino.setDiaPagamento(origem.getDiaPagamento());
+        destino.setListaPreco(origem.getListaPreco());
+        destino.setFundacao(origem.getFundacao());
+        destino.setFoto(origem.getFoto());
+        destino.setAnexos(origem.getAnexos());
+        destino.setDadosPessoais(origem.getDadosPessoais());
         destino.setConsumidorFinal(origem.getConsumidorFinal());
         destino.setFinalidade(origem.getFinalidade());
         destino.setRegimeTributario(origem.getRegimeTributario());

@@ -39,6 +39,7 @@ const WIDGETS = [
 const ATALHOS = [
     { nome: "Dashboard", rota: "/dashboard#/vendas" },
     { nome: "Dashboard de expedição", rota: "/dashboard#/expedicao" },
+    { nome: "Expedição", rota: "/expedicao" },
     { nome: "Clientes", rota: "/contatos#/" },
     { nome: "PDV", rota: "/pdv" },
     { nome: "Notas de entrada", rota: "/notas_entrada#list" },

@@ -1,4 +1,5 @@
 import { CONTATOS_INICIAIS, gravarContatos, lerContatos } from "./contatos";
+import { avisarPrecosAtualizados } from "./precoPromocional";
 
 export const GESTOR_META_KEY = "erp-gestor-meta-v1";
 export const PRODUTOS_LOJA_KEY = "erp-produtos-loja-v1";
@@ -42,6 +43,21 @@ export function definirProdutosLoja(lista) {
     } catch {
         /* quota: keep in memory only */
     }
+}
+
+export function invalidarCacheProdutosLoja() {
+    cacheProdutos = null;
+}
+
+if (typeof window !== "undefined" && !window.__erpPontePrecosLoja) {
+    window.__erpPontePrecosLoja = true;
+    window.addEventListener("storage", (ev) => {
+        if (ev.key && ev.key !== PRODUTOS_LOJA_KEY) {
+            return;
+        }
+        cacheProdutos = null;
+        avisarPrecosAtualizados();
+    });
 }
 
 async function jsonDe(nome) {
@@ -142,6 +158,7 @@ export function mapearProdutoGestor(p) {
         codigoFornecedor: p.codigoFornecedor || "",
         nome: p.nome,
         preco: Number(p.preco) || 0,
+        precoAtacado: Number(p.precoAtacado) || 0,
         precoPromocional: Number(p.precoPromocional) || 0,
         descontoPercentual: Number(p.descontoPercentual) || 0,
         custo: Number(p.custo) || 0,
@@ -154,6 +171,7 @@ export function mapearProdutoGestor(p) {
         localizacao: p.localizacao || "",
         estoque: Number(p.estoque) || 0,
         ativo: p.ativo !== false,
+        imagem: p.imagem || "",
         tipo: p.tipo || "",
         produtoProducao: Boolean(p.produtoProducao),
         atalho: ["PAPELARIA", "PERSONALIZADOS", "PERSONALIZADO"].includes(p.grupo) && Number(p.preco) > 0
@@ -244,7 +262,70 @@ export async function mesclarNaturaNfe(forcar = false) {
     return aplicarProdutosNfe(dados.produtos || [], { somarEstoque: false });
 }
 
+function nomeRaiz(nome) {
+    const texto = String(nome || "");
+    const corte = texto.indexOf(">");
+    return (corte >= 0 ? texto.slice(0, corte) : texto).trim();
+}
+
+function gruposRaiz(grupos, produtos) {
+    const vistos = new Set();
+    const saida = [];
+    const fontes = [
+        ...(Array.isArray(grupos) ? grupos.map((g) => g?.nome || g) : []),
+        ...produtos.map((p) => p.grupo || p.categoria)
+    ];
+    fontes.forEach((nome) => {
+        const raiz = nomeRaiz(nome);
+        const chave = raiz.toLocaleLowerCase("pt-BR");
+        if (!raiz || vistos.has(chave)) {
+            return;
+        }
+        vistos.add(chave);
+        saida.push({ id: saida.length + 1, nome: raiz });
+    });
+    saida.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    return saida;
+}
+
+async function puxarVitrineErp() {
+    const resp = await fetch("/api/publico/vitrine", { headers: { Accept: "application/json" } });
+    if (!resp.ok) {
+        throw new Error("vitrine");
+    }
+    const data = await resp.json();
+    const produtos = Array.isArray(data?.produtos) ? data.produtos : [];
+    if (!produtos.length) {
+        return false;
+    }
+    const mapeados = produtos.map((item) => mapearProdutoGestor({
+        ...item,
+        custo: 0
+    }));
+    definirProdutosLoja(mapeados);
+    const grupos = gruposRaiz(data.grupos, mapeados);
+    localStorage.setItem("erp-grupos-loja-v1", JSON.stringify(grupos));
+    localStorage.setItem("erp-marcas-loja-v1", JSON.stringify(Array.isArray(data.marcas) ? data.marcas : []));
+    gravarMetaGestor({
+        ...(metaGestor() || {}),
+        origem: "erp",
+        importadoEm: new Date().toISOString(),
+        produtosMemoria: produtos.length,
+        grupos: grupos.length,
+        marcas: (data.marcas || []).length
+    });
+    avisarPrecosAtualizados();
+    return true;
+}
+
 export async function garantirCatalogoLoja() {
+    try {
+        if (await puxarVitrineErp()) {
+            return metaGestor();
+        }
+    } catch {
+        /* o ERP ainda não respondeu: segue o arquivo local */
+    }
     const ja = produtosLoja();
     if (!(ja.length > 20 && Object.prototype.hasOwnProperty.call(ja[0], "custo"))) {
         try {

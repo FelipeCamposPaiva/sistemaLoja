@@ -222,7 +222,7 @@ public class DashboardFinanceiroService {
 
     private boolean abertaReceber(ContaReceber conta) {
         String status = conta.getStatus() == null ? "" : conta.getStatus().toUpperCase(PT);
-        return !status.equals("RECEBIDO") && !status.equals("CANCELADO") && !status.equals("AGRUPADO");
+        return !status.equals("RECEBIDO") && !status.equals("CANCELADO") && !status.equals("AGRUPADO") && !status.equals("CREDITO");
     }
 
     private boolean abertaPagar(ContaPagar conta) {

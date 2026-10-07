@@ -219,7 +219,49 @@ public class PedidoVendaController {
         if (corpo.get("status") != null) {
             pedido.setStatus(String.valueOf(corpo.get("status")));
         }
+        gravarDetalheExpedicao(pedido, corpo);
         return repository.save(pedido);
+    }
+
+    private void gravarDetalheExpedicao(PedidoVenda pedido, Map<String, Object> corpo) {
+        String[] campos = {"embalagem", "rastreio", "formaEnvio", "volumes", "notaFiscal", "dataLimiteDespacho"};
+        Map<String, Object> extra = null;
+        for (String campo : campos) {
+            if (!corpo.containsKey(campo) || corpo.get(campo) == null) {
+                continue;
+            }
+            if (extra == null) {
+                extra = detalhesMutavel(pedido);
+            }
+            extra.put(campo, String.valueOf(corpo.get(campo)));
+        }
+        if (extra == null) {
+            return;
+        }
+        try {
+            pedido.setDetalhes(mapper.writeValueAsString(extra));
+        } catch (Exception ex) {
+            throw new IllegalStateException("Não foi possível gravar os dados de expedição.");
+        }
+    }
+
+    private Map<String, Object> detalhesMutavel(PedidoVenda pedido) {
+        Map<String, Object> extra = new HashMap<>();
+        String bruto = pedido.getDetalhes();
+        if (bruto == null || bruto.isBlank()) {
+            return extra;
+        }
+        try {
+            String texto = bruto.trim();
+            if (texto.startsWith("{")) {
+                extra.putAll(mapper.readValue(texto, new TypeReference<Map<String, Object>>() {}));
+            } else if (texto.startsWith("[")) {
+                extra.put("itens", mapper.readValue(texto, new TypeReference<List<Map<String, Object>>>() {}));
+            }
+        } catch (Exception ignored) {
+            /* detalhes inválido */
+        }
+        return extra;
     }
 
     private Map<String, Object> lancarUm(PedidoVenda pedido) {

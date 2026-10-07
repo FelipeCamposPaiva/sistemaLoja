@@ -49,7 +49,7 @@ export default function Tecnicos() {
             <nav className="dash-crumb">
                 <Link to="/index">início</Link>
                 <span>›</span>
-                <span>serviços</span>
+                <span>cadastros</span>
                 <span>›</span>
                 <span>técnicos</span>
             </nav>

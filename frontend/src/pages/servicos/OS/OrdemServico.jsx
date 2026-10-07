@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
     CalendarDays,
     Check,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Columns3,
     FileSpreadsheet,
     FileText,
@@ -38,6 +40,7 @@ import {
 } from "../../../services/os.service";
 import { lerArquivoOS, lerPlanilhaOS, mesclarLeiturasOS } from "../../../services/osImport.service";
 import ROTAS from "../../../constants/rotas";
+import { lerContatos } from "../../../constants/contatos";
 import ImportadorMassa from "../../cadastros/ImportadorMassa";
 import NovaOS from "./NovaOS";
 
@@ -48,12 +51,14 @@ import "../../../styles/pages/clientes.css";
 import "../../../styles/pages/produtos.css";
 import "../../../styles/pages/os.css";
 
-const COLUNAS_KEY = "erp-os-colunas-v2";
+const COLUNAS_KEY = "erp-os-colunas-v3";
+const COLUNAS_PADRAO = ["numero", "data", "prevista", "conclusao", "cliente", "fantasia", "total", "equipamento", "marcadores", "integracoes"];
+const TAMANHOS_PAGINA = [20, 50, 100];
 const HOJE = new Date();
 
 function periodoPadrao() {
     return {
-        modo: "mes",
+        modo: "nenhum",
         campo: "entrada",
         mes: HOJE.getMonth(),
         ano: HOJE.getFullYear(),
@@ -127,7 +132,72 @@ function colunasSalvas() {
     } catch {
         /* ignore */
     }
-    return COLUNAS_OS.map((c) => c.id);
+    return [...COLUNAS_PADRAO];
+}
+
+function faixasPagina(atual, total) {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => ({ tipo: "pagina", n: i + 1 }));
+    }
+    let de = 2;
+    let ate = 5;
+    if (atual > 4 && atual < total - 3) {
+        de = atual - 1;
+        ate = atual + 1;
+    } else if (atual >= total - 3) {
+        de = Math.max(2, total - 4);
+        ate = total - 1;
+    }
+    const itens = [{ tipo: "pagina", n: 1 }];
+    if (de > 2) {
+        itens.push({ tipo: "reticencias", id: "antes" });
+    }
+    for (let n = de; n <= ate; n += 1) {
+        itens.push({ tipo: "pagina", n });
+    }
+    if (ate < total - 1) {
+        itens.push({ tipo: "reticencias", id: "depois" });
+    }
+    itens.push({ tipo: "pagina", n: total });
+    return itens;
+}
+
+function valorOrdem(os, campo) {
+    if (campo === "numero") {
+        const n = Number(String(os.numero || os.id || "").replace(/\D/g, ""));
+        return Number.isFinite(n) ? n : 0;
+    }
+    if (campo === "data") {
+        return isoDate(os.dataAbertura) || "";
+    }
+    if (campo === "prevista") {
+        return isoDate(os.dataPrevisao) || "";
+    }
+    if (campo === "conclusao") {
+        return isoDate(os.dataConclusao) || "";
+    }
+    if (campo === "total") {
+        return Number(os.valor || 0);
+    }
+    if (campo === "cliente") {
+        return String(os.cliente || "").toLowerCase();
+    }
+    if (campo === "fantasia") {
+        return String(os.fantasia || "").toLowerCase();
+    }
+    if (campo === "equipamento") {
+        return String(os.equipamento || "").toLowerCase();
+    }
+    if (campo === "marcadores") {
+        return String(os.marcadores || "").toLowerCase();
+    }
+    if (campo === "tecnicos") {
+        return nomesTecnicos(os).toLowerCase();
+    }
+    if (campo === "setor") {
+        return String(os.setorAtual || os.status || "").toLowerCase();
+    }
+    return "";
 }
 
 function exportarCsv(lista) {
@@ -161,6 +231,7 @@ export default function OrdemServico() {
 
 function ListaOS() {
     const navigate = useNavigate();
+    const [params] = useSearchParams();
     const raiz = useRef(null);
     const xlsRef = useRef(null);
     const [lista, setLista] = useState([]);
@@ -178,6 +249,9 @@ function ListaOS() {
     const [rascunho, setRascunho] = useState({ marcador: "", tecnico: "" });
     const [importando, setImportando] = useState(false);
     const [importadorMassa, setImportadorMassa] = useState(false);
+    const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = useState(50);
+    const [ordem, setOrdem] = useState({ campo: "numero", dir: "desc" });
 
     async function carregar() {
         setLoading(true);
@@ -195,6 +269,25 @@ function ListaOS() {
     useEffect(() => {
         carregar();
     }, []);
+
+    useEffect(() => {
+        setPagina(1);
+    }, [busca, aba, periodo, filtros, porPagina]);
+
+    useEffect(() => {
+        const equipamento = params.get("equipamento");
+        if (equipamento) {
+            setBusca(equipamento);
+        }
+        const id = params.get("contato");
+        if (!id) {
+            return;
+        }
+        const contato = lerContatos().find((item) => String(item.id) === String(id));
+        if (contato?.nome) {
+            setBusca(contato.nome);
+        }
+    }, [params]);
 
     useEffect(() => {
         function fechar(ev) {
@@ -226,7 +319,7 @@ function ListaOS() {
                 }
             }
             if (termo) {
-                const blob = [os.cliente, os.fantasia, os.numero, os.descricao, os.marcadores, nomesTecnicos(os)].join(" ").toLowerCase();
+                const blob = [os.cliente, os.fantasia, os.numero, os.descricao, os.equipamento, os.marcadores, nomesTecnicos(os)].join(" ").toLowerCase();
                 if (!blob.includes(termo)) {
                     return false;
                 }
@@ -249,6 +342,25 @@ function ListaOS() {
         return baseFiltrada.filter((os) => aba === "todas" || abaDaSituacao(os.status) === aba);
     }, [baseFiltrada, aba]);
 
+    const ordenadas = useMemo(() => {
+        const fator = ordem.dir === "asc" ? 1 : -1;
+        return [...visiveis].sort((a, b) => {
+            const va = valorOrdem(a, ordem.campo);
+            const vb = valorOrdem(b, ordem.campo);
+            if (va < vb) {
+                return -1 * fator;
+            }
+            if (va > vb) {
+                return 1 * fator;
+            }
+            return 0;
+        });
+    }, [visiveis, ordem]);
+
+    const totalPaginas = Math.max(1, Math.ceil(ordenadas.length / porPagina));
+    const paginaAtual = Math.min(pagina, totalPaginas);
+    const fatia = ordenadas.slice((paginaAtual - 1) * porPagina, paginaAtual * porPagina);
+
     const temFiltro = busca || periodo.modo !== "nenhum" || filtros.marcador || filtros.tecnico || aba !== "todas";
 
     function visivel(id) {
@@ -270,11 +382,20 @@ function ListaOS() {
     }
 
     function marcarPagina(ev) {
+        const ids = fatia.map((os) => os.id);
         if (ev.target.checked) {
-            setMarcados(visiveis.map((os) => os.id));
+            setMarcados((atual) => [...new Set([...atual, ...ids])]);
             return;
         }
-        setMarcados([]);
+        setMarcados((atual) => atual.filter((id) => !ids.includes(id)));
+    }
+
+    function alternarOrdem(campo) {
+        setOrdem((atual) => (
+            atual.campo === campo
+                ? { campo, dir: atual.dir === "asc" ? "desc" : "asc" }
+                : { campo, dir: campo === "numero" || campo === "data" || campo === "total" ? "desc" : "asc" }
+        ));
     }
 
     async function aplicarStatus(status) {
@@ -346,7 +467,7 @@ function ListaOS() {
     const totalVis = visiveis.reduce((acc, os) => acc + Number(os.valor || 0), 0);
 
     return (
-        <div className="os-page" ref={raiz}>
+        <div className="os-page has-pager" ref={raiz}>
             <nav className="dash-crumb">
                 <Link to="/index">início</Link>
                 <span>›</span>
@@ -368,8 +489,6 @@ function ListaOS() {
                     <button type="button" className="prd-btn prd-btn-primary" onClick={() => navigate({ pathname: ROTAS.ORDEM_SERVICO, hash: "add" })}>
                         incluir ordem de serviço
                     </button>
-                    <Link className="os-ghost" to={ROTAS.TECNICOS}>técnicos</Link>
-                    <Link className="os-ghost" to={ROTAS.RELATORIO_TECNICOS}>relatório por técnico</Link>
                     <div className="ctt-drop">
                         <button
                             type="button"
@@ -377,12 +496,18 @@ function ListaOS() {
                             onClick={() => setAberto(aberto === "mais" ? null : "mais")}
                         >
                             mais ações
-                            <ChevronDown size={14} />
+                            <MoreHorizontal size={16} />
                         </button>
                         {aberto === "mais" ? (
                             <div className="ctt-menu is-right">
                                 <button type="button" onClick={imprimir}>
                                     <Printer size={14} /> imprimir relatório
+                                </button>
+                                <button type="button" onClick={() => { navigate(ROTAS.TECNICOS); setAberto(null); }}>
+                                    técnicos
+                                </button>
+                                <button type="button" onClick={() => { navigate(ROTAS.RELATORIO_TECNICOS); setAberto(null); }}>
+                                    relatório por técnico
                                 </button>
                                 <button type="button" onClick={() => { navigate("/ordem_servicos/exportar"); setAberto(null); }}>
                                     <FileSpreadsheet size={14} /> exportar ordens de serviço para planilha
@@ -416,7 +541,7 @@ function ListaOS() {
                     <input
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        placeholder="Pesquise por cliente, nº da ordem ou nº de série"
+                        placeholder="Pesquise por cliente, nº da ordem ou nº da série"
                     />
                 </label>
                 <div className="ctt-drop">
@@ -539,9 +664,11 @@ function ListaOS() {
                         </div>
                     ) : null}
                 </div>
-                <button type="button" className="idx-text" disabled={!temFiltro} onClick={limparFiltros}>
-                    limpar filtros
-                </button>
+                {temFiltro ? (
+                    <button type="button" className="idx-text" onClick={limparFiltros}>
+                        limpar filtros
+                    </button>
+                ) : null}
             </div>
 
             <div className="os-tabs">
@@ -550,6 +677,7 @@ function ListaOS() {
                         key={sit.id}
                         type="button"
                         className={aba === sit.id ? "is-active" : ""}
+                        style={aba === sit.id && sit.cor ? { borderBottomColor: sit.cor } : undefined}
                         onClick={() => setAba(sit.id)}
                     >
                         <span>
@@ -579,27 +707,30 @@ function ListaOS() {
                             <th className="ctt-check">
                                 <input
                                     type="checkbox"
-                                    checked={visiveis.length > 0 && visiveis.every((os) => marcados.includes(os.id))}
+                                    checked={fatia.length > 0 && fatia.every((os) => marcados.includes(os.id))}
                                     onChange={marcarPagina}
-                                    aria-label="Selecionar todas"
+                                    aria-label="Selecionar a página"
                                 />
                             </th>
                             <th />
                             {COLUNAS_OS.filter((c) => visivel(c.id)).map((c) => (
                                 <th key={c.id} className={c.id === "total" ? "is-num" : ""}>
-                                    {c.label} <span>↕</span>
+                                    <button type="button" className="os-sort" onClick={() => alternarOrdem(c.id)}>
+                                        {c.label}
+                                        <span>{ordem.campo === c.id ? (ordem.dir === "asc" ? "↑" : "↓") : "↕"}</span>
+                                    </button>
                                 </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {visiveis.length === 0 ? (
+                        {ordenadas.length === 0 ? (
                             <tr>
                                 <td colSpan={2 + colunas.length} className="ctt-vazio">
                                     Nenhuma ordem de serviço encontrada.
                                 </td>
                             </tr>
-                        ) : visiveis.map((os) => {
+                        ) : fatia.map((os) => {
                             const sit = situacaoMeta(os.status);
                             return (
                                 <tr key={os.id} className={marcados.includes(os.id) ? "is-sel" : ""}>
@@ -650,8 +781,8 @@ function ListaOS() {
                                     {visivel("integracoes") ? (
                                         <td>
                                             <span className="os-int">
-                                                <em className={os.contasLancadas ? "is-on" : ""}>C</em>
-                                                <em className={os.estoqueLancado ? "is-on" : ""}>V</em>
+                                                <em className={os.contasLancadas ? "is-on" : ""} title="Contas"><Check size={12} /></em>
+                                                <em className={os.estoqueLancado ? "is-on" : ""} title="Estoque"><Check size={12} /></em>
                                             </span>
                                         </td>
                                     ) : null}
@@ -674,7 +805,7 @@ function ListaOS() {
                         <Check size={14} /> finalizar
                     </button>
                     <button type="button" onClick={imprimir}><Printer size={14} /> imprimir</button>
-                    <button type="button" onClick={() => navigate("/nfs")}><FileText size={14} /> gerar nota fiscal</button>
+                    <button type="button" onClick={() => navigate(ROTAS.NFS)}><FileText size={14} /> gerar nota fiscal</button>
                     <button type="button" className="os-danger" onClick={excluirMarcadas}><Trash2 size={14} /> excluir</button>
                     <div className="ctt-drop">
                         <button type="button" className="os-ghost" onClick={() => setAberto(aberto === "bulk" ? null : "bulk")}>
@@ -684,7 +815,7 @@ function ListaOS() {
                             <div className="ctt-menu is-up">
                                 <button type="button" onClick={() => aplicarStatus("ENTREGUE")}><Check size={14} /> finalizar</button>
                                 <button type="button" onClick={imprimir}><Printer size={14} /> imprimir</button>
-                                <button type="button" onClick={() => navigate("/nfs")}><FileText size={14} /> gerar nota fiscal</button>
+                                <button type="button" onClick={() => navigate(ROTAS.NFS)}><FileText size={14} /> gerar nota fiscal</button>
                                 <button type="button" onClick={excluirMarcadas}><Trash2 size={14} /> excluir ordens de serviço</button>
                                 <button type="button" onClick={async () => {
                                     await Promise.all(marcados.map(async (id) => {
@@ -725,20 +856,62 @@ function ListaOS() {
                             </div>
                         ) : null}
                     </div>
-                    <div className="os-bulk-tot">
-                        <span>selecionadas <strong>{marcados.length}</strong></span>
-                        <span>quantidade <strong>{visiveis.length}</strong></span>
-                        <span>valor total (R$) <strong>{moeda(totalSel)}</strong></span>
                     </div>
+            ) : null}
+
+            <footer className="os-foot">
+                <div className="os-foot-nav">
+                    <nav className="ctt-pag" aria-label="Páginas">
+                        <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina(paginaAtual - 1)} aria-label="Página anterior">
+                            <ChevronLeft size={16} />
+                        </button>
+                        {faixasPagina(paginaAtual, totalPaginas).map((item) => (
+                            item.tipo === "reticencias" ? (
+                                <span key={item.id} className="os-ellipsis">…</span>
+                            ) : (
+                                <button
+                                    key={item.n}
+                                    type="button"
+                                    className={item.n === paginaAtual ? "is-active" : ""}
+                                    onClick={() => setPagina(item.n)}
+                                >
+                                    {String(item.n).padStart(2, "0")}
+                                </button>
+                            )
+                        ))}
+                        <button type="button" disabled={paginaAtual >= totalPaginas} onClick={() => setPagina(paginaAtual + 1)} aria-label="Próxima página">
+                            <ChevronRight size={16} />
+                        </button>
+                    </nav>
+                    <label className="erp-pager-size">
+                        <select
+                            value={porPagina}
+                            onChange={(e) => setPorPagina(Number(e.target.value))}
+                            aria-label="Itens por página"
+                        >
+                            {TAMANHOS_PAGINA.map((n) => (
+                                <option key={n} value={n}>{n} por página</option>
+                            ))}
+                        </select>
+                    </label>
                 </div>
-            ) : (
-                <div className="os-bulk os-bulk-only">
-                    <div className="os-bulk-tot">
-                        <span>quantidade <strong>{visiveis.length}</strong></span>
-                        <span>valor total (R$) <strong>{moeda(totalVis)}</strong></span>
-                    </div>
+                <div className="os-foot-tot">
+                    {marcados.length > 0 ? (
+                        <span>
+                            <strong>{marcados.length}</strong>
+                            <small>selecionadas · {moeda(totalSel)}</small>
+                        </span>
+                    ) : null}
+                    <span>
+                        <strong>{visiveis.length}</strong>
+                        <small>quantidade</small>
+                    </span>
+                    <span>
+                        <strong>{moeda(totalVis)}</strong>
+                        <small>valor total (R$)</small>
+                    </span>
                 </div>
-            )}
+            </footer>
 
             <ImportadorMassa
                 aberto={importadorMassa}

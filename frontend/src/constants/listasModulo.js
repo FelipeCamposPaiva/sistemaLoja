@@ -58,6 +58,14 @@ const EXTRAS = {
         empty: "Nenhum orçamento.",
         seed: [item("ORC-90", "Kit escolar 40 unidades", "Aberto")]
     },
+    "/contratos_servicos": {
+        incluir: "Incluir contrato",
+        empty: "Nenhum contrato de serviço."
+    },
+    "/cobrancas_servicos": {
+        incluir: "Incluir cobrança",
+        empty: "Nenhuma cobrança de serviço."
+    },
     "/inventario": {
         incluir: "Incluir inventário",
         empty: "Nenhum inventário em andamento."

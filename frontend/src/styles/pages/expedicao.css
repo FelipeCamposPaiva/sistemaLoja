@@ -1,0 +1,361 @@
+.exp-page {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.exp-page > * {
+    min-width: 0;
+}
+
+.exp-page .fer-head {
+    margin-bottom: 0;
+}
+
+.exp-page .prd-sub {
+    margin: 6px 0 0;
+}
+
+.exp-fluxo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 8px;
+}
+
+.exp-etapa {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-height: 72px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.exp-etapa small {
+    font-size: 12px;
+    color: var(--muted, #64748b);
+}
+
+.exp-etapa strong {
+    font-size: 22px;
+    letter-spacing: -0.03em;
+}
+
+.exp-etapa.is-on {
+    border-color: var(--accent, #ff2f92);
+    box-shadow: inset 3px 0 0 var(--accent, #ff2f92);
+}
+
+.exp-etapa.is-abertas strong { color: #0f172a; }
+.exp-etapa.is-fila strong { color: #c2410c; }
+.exp-etapa.is-embalar strong { color: #7e22ce; }
+.exp-etapa.is-separando strong { color: #1d4ed8; }
+.exp-etapa.is-separar strong { color: #b45309; }
+.exp-etapa.is-despachados strong { color: #334155; }
+
+.exp-alertas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.exp-alertas button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+}
+
+.exp-alertas button b {
+    font-size: 12px;
+    color: var(--muted, #64748b);
+}
+
+.exp-alertas button.is-on {
+    border-color: var(--accent, #ff2f92);
+    color: var(--accent, #ff2f92);
+}
+
+.exp-envio {
+    min-height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font: inherit;
+}
+
+.exp-corpo {
+    min-width: 0;
+}
+
+.exp-page .os-scroll {
+    max-width: 100%;
+}
+
+.exp-table {
+    width: 100%;
+    min-width: 860px;
+}
+
+.exp-corpo.has-painel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 14px;
+    align-items: start;
+}
+
+.exp-pedido {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exp-abrir {
+    min-height: 26px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+
+.exp-abrir:hover {
+    border-color: var(--accent, #ff2f92);
+    color: var(--accent, #ff2f92);
+}
+
+.exp-table small.exp-origem {
+    display: block;
+    color: var(--muted, #64748b);
+    font-size: 11px;
+}
+
+.exp-table tr.is-late td {
+    background: #fff7ed;
+}
+
+.exp-table tr.is-open td {
+    background: color-mix(in srgb, var(--accent, #ff2f92) 8%, #fff);
+}
+
+.exp-tarde {
+    color: #c2410c;
+    font-weight: 700;
+}
+
+.exp-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.exp-badge.is-coleta { background: #ffedd5; color: #c2410c; }
+.exp-badge.is-embalar { background: #f3e8ff; color: #7e22ce; }
+.exp-badge.is-separando { background: #dbeafe; color: #1d4ed8; }
+.exp-badge.is-separar { background: #fef3c7; color: #b45309; }
+.exp-badge.is-transporte { background: #e2e8f0; color: #334155; }
+.exp-badge.is-entregue { background: #ecfccb; color: #3f6212; }
+
+.exp-acoes {
+    text-align: right;
+}
+
+.exp-mais {
+    margin-top: 10px;
+}
+
+.exp-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 10px;
+    color: var(--muted, #64748b);
+    font-size: 13px;
+}
+
+.exp-foot strong {
+    color: inherit;
+}
+
+.exp-painel {
+    position: sticky;
+    top: 12px;
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.exp-painel header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.exp-painel header p,
+.exp-painel-cli span {
+    margin: 0;
+    color: var(--muted, #64748b);
+    font-size: 12px;
+}
+
+.exp-painel h3 {
+    margin: 0;
+}
+
+.exp-painel-cli {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+}
+
+.exp-alerta {
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 13px;
+}
+
+.exp-itens {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 220px;
+    overflow: auto;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+}
+
+.exp-itens li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+}
+
+.exp-itens li:last-child {
+    border-bottom: 0;
+}
+
+.exp-itens small {
+    display: block;
+    color: var(--muted, #64748b);
+}
+
+.exp-painel label {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--muted, #64748b);
+}
+
+.exp-painel input,
+.exp-painel select {
+    min-height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0 10px;
+    font: inherit;
+    color: inherit;
+    background: #fff;
+}
+
+.exp-painel-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.exp-painel-acoes .prd-btn,
+.exp-painel-acoes a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.exp-romaneio {
+    display: none;
+}
+
+@media (max-width: 1100px) {
+    .exp-corpo.has-painel {
+        grid-template-columns: 1fr;
+    }
+
+    .exp-painel {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .exp-fluxo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .exp-romaneio,
+    .exp-romaneio * {
+        visibility: visible;
+    }
+
+    .exp-romaneio {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #111;
+    }
+
+    .exp-romaneio table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .exp-romaneio th,
+    .exp-romaneio td {
+        border-bottom: 1px solid #ccc;
+        padding: 6px 4px;
+        text-align: left;
+        font-size: 12px;
+    }
+}

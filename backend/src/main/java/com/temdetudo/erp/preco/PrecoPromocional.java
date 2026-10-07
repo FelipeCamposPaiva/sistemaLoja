@@ -47,12 +47,23 @@ public final class PrecoPromocional {
     }
 
     public static void reajustar(Produto produto, BigDecimal percentual) {
+        reajustar(produto, percentual, true, true);
+    }
+
+    public static void reajustar(Produto produto, BigDecimal percentual, boolean venda, boolean atacado) {
         if (produto == null || percentual == null) {
             return;
         }
-        BigDecimal preco = n(produto.getPreco());
         BigDecimal fator = BigDecimal.ONE.add(percentual.divide(CEM, 8, ARRED));
-        produto.setPreco(preco.multiply(fator).setScale(CASAS, ARRED));
+        if (venda) {
+            produto.setPreco(n(produto.getPreco()).multiply(fator).setScale(CASAS, ARRED));
+        }
+        if (atacado) {
+            BigDecimal atual = n(produto.getPrecoAtacado());
+            if (atual.compareTo(BigDecimal.ZERO) > 0) {
+                produto.setPrecoAtacado(atual.multiply(fator).setScale(CASAS, ARRED));
+            }
+        }
         alinhar(produto);
     }
 

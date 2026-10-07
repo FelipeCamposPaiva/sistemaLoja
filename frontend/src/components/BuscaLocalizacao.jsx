@@ -21,7 +21,9 @@ export default function BuscaLocalizacao({
     onSoEstoque,
     filtroEstoque,
     onFiltroEstoque,
-    placeholder = "Ex.: PT-150, caixa, corredor ou setor"
+    onKeyDown,
+    placeholder = "Ex.: PT-150, caixa, corredor ou setor",
+    children
 }) {
     const filtro = filtroAtual(filtroEstoque, soEstoque);
     const mostrarFiltro = Boolean(onFiltroEstoque || onSoEstoque);
@@ -41,6 +43,7 @@ export default function BuscaLocalizacao({
                     placeholder={placeholder}
                     autoComplete="off"
                     aria-label="Localização"
+                    onKeyDown={onKeyDown}
                 />
                 {localizacao ? (
                     <button type="button" className="prd-limpar" onClick={() => onLocalizacao("")} aria-label="Limpar busca">
@@ -48,6 +51,7 @@ export default function BuscaLocalizacao({
                     </button>
                 ) : null}
             </label>
+            {children}
             {mostrarFiltro ? (
                 <div className="loc-estoque-pills" role="group" aria-label="Situação do estoque">
                     {FILTROS_ESTOQUE.map((item) => (

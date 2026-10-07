@@ -4,7 +4,7 @@ import { Printer } from "lucide-react";
 
 import BuscaLocalizacao from "../../components/BuscaLocalizacao";
 import ROTAS from "../../constants/rotas";
-import { filtrarPorLocalizacao, imprimirProdutosLocalizacao } from "../../services/localizacao";
+import { filtrarPorLocalizacao, imprimirProdutosLocalizacao, localizacaoDe } from "../../services/localizacao";
 import { criarInventario, listarInventarios } from "../../services/inventario.service";
 import { listarProdutos } from "../../services/produto.service";
 
@@ -123,6 +123,12 @@ export default function Inventario() {
                         <Printer size={15} />
                         imprimir folha de contagem
                     </button>
+                    <Link
+                        className="prd-btn"
+                        to={localizacao.trim() ? `${ROTAS.LOCALIZACOES}?localizacao=${encodeURIComponent(localizacao.trim())}` : ROTAS.LOCALIZACOES}
+                    >
+                        ver no mapa de prateleiras
+                    </Link>
                 </div>
             </div>
 
@@ -155,7 +161,7 @@ export default function Inventario() {
                             <tr key={p.id}>
                                 <td>{p.sku || "—"}</td>
                                 <td>{p.nome}</td>
-                                <td>{p.localizacao || "—"}</td>
+                                <td>{localizacaoDe(p) || "—"}</td>
                                 <td>{qtd(p.estoque)}</td>
                             </tr>
                         ))}

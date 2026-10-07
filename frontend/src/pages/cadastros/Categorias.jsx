@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
     ArrowUpDown,
     BookOpen,
@@ -68,6 +68,7 @@ function fmt(n) {
 }
 
 export default function Categorias() {
+    const [params] = useSearchParams();
     const arquivoRef = useRef(null);
     const fotoRef = useRef(null);
     const [lista, setLista] = useState(lerCategorias);
@@ -75,7 +76,14 @@ export default function Categorias() {
     const [abertas, setAbertas] = useState(() => new Set(["50070", "cadernos", "canetas"]));
     const [selId, setSelId] = useState("50070");
     const [form, setForm] = useState(() => lerCategorias().find((c) => c.id === "50070") || novaCategoria());
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(() => params.get("q") || "");
+
+    useEffect(() => {
+        const q = params.get("q");
+        if (q) {
+            setBusca(q);
+        }
+    }, [params]);
     const [filtroPai, setFiltroPai] = useState("todas");
     const [filtroStatus, setFiltroStatus] = useState("todos");
     const [aba, setAba] = useState("info");

@@ -878,6 +878,41 @@ export function holeritesDe(funcId) {
     return HOLERITES.filter((h) => String(h.funcId) === String(funcId));
 }
 
+export function mesmoNome(a, b) {
+    const na = String(a || "").trim().toLowerCase();
+    const nb = String(b || "").trim().toLowerCase();
+    if (!na || !nb) {
+        return false;
+    }
+    if (na === nb) {
+        return true;
+    }
+    const pa = na.split(/\s+/)[0];
+    const pb = nb.split(/\s+/)[0];
+    return pa.length > 2 && pa === pb;
+}
+
+export function equipeAtiva() {
+    return listarFuncionarios()
+        .filter((f) => f.situacao !== "desligado")
+        .map((f) => ({
+            id: f.id,
+            nome: nomePessoa(f.nome),
+            cargo: f.cargo || "",
+            producao: /produ|gr[áa]fic|design|colabor/i.test(f.cargo || "")
+        }));
+}
+
+export function supervisorDe(nome) {
+    const equipe = equipeAtiva();
+    const pessoa = equipe.find((p) => mesmoNome(p.nome, nome));
+    if (pessoa && /s[oó]ci|pr[oó]-labore|administrador/i.test(pessoa.cargo)) {
+        return "Administrador";
+    }
+    const socia = equipe.find((p) => /s[oó]ci|pr[oó]-labore/i.test(p.cargo));
+    return socia?.nome || "Administrador";
+}
+
 export const SITUACAO = {
     ativo: { nome: "Ativo", classe: "ok" },
     experiencia: { nome: "Experiência", classe: "exp" },

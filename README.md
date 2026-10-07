@@ -34,6 +34,16 @@ npm run dev
 
 O `vite.config` sobe o Spring Boot automaticamente se a porta 8080 estiver livre.
 
+## Executável (outro computador)
+
+Na máquina de desenvolvimento, com Java 21, Node.js e o MySQL desta loja no ar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ops/empacotar-exe.ps1
+```
+
+O pacote sai em `desktop/saida/ERP-TemDeTudo-windows.zip`. No computador novo, extraia a pasta inteira (não só o `.exe`), instale o MySQL Server e abra `ERP-TemDeTudo.exe`. A primeira execução pede o usuário do MySQL, cria as tabelas e abre o navegador. Feche a janela preta para encerrar.
+
 ## Estrutura
 
 ```

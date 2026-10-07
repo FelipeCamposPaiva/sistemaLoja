@@ -1,78 +1,141 @@
-import { Link } from "react-router-dom";
-import { History, Plug, ReceiptText, Settings, Shield, Users, Wrench } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { Search } from "lucide-react";
 
+import { PREFERENCIAS, PREFERENCIAS_ABAS, abaPorRota } from "../../constants/preferencias";
 import ROTAS from "../../constants/rotas";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
-import "../../styles/pages/ferramentas.css";
+import "../../styles/pages/preferencias.css";
 
-const BLOCOS = [
-    {
-        titulo: "Empresa",
-        texto: "Dados da loja, usuários e permissões.",
-        links: [
-            { nome: "Minha conta", rota: "/dados_conta", Icon: Users },
-            { nome: "Equipe", rota: "/funcionarios", Icon: Users }
-        ]
-    },
-    {
-        titulo: "Fiscal e vendas",
-        texto: "Notas, PDV, faturamento e boletos.",
-        links: [
-            { nome: "Notas de entrada", rota: `${ROTAS.NOTAS_ENTRADA}#list`, Icon: ReceiptText },
-            { nome: "PDV", rota: ROTAS.PDV, Icon: ReceiptText },
-            { nome: "Juros e multa", rota: "/configuracoes/juros-multa", Icon: ReceiptText },
-            { nome: "Inutilização de NF-e", rota: "/ferramentas/nfe-inutilizacao", Icon: Shield }
-        ]
-    },
-    {
-        titulo: "Integrações e manutenção",
-        texto: "Canais, backup e tarefas.",
-        links: [
-            { nome: "Loja virtual", rota: ROTAS.LOJA_ADMIN, Icon: Plug },
-            { nome: "Integrações", rota: ROTAS.INTEGRACOES, Icon: Plug },
-            { nome: "Ferramentas", rota: ROTAS.FERRAMENTAS, Icon: Wrench },
-            { nome: "Auditoria", rota: ROTAS.AUDITORIA, Icon: History },
-            { nome: "Auditoria de estoque", rota: ROTAS.AUDITORIA_ESTOQUE, Icon: History },
-            { nome: "Backup", rota: "/ferramentas/backup", Icon: Settings }
-        ]
+function textoBusca(valor) {
+    return String(valor || "")
+        .normalize("NFD")
+        .replace(/\p{M}/gu, "")
+        .toLowerCase();
+}
+
+function Selo({ texto, tom }) {
+    if (!texto) {
+        return null;
     }
-];
+    return <span className={`pref-selo${tom === "alerta" ? " is-alerta" : " is-info"}`}>{texto}</span>;
+}
+
+function Linha({ item }) {
+    const miolo = (
+        <>
+            <span>{item.nome}</span>
+            {item.ajuda ? (
+                <span className="pref-ajuda" title={item.ajuda} aria-label={item.ajuda}>?</span>
+            ) : null}
+            <Selo texto={item.selo} tom={item.seloTom} />
+        </>
+    );
+    if (!item.rota) {
+        return <div className="pref-linha is-estatica">{miolo}</div>;
+    }
+    return (
+        <Link className="pref-linha" to={item.rota}>
+            {miolo}
+        </Link>
+    );
+}
 
 export default function Configuracoes() {
+    const { pathname } = useLocation();
+    const aba = abaPorRota(pathname);
+    const [busca, setBusca] = useState("");
+    const [rtcAberto, setRtcAberto] = useState(false);
+    const termo = textoBusca(busca.trim());
+
+    const resultados = useMemo(() => {
+        if (!termo) {
+            return null;
+        }
+        return PREFERENCIAS_ABAS.map((grupo) => ({
+            ...grupo,
+            itens: (PREFERENCIAS[grupo.id] || []).filter((item) => item.tipo !== "secao" && textoBusca(item.nome).includes(termo))
+        })).filter((grupo) => grupo.itens.length);
+    }, [termo]);
+
+    if (!aba) {
+        return <Navigate to="/preferencias_geral" replace />;
+    }
+
+    const itens = PREFERENCIAS[aba.id] || [];
+
     return (
-        <div className="fer-main">
+        <div className="pref-page">
             <nav className="dash-crumb" aria-label="Trilha">
                 <Link to={ROTAS.INDICE}>início</Link>
+                {aba.trilha.map((passo) => (
+                    <span key={passo}>
+                        <span>›</span>
+                        <span>{passo}</span>
+                    </span>
+                ))}
                 <span>›</span>
                 <span>configurações</span>
             </nav>
-            <h2 className="fer-title">Configurações</h2>
-            <p className="idx-sub" style={{ marginBottom: 22 }}>
-                Atalhos para o que a loja usa no dia a dia — sem sair do ERP.
-            </p>
-            <div className="cfg-blocos">
-                {BLOCOS.map((bloco) => (
-                    <section key={bloco.titulo} className="cfg-bloco">
-                        <h3>{bloco.titulo}</h3>
-                        <p>{bloco.texto}</p>
-                        <ul>
-                            {bloco.links.map((link) => {
-                                const Icon = link.Icon;
-                                return (
-                                    <li key={link.rota}>
-                                        <Link to={link.rota}>
-                                            <Icon size={16} />
-                                            {link.nome}
-                                        </Link>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </section>
+            <h2>Configurações do Sistema ERP</h2>
+            <label className="pref-busca">
+                <span className="sr-only">Buscar configuração</span>
+                <input
+                    value={busca}
+                    onChange={(evento) => setBusca(evento.target.value)}
+                    placeholder="Busque pela funcionalidade ou dúvida"
+                />
+                <Search size={16} aria-hidden="true" />
+            </label>
+            <nav className="pref-abas" aria-label="Áreas de configuração">
+                {PREFERENCIAS_ABAS.map((item) => (
+                    <Link key={item.id} to={item.rota} className={item.id === aba.id && !termo ? "is-active" : ""}>
+                        {item.nome}
+                        {item.selo ? <Selo texto={item.selo} tom="info" /> : null}
+                    </Link>
                 ))}
-            </div>
+            </nav>
+
+            {termo ? (
+                <div className="pref-lista">
+                    {resultados.length ? resultados.map((grupo) => (
+                        <section key={grupo.id}>
+                            <h3 className="pref-secao">{grupo.nome}</h3>
+                            {grupo.itens.map((item, indice) => (
+                                <Linha key={`${grupo.id}-${indice}-${item.nome}`} item={item} />
+                            ))}
+                        </section>
+                    )) : (
+                        <p className="pref-vazio">Nenhuma configuração encontrada.</p>
+                    )}
+                </div>
+            ) : (
+                <div className="pref-lista">
+                    {aba.id === "tributacao" ? (
+                        <aside className="pref-rtc">
+                            <p><strong>Configure sua empresa para a Reforma Tributária do Consumo (RTC)</strong></p>
+                            <p>
+                                Para ajudar você nessa transição, o cálculo de CBS e IBS fica desligado até a loja concluir o cadastro dos códigos de classificação.
+                            </p>
+                            <button type="button" onClick={() => setRtcAberto((aberto) => !aberto)}>
+                                {rtcAberto ? "Ocultar detalhes" : "Veja mais detalhes"}
+                            </button>
+                            {rtcAberto ? (
+                                <p>
+                                    As opções de NF-e, NFC-e e NFS-e desta aba mostram o estado atual. O selo desabilitado indica que a emissão ainda usa a tributação vigente.
+                                </p>
+                            ) : null}
+                        </aside>
+                    ) : null}
+                    {itens.map((item, indice) => (
+                        item.tipo === "secao"
+                            ? <h3 key={`${item.nome}-${indice}`} className="pref-secao">{item.nome}</h3>
+                            : <Linha key={`${item.nome}-${indice}`} item={item} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

@@ -24,6 +24,7 @@ const Vendedores = lazy(() => import("../pages/cadastros/Vendedores"));
 const Moveis = lazy(() => import("../pages/cadastros/Moveis"));
 const MovelForm = lazy(() => import("../pages/cadastros/MovelForm"));
 const Maquinas = lazy(() => import("../pages/cadastros/Maquinas"));
+const MaquinaPublica = lazy(() => import("../pages/cadastros/MaquinaPublica"));
 const Embalagens = lazy(() => import("../pages/cadastros/Embalagens"));
 const Ferramentas = lazy(() => import("../pages/inicio/Ferramentas"));
 const FerramentaLista = lazy(() => import("../pages/ferramentas/FerramentaLista"));
@@ -45,10 +46,14 @@ const RhCadastro = lazy(() => import("../pages/painelfuncionario/RhCadastro"));
 const RhMovimento = lazy(() => import("../pages/painelfuncionario/RhMovimento"));
 const PainelProducao = lazy(() => import("../pages/servicos/PainelProducao/Producao"));
 const ProducaoGrafica = lazy(() => import("../pages/servicos/ProducaoGrafica.jsx"));
+const OrdensProducao = lazy(() => import("../pages/servicos/OrdensProducao.jsx"));
 const OrdemServico = lazy(() => import("../pages/servicos/OS/OrdemServico"));
+const Orcamentos = lazy(() => import("../pages/servicos/OS/Orcamentos"));
 const ExportadorOS = lazy(() => import("../pages/servicos/OS/ExportadorOS"));
 const RelatorioTecnicos = lazy(() => import("../pages/servicos/OS/RelatorioTecnicos"));
+const RelatorioGrupo = lazy(() => import("../pages/shared/RelatorioGrupo"));
 const NfsOs = lazy(() => import("../pages/servicos/OS/NfsOs"));
+const RelatoriosServicos = lazy(() => import("../pages/servicos/RelatoriosServicos"));
 const Tecnicos = lazy(() => import("../pages/cadastros/Tecnicos"));
 const NotasEntrada = lazy(() => import("../pages/suprimentos/NotasEntrada"));
 const NotaEntradaForm = lazy(() => import("../pages/suprimentos/NotaEntradaForm"));
@@ -76,6 +81,7 @@ const Promocoes = lazy(() => import("../pages/vendas/Promocoes"));
 const PedidoVenda = lazy(() => import("../pages/vendas/PedidoVenda"));
 const Separacao = lazy(() => import("../pages/vendas/Separacao"));
 const Expedicao = lazy(() => import("../pages/vendas/Expedicao"));
+const DevolucoesVenda = lazy(() => import("../pages/vendas/DevolucoesVenda"));
 const ContasReceber = lazy(() => import("../pages/financas/ContasReceber"));
 const ContasPagar = lazy(() => import("../pages/financas/ContasPagar"));
 const Balancete = lazy(() => import("../pages/financas/Balancete"));
@@ -83,6 +89,22 @@ const CobrancaBancaria = lazy(() => import("../pages/financas/CobrancaBancaria")
 const BalancoPatrimonial = lazy(() => import("../pages/financas/BalancoPatrimonial"));
 const MinhaConta = lazy(() => import("../pages/inicio/MinhaConta"));
 const Configuracoes = lazy(() => import("../pages/configuracoes/Configuracoes"));
+const Empresa = lazy(() => import("../pages/configuracoes/Empresa"));
+const DadosUsuario = lazy(() => import("../pages/configuracoes/DadosUsuario"));
+const UsuariosSistema = lazy(() => import("../pages/configuracoes/UsuariosSistema"));
+const ServidorEmail = lazy(() => import("../pages/configuracoes/ServidorEmail"));
+const EnvioDocumentos = lazy(() => import("../pages/configuracoes/EnvioDocumentos"));
+const EtiquetasConfig = lazy(() => import("../pages/configuracoes/EtiquetasConfig"));
+const AgendaConfig = lazy(() => import("../pages/configuracoes/AgendaConfig"));
+const InterfaceUsuario = lazy(() => import("../pages/configuracoes/InterfaceUsuario"));
+const NotificacoesConfig = lazy(() => import("../pages/configuracoes/NotificacoesConfig"));
+const PrintNodeConfig = lazy(() => import("../pages/configuracoes/PrintNodeConfig"));
+const MultiEmpresas = lazy(() => import("../pages/configuracoes/MultiEmpresas"));
+const SistemaUnidade = lazy(() => import("../pages/configuracoes/SistemaUnidade"));
+const AplicativosApi = lazy(() => import("../pages/configuracoes/AplicativosApi"));
+const TokenApi = lazy(() => import("../pages/configuracoes/TokenApi"));
+const ConfiguracoesApi = lazy(() => import("../pages/configuracoes/ConfiguracoesApi"));
+const WebhooksConfig = lazy(() => import("../pages/configuracoes/WebhooksConfig"));
 const FinanceiroJuros = lazy(() => import("../pages/configuracoes/FinanceiroJuros"));
 const Auditoria = lazy(() => import("../pages/configuracoes/Auditoria"));
 const NotFound = lazy(() => import("../pages/errors/NotFound"));
@@ -112,9 +134,20 @@ function RedirectFerramentas() {
     return <Navigate to={{ pathname: "/ferramentas_geral", search }} replace />;
 }
 
+function RedirectPreferencias() {
+    const { search } = useLocation();
+    return <Navigate to={{ pathname: "/preferencias_geral", search }} replace />;
+}
+
 function RedirectPedidosCompra() {
     const { search } = useLocation();
     return <Navigate to={{ pathname: "/pedidos_compra", search, hash: "list" }} replace />;
+}
+
+function RedirectPreservando({ para, hashPadrao = "" }) {
+    const { search, hash } = useLocation();
+    const ancora = hash && hash !== "#" ? hash.replace(/^#/, "") : hashPadrao;
+    return <Navigate to={{ pathname: para, search, hash: ancora || undefined }} replace />;
 }
 
 function HashList({ hash = "list", children }) {
@@ -144,7 +177,7 @@ const rotasMenu = [
         MENU.flatMap((grupo) =>
             grupo.itens
                 .map((item) => item.rota)
-                .filter((rota) => rota && !["/", "/index", "/dashboard", "/detalhes_versao", "/home_agenda", "/integracoes", "/integracoes", "/integracoes/nova", "/ferramentas", "/ferramentas_geral", "/contatos", "/contatos#/", "/dashboard#/vendas", "/dashboard#/financas", "/dashboard#/estoque", "/dashboard#/expedicao", "/dashboard-financeiro", "/dados_conta", "/clientes", "/produtos", "/produtos#list", "/produto_categorias", "/categorias-produtos", "/marcas", "/marcas#list", "/vendedores", "/vendedores#list", "/moveis", "/maquinas", "/embalagens", "/embalagens#list", "/localizacoes", "/ponto", "/ponto/registros", "/ponto/espelho", "/ponto/ajustes", "/ponto/relatorios", "/funcionarios", "/ferias", "/rescisoes", "/informes", "/rh-avisos", "/holerite", "/guias", "/rh-documentos", "/comissoes", "/painel-producao", "/producao", "/rh", "/crm", "/loja", "/loja-admin", "/pedido-ecommerce", "/notas-entrada", "/notas_entrada", "/notas_entrada#list", "/conferencia-compra", "/entrada_de_mercadorias", "/servicos-tomados", "/servicos_tomados", "/servicos_tomados#/", "/pdv", "/promocoes", "/produtos/reajuste", "/pedido-venda", "/vendas", "/vendas#list", "/separacao", "/expedicao", "/expedicao/dashboard", "/contas-receber", "/contas-pagar", "/balancete", "/balanco-patrimonial", "/cobranca-bancaria", "/minha-conta", "/configuracoes", "/configuracoes/juros-multa", "/auditoria", "/estoque", "/estoque/auditoria", "/estoque/dashboard", "/ordens-compra", "/pedidos_compra", "/pedidos_compra#list", "/necessidades-compra", "/giro-estoque", "/inventario", "/ordem_servicos", "/ordem_servicos/relatorio-tecnicos", "/tecnicos", "/nfs", "/os", "/os/nova", "/nova-os"].includes(rota))
+                .filter((rota) => rota && !String(rota).startsWith("/relatorio/") && !["/", "/index", "/dashboard", "/detalhes_versao", "/home_agenda", "/integracoes", "/integracoes", "/integracoes/nova", "/ferramentas", "/ferramentas_geral", "/contatos", "/contatos#/", "/dashboard#/vendas", "/dashboard#/financas", "/dashboard#/estoque", "/dashboard#/expedicao", "/dashboard-financeiro", "/dados_conta", "/clientes", "/produtos", "/produtos#list", "/produto_categorias", "/categorias-produtos", "/marcas", "/marcas#list", "/vendedores", "/vendedores#list", "/moveis", "/maquinas", "/embalagens", "/embalagens#list", "/localizacoes", "/ponto", "/ponto/registros", "/ponto/espelho", "/ponto/ajustes", "/ponto/relatorios", "/funcionarios", "/ferias", "/rescisoes", "/informes", "/rh-avisos", "/holerite", "/guias", "/rh-documentos", "/comissoes", "/painel-producao", "/ordens_producao", "/producao", "/rh", "/crm", "/loja", "/loja-admin", "/pedido-ecommerce", "/notas-entrada", "/notas_entrada", "/notas_entrada#list", "/conferencia-compra", "/entrada_de_mercadorias", "/servicos-tomados", "/servicos_tomados", "/servicos_tomados#/", "/pdv", "/promocoes", "/produtos/reajuste", "/pedido-venda", "/vendas", "/vendas#list", "/separacao", "/expedicao", "/expedicao/dashboard", "/devolucoes", "/contas-receber", "/contas-pagar", "/balancete", "/balanco-patrimonial", "/cobranca-bancaria", "/minha-conta", "/configuracoes", "/preferencias_geral", "/configuracoes/juros-multa", "/auditoria", "/estoque", "/estoque/auditoria", "/estoque/dashboard", "/ordens-compra", "/pedidos_compra", "/pedidos_compra#list", "/necessidades-compra", "/giro-estoque", "/inventario", "/orcamentos", "/orcamentos#list", "/orcamentos_servicos", "/orcamentos_servicos#list", "/ordem_servicos", "/ordem_servicos#list", "/ordem_servicos/relatorio-tecnicos", "/ordem_producao", "/ordem_producao#list", "/painel_ordem_servicos", "/notas_servicos", "/notas_servicos#list", "/relatorios_servicos", "/relatorios_servicos#list", "/tecnicos", "/nfs", "/os", "/os/nova", "/nova-os"].includes(rota))
         )
     )
 ];
@@ -171,6 +204,8 @@ export default function AppRoutes() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/esqueci-senha" element={<ForgotPassword />} />
                 </Route>
+
+                <Route path="/m/:codigo" element={<MaquinaPublica />} />
 
                 <Route element={<PrivateRoute />}>
                     <Route element={<AppLayout />}>
@@ -218,15 +253,25 @@ export default function AppRoutes() {
                         <Route path="/rh" element={<RhHub />} />
                         <Route path="/rh/cadastro/:tipo" element={<RhCadastro />} />
                         <Route path="/rh/:acao" element={<RhMovimento />} />
-                        <Route path="/painel-producao" element={<PainelProducao />} />
-                        <Route path="/producao" element={<ProducaoGrafica />} />
+                        <Route path="/painel_ordem_servicos" element={<PainelProducao />} />
+                        <Route path="/painel-producao" element={<Navigate to="/painel_ordem_servicos" replace />} />
+                        <Route path="/ordem_producao" element={<HashList><OrdensProducao /></HashList>} />
+                        <Route path="/ordem_producao/grafica" element={<ProducaoGrafica />} />
+                        <Route path="/ordens_producao" element={<RedirectPreservando para="/ordem_producao" hashPadrao="list" />} />
+                        <Route path="/ordens_producao/grafica" element={<Navigate to="/ordem_producao/grafica" replace />} />
+                        <Route path="/producao" element={<Navigate to="/ordem_producao#list" replace />} />
                         <Route path="/ordem_servicos/exportar" element={<ExportadorOS />} />
                         <Route path="/ordem_servicos/relatorio-tecnicos" element={<RelatorioTecnicos />} />
+                        <Route path="/relatorios_servicos" element={<HashList><RelatoriosServicos /></HashList>} />
+                        <Route path="/relatorio/:grupo" element={<RelatorioGrupo />} />
                         <Route path="/tecnicos" element={<Tecnicos />} />
-                        <Route path="/nfs" element={<NfsOs />} />
+                        <Route path="/notas_servicos" element={<HashList><NfsOs /></HashList>} />
+                        <Route path="/nfs" element={<Navigate to="/notas_servicos#list" replace />} />
                         <Route path="/exportar_ordens_servico" element={<Navigate to="/ordem_servicos/exportar" replace />} />
                         <Route path="/importador_ordem_servicos" element={<Navigate to="/ferramentas/importar/os" replace />} />
-                        <Route path="/ordem_servicos" element={<OrdemServico />} />
+                        <Route path="/orcamentos_servicos" element={<HashList><Orcamentos /></HashList>} />
+                        <Route path="/orcamentos" element={<RedirectPreservando para="/orcamentos_servicos" hashPadrao="list" />} />
+                        <Route path="/ordem_servicos" element={<HashList><OrdemServico /></HashList>} />
                         <Route path="/os" element={<Navigate to="/ordem_servicos" replace />} />
                         <Route path="/os/nova" element={<Navigate to="/ordem_servicos#add" replace />} />
                         <Route path="/os/:id" element={<OsRedirect />} />
@@ -270,6 +315,7 @@ export default function AppRoutes() {
                         <Route path="/separacao/:id" element={<Separacao />} />
                         <Route path="/expedicao/dashboard" element={<Navigate to="/dashboard#/expedicao" replace />} />
                         <Route path="/expedicao" element={<Expedicao />} />
+                        <Route path="/devolucoes" element={<DevolucoesVenda />} />
                         <Route path="/contas-receber" element={<ContasReceber />} />
                         <Route path="/contas-pagar" element={<ContasPagar />} />
                         <Route path="/balancete" element={<Balancete />} />
@@ -277,7 +323,32 @@ export default function AppRoutes() {
                         <Route path="/balanco-patrimonial" element={<BalancoPatrimonial />} />
                         <Route path="/dados_conta" element={<MinhaConta />} />
                         <Route path="/minha-conta" element={<Navigate to="/dados_conta" replace />} />
-                        <Route path="/configuracoes" element={<Configuracoes />} />
+                        <Route path="/empresa" element={<Empresa />} />
+                        <Route path="/dados_usuario" element={<DadosUsuario />} />
+                        <Route path="/usuarios_sistema" element={<UsuariosSistema />} />
+                        <Route path="/configuracoes_servidor_email" element={<ServidorEmail />} />
+                        <Route path="/parametros_envio_doc_geral" element={<EnvioDocumentos />} />
+                        <Route path="/configuracoes_etiquetas" element={<HashList><EtiquetasConfig /></HashList>} />
+                        <Route path="/configuracoes_agenda" element={<AgendaConfig />} />
+                        <Route path="/interface_usuario" element={<InterfaceUsuario />} />
+                        <Route path="/configuracoes_notificacoes" element={<NotificacoesConfig />} />
+                        <Route path="/configuracoes_print_node" element={<PrintNodeConfig />} />
+                        <Route path="/multi_empresas" element={<MultiEmpresas />} />
+                        <Route path="/sistema" element={<SistemaUnidade />} />
+                        <Route path="/aplicativos_api" element={<AplicativosApi />} />
+                        <Route path="/configuracoes_api_web_services" element={<TokenApi />} />
+                        <Route path="/configuracoes_api" element={<ConfiguracoesApi />} />
+                        <Route path="/configuracoes_webhooks_empresa" element={<WebhooksConfig />} />
+                        <Route path="/preferencias_geral" element={<Configuracoes />} />
+                        <Route path="/preferencias_cadastros" element={<Configuracoes />} />
+                        <Route path="/preferencias_suprimentos" element={<Configuracoes />} />
+                        <Route path="/preferencias_vendas" element={<Configuracoes />} />
+                        <Route path="/preferencias_notas_fiscais" element={<Configuracoes />} />
+                        <Route path="/preferencias_financeiro" element={<Configuracoes />} />
+                        <Route path="/preferencias_servicos" element={<Configuracoes />} />
+                        <Route path="/preferencias_ecommerce" element={<Configuracoes />} />
+                        <Route path="/preferencias_tributacao" element={<Configuracoes />} />
+                        <Route path="/configuracoes" element={<RedirectPreferencias />} />
                         <Route path="/configuracoes/juros-multa" element={<FinanceiroJuros />} />
                         <Route path="/auditoria" element={<Auditoria />} />
                         <Route path="/ferramentas_geral" element={<Ferramentas />} />
@@ -289,9 +360,17 @@ export default function AppRoutes() {
                         <Route path="/ferramentas/resumo-sincronizacoes" element={<ResumoSincronizacoes />} />
                         <Route path="/ferramentas/sincronizacoes-multiempresa" element={<SincronizacoesMultiempresa />} />
                         <Route path="/ferramentas/:pagina" element={<FerramentaLista />} />
-                        {rotasMenu.map((rota) => (
-                            <Route key={rota} path={rota} element={<Modulo />} />
-                        ))}
+                        {rotasMenu.map((rota) => {
+                            const path = String(rota).split("#")[0];
+                            const hash = String(rota).split("#")[1];
+                            return (
+                                <Route
+                                    key={path}
+                                    path={path}
+                                    element={hash ? <HashList hash={hash.replace(/^\//, "") || "list"}><Modulo /></HashList> : <Modulo />}
+                                />
+                            );
+                        })}
                         <Route path="/403" element={<Forbidden />} />
                         <Route path="/404" element={<NotFound />} />
                     </Route>

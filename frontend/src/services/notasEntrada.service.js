@@ -165,8 +165,8 @@ export async function sincronizarItensNotaEntrada(notaId, itens = []) {
             notaEntradaId: notaId,
             produtoId,
             quantidade,
-            valorUnitario: item.valorUnitario ?? item.preco || item.custo || 0,
-            valorTotal: item.valorTotal ?? item.total || 0
+            valorUnitario: item.valorUnitario ?? (item.preco || item.custo || 0),
+            valorTotal: item.valorTotal ?? (item.total || 0)
         });
     }
 }

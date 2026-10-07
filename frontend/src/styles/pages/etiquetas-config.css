@@ -1,0 +1,191 @@
+.etiq-page {
+    max-width: 980px;
+    padding-bottom: 40px;
+}
+
+.etiq-head,
+.etiq-painel header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.etiq-head h2,
+.etiq-form h2 {
+    margin: 8px 0 16px;
+    font-size: 20px;
+}
+
+.etiq-head > div {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.etiq-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.etiq-tabela th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+}
+
+.etiq-tabela td {
+    position: relative;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.etiq-menu-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.etiq-menu {
+    position: absolute;
+    left: 28px;
+    top: 36px;
+    z-index: 3;
+    min-width: 170px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+}
+
+.etiq-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+}
+
+.etiq-menu button:hover {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.etiq-form {
+    max-width: 640px;
+}
+
+.etiq-form label,
+.etiq-dupla label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.etiq-form input,
+.etiq-form select {
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0 10px;
+    font: inherit;
+    font-weight: 500;
+}
+
+.etiq-dupla {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 14px;
+}
+
+.etiq-painel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 20;
+    width: min(360px, 100%);
+    height: 100%;
+    padding: 22px 18px;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    box-shadow: -8px 0 24px rgb(0 0 0 / 8%);
+}
+
+.etiq-painel h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.etiq-painel p,
+.etiq-painel small {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.etiq-tipos {
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.etiq-tipos label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+}
+
+.etiq-tipos label.is-on {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.etiq-painel-acoes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.etiq-painel header button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.etiq-logo {
+    display: block;
+    max-width: 140px;
+    max-height: 80px;
+    margin: 12px 0;
+    object-fit: contain;
+    background: #fff;
+}
+
+@media (max-width: 700px) {
+    .etiq-head,
+    .etiq-dupla {
+        display: block;
+    }
+}

@@ -49,8 +49,29 @@ function lerLocal() {
 }
 
 function gravarLocal(lista) {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(lista));
+    try {
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(lista));
+    } catch {
+        try {
+            localStorage.removeItem(LOCAL_KEY);
+        } catch {
+            /* ignore */
+        }
+    }
     return lista;
+}
+
+function lembrarLista(lista) {
+    try {
+        localStorage.setItem(SEED_KEY, "1");
+        if (lista.length > 400) {
+            localStorage.removeItem(LOCAL_KEY);
+            return;
+        }
+        gravarLocal(lista);
+    } catch {
+        /* a lista da API segue valendo mesmo sem cache local */
+    }
 }
 
 export async function listarPedidosVenda() {
@@ -58,12 +79,7 @@ export async function listarPedidosVenda() {
         const dados = await pedidos.list();
         const lista = Array.isArray(dados) ? dados.map(pedidoDaApi) : [];
         if (lista.length) {
-            try {
-                localStorage.setItem(SEED_KEY, "1");
-            } catch {
-                /* ignore */
-            }
-            gravarLocal(lista);
+            lembrarLista(lista);
             return lista;
         }
         const local = lerLocal();

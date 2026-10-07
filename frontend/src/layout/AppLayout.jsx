@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, LifeBuoy, LogOut, Settings, Store, User } from "lucide-react";
+import { Bell, Building2, ChevronDown, GripVertical, LifeBuoy, LogOut, Network, Pin, RotateCcw, Settings, Store, User } from "lucide-react";
 
-import MENU, { itensPlanos } from "../constants/menu";
+import MENU, { itensComRelatorioNoFim, itensPlanos } from "../constants/menu";
 import { AVISOS, gravarAvisosLidos, lerAvisosLidos } from "../constants/avisos";
 import { CONTA_PREFS_EVT, corDe, lerConta, temaEscuroAtivo } from "../constants/conta";
+import { definirUnidade, empresasDaConta, unidadeAtual, unidadePronta, UNIDADE_EVT } from "../constants/empresas";
 import ROTAS from "../constants/rotas";
 import useAuth from "../hooks/useAuth.jsx";
 import logo from "../assets/logo/logo.svg";
@@ -18,6 +19,48 @@ import "../styles/theme/search-focus.css";
 import "../styles/theme/pager.css";
 
 const MENU_FIXO_KEY = "erp-menu-fixo";
+const MENU_ORDEM_KEY = "erp-menu-ordem";
+
+function lerOrdemMenu() {
+    try {
+        const bruto = JSON.parse(localStorage.getItem(MENU_ORDEM_KEY) || "{}");
+        return {
+            travada: bruto.travada !== false,
+            grupos: bruto.grupos && typeof bruto.grupos === "object" ? bruto.grupos : {}
+        };
+    } catch {
+        return { travada: true, grupos: {} };
+    }
+}
+
+function chaveItem(item) {
+    return String(item?.rota || item?.nome || "");
+}
+
+function itensVisiveis(grupo, prefs) {
+    const base = Array.isArray(grupo?.itens) ? grupo.itens : [];
+    const salvo = prefs?.grupos?.[grupo?.id];
+    if (!Array.isArray(salvo) || !salvo.length) {
+        return itensComRelatorioNoFim(base);
+    }
+    const porChave = new Map(base.map((item) => [chaveItem(item), item]));
+    const usados = new Set();
+    const ordem = [];
+    salvo.forEach((chave) => {
+        const item = porChave.get(chave);
+        if (item && !usados.has(chave)) {
+            ordem.push(item);
+            usados.add(chave);
+        }
+    });
+    itensComRelatorioNoFim(base).forEach((item) => {
+        const chave = chaveItem(item);
+        if (!usados.has(chave)) {
+            ordem.push(item);
+        }
+    });
+    return ordem;
+}
 
 function ancoraRota(rota) {
     const texto = String(rota || "");
@@ -41,7 +84,7 @@ function rotaAtiva(pathname, rota, hash = "") {
         return pathname === "/loja-admin";
     }
     if (pathname === caminho) {
-        if (!ancora) {
+        if (!ancora || ancora === "list") {
             return true;
         }
         const atual = String(hash || "").replace(/^#/, "").replace(/^\//, "");
@@ -51,6 +94,9 @@ function rotaAtiva(pathname, rota, hash = "") {
         return false;
     }
     if (caminho === "/ferramentas_geral" && pathname.startsWith("/ferramentas")) {
+        return true;
+    }
+    if (caminho === "/preferencias_geral" && (pathname.startsWith("/preferencias") || pathname.startsWith("/configuracoes") || pathname === "/empresa" || pathname === "/dados_usuario" || pathname === "/usuarios_sistema" || pathname === "/parametros_envio_doc_geral" || pathname === "/interface_usuario" || pathname === "/multi_empresas" || pathname === "/aplicativos_api")) {
         return true;
     }
     return pathname.startsWith(`${caminho}/`) || (caminho === "/ordem_servicos" && pathname.startsWith("/os"));
@@ -92,7 +138,8 @@ function dadosConta(usuario) {
     const bruto = lerConta(usuario);
     return {
         nome: bruto.nome,
-        empresa: bruto.empresa,
+        empresa: unidadeAtual().nome,
+        empresaId: unidadeAtual().id,
         cargo: bruto.cargo,
         foto: bruto.foto,
         cor: bruto.cor,
@@ -119,7 +166,7 @@ function FlyoutLoja({ itens, pathname, hash }) {
 
     return (
         <div className="flyout-list flyout-loja-menu">
-            {itens.map((item) => {
+            {itensComRelatorioNoFim(itens).map((item) => {
                 const Icon = item.icon;
                 if (item.externo) {
                     return (
@@ -148,7 +195,7 @@ function FlyoutLoja({ itens, pathname, hash }) {
                             </button>
                             {aberto ? (
                                 <div className="flyout-sub">
-                                    {item.filhos.map((filho) => (
+                                    {itensComRelatorioNoFim(item.filhos).map((filho) => (
                                         <NavLink
                                             key={filho.rota}
                                             to={filho.rota}
@@ -199,6 +246,9 @@ export default function AppLayout() {
         }
     });
     const [painel, setPainel] = useState(null);
+    const [menuOrdem, setMenuOrdem] = useState(lerOrdemMenu);
+    const [arraste, setArraste] = useState("");
+    const arrasteRef = useRef("");
     const [lidos, setLidos] = useState(lerAvisosLidos);
     const [contaTick, setContaTick] = useState(0);
     const shellRef = useRef(null);
@@ -215,7 +265,11 @@ export default function AppLayout() {
             setFixo(contaNova.menu !== "compacto");
         }
         window.addEventListener(CONTA_PREFS_EVT, sync);
-        return () => window.removeEventListener(CONTA_PREFS_EVT, sync);
+        window.addEventListener(UNIDADE_EVT, sync);
+        return () => {
+            window.removeEventListener(CONTA_PREFS_EVT, sync);
+            window.removeEventListener(UNIDADE_EVT, sync);
+        };
     }, [usuario]);
 
     useEffect(() => {
@@ -251,18 +305,6 @@ export default function AppLayout() {
     const flyoutConta = painel === "conta";
     const flyoutAvisos = painel === "avisos";
 
-    function alternarFixo() {
-        setFixo((atual) => {
-            const proximo = !atual;
-            try {
-                localStorage.setItem(MENU_FIXO_KEY, proximo ? "1" : "0");
-            } catch {
-                /* ignore */
-            }
-            return proximo;
-        });
-    }
-
     function sair() {
         logout();
         navigate("/login", { replace: true });
@@ -283,6 +325,11 @@ export default function AppLayout() {
         setPainel(null);
     }
 
+    function trocarSistema(id) {
+        definirUnidade(id);
+        navigate(unidadePronta(id) ? ROTAS.INDICE : ROTAS.SISTEMA);
+    }
+
     function abrirGrupo(id) {
         setGrupoId(id);
         setPainel(null);
@@ -290,6 +337,59 @@ export default function AppLayout() {
             navigate("/loja-admin");
         }
     }
+
+    function gravarOrdem(proximo) {
+        setMenuOrdem(proximo);
+        try {
+            localStorage.setItem(MENU_ORDEM_KEY, JSON.stringify(proximo));
+        } catch {
+            /* ignore */
+        }
+    }
+
+    function alternarTrava() {
+        gravarOrdem({ ...menuOrdem, travada: !menuOrdem.travada });
+    }
+
+    function restaurarOrdem() {
+        const grupos = { ...menuOrdem.grupos };
+        delete grupos[grupoAtivo.id];
+        gravarOrdem({ ...menuOrdem, grupos });
+    }
+
+    function iniciarArraste(chave, ev) {
+        arrasteRef.current = chave;
+        ev.dataTransfer.setData("text/plain", chave);
+        ev.dataTransfer.effectAllowed = "move";
+        setArraste(chave);
+    }
+
+    function soltarItem(destino, ev) {
+        ev.preventDefault();
+        const origem = ev.dataTransfer.getData("text/plain") || arrasteRef.current;
+        arrasteRef.current = "";
+        setArraste("");
+        if (menuOrdem.travada || !origem || origem === destino) {
+            return;
+        }
+        const itens = itensVisiveis(grupoAtivo, menuOrdem);
+        const chaves = itens.map(chaveItem);
+        const de = chaves.indexOf(origem);
+        const para = chaves.indexOf(destino);
+        if (de < 0 || para < 0) {
+            return;
+        }
+        chaves.splice(de, 1);
+        chaves.splice(para, 0, origem);
+        gravarOrdem({
+            ...menuOrdem,
+            grupos: { ...menuOrdem.grupos, [grupoAtivo.id]: chaves }
+        });
+    }
+
+    const itensGrupo = itensVisiveis(grupoAtivo, menuOrdem);
+    const ordemCustom = Array.isArray(menuOrdem.grupos?.[grupoAtivo.id]) && menuOrdem.grupos[grupoAtivo.id].length > 0;
+    const podeReordenar = grupoAtivo.id !== "loja-virtual" && !flyoutConta && !flyoutAvisos;
 
     return (
         <div
@@ -361,15 +461,6 @@ export default function AppLayout() {
                             {conta.notificacoes && naoLidos ? <em>{naoLidos > 9 ? "9+" : naoLidos}</em> : null}
                             <span>Notificações</span>
                         </button>
-
-                        <label className="rail-pin">
-                            <input
-                                type="checkbox"
-                                checked={fixo}
-                                onChange={alternarFixo}
-                            />
-                            Fixar menu
-                        </label>
                     </div>
                 </nav>
 
@@ -407,6 +498,34 @@ export default function AppLayout() {
                                     <strong>Minha conta</strong>
                                 </header>
                                 <div className="flyout-list flyout-conta">
+                                    <p className="flyout-sec">Multiempresa</p>
+                                    <div className="flyout-empresas">
+                                        {empresasDaConta().map((empresa) => {
+                                            const ativa = empresa.id === conta.empresaId;
+                                            const codigo = empresa.sigla.length <= 4 ? empresa.sigla : "";
+                                            const detalhe = ativa
+                                                ? [codigo, conta.cargo, conta.nome].filter(Boolean).join(" · ")
+                                                : codigo;
+                                            return (
+                                                <button
+                                                    key={empresa.id}
+                                                    type="button"
+                                                    className={`flyout-empresa${ativa ? " is-on" : ""}`}
+                                                    onClick={() => trocarSistema(empresa.id)}
+                                                >
+                                                    <Building2 size={16} strokeWidth={1.7} />
+                                                    <span>
+                                                        <strong>{empresa.nome}</strong>
+                                                        {detalhe ? <small>{detalhe}</small> : null}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button type="button" className="flyout-link" onClick={() => navigate(ROTAS.MULTI_EMPRESAS)}>
+                                        <Network size={16} strokeWidth={1.7} />
+                                        Gerenciar Multiempresa
+                                    </button>
                                     <p className="flyout-sec">Conta</p>
                                     <button type="button" className="flyout-link" onClick={() => navigate(ROTAS.MINHA_CONTA)}>
                                         <User size={16} strokeWidth={1.7} />
@@ -428,11 +547,6 @@ export default function AppLayout() {
                                         <LifeBuoy size={16} strokeWidth={1.7} />
                                         Usuário de suporte
                                     </button>
-                                    <p className="flyout-sec">Empresa</p>
-                                    <div className="flyout-empresa">
-                                        <strong>{conta.empresa}</strong>
-                                        <small>{conta.cargo} · {conta.nome}</small>
-                                    </div>
                                 </div>
                                 <button type="button" className="flyout-sair" onClick={sair}>
                                     <LogOut size={16} />
@@ -443,27 +557,80 @@ export default function AppLayout() {
                             <>
                                 <header className="flyout-head">
                                     <strong>{grupoAtivo.titulo}</strong>
+                                    {podeReordenar ? (
+                                        <span className="flyout-head-acoes">
+                                            {!menuOrdem.travada && ordemCustom ? (
+                                                <button
+                                                    type="button"
+                                                    className="flyout-pin"
+                                                    title="Restaurar ordem padrão"
+                                                    onClick={restaurarOrdem}
+                                                >
+                                                    <RotateCcw size={14} />
+                                                </button>
+                                            ) : null}
+                                            <button
+                                                type="button"
+                                                className={`flyout-pin${menuOrdem.travada ? " is-on" : ""}`}
+                                                aria-pressed={menuOrdem.travada}
+                                                title={menuOrdem.travada ? "Ordem fixa. Clique para reordenar." : "Fixar esta ordem"}
+                                                onClick={alternarTrava}
+                                            >
+                                                <Pin size={14} />
+                                            </button>
+                                        </span>
+                                    ) : null}
                                 </header>
                                 {grupoAtivo.id === "loja-virtual" ? (
                                     <FlyoutLoja itens={grupoAtivo.itens} pathname={pathname} hash={hash} />
                                 ) : (
                                     <div className="flyout-list">
-                                        {grupoAtivo.itens.map((item) => {
+                                        {!menuOrdem.travada ? (
+                                            <p className="flyout-dica">Arraste para mudar a ordem</p>
+                                        ) : null}
+                                        {itensGrupo.map((item) => {
                                             const Icon = item.icon;
                                             const to = item.rota === "/" ? "/index" : item.rota;
+                                            const chave = chaveItem(item);
                                             return (
-                                                <NavLink
-                                                    key={`${grupoAtivo.id}-${item.nome}`}
-                                                    to={to}
-                                                    end
-                                                    className={({ isActive }) =>
-                                                        `flyout-link${linkAtivo(isActive, pathname, item.rota, hash) ? " is-active" : ""}`
-                                                    }
+                                                <div
+                                                    key={`${grupoAtivo.id}-${chave}`}
+                                                    className={`flyout-row${arraste === chave ? " is-drag" : ""}`}
+                                                    onDragOver={(ev) => {
+                                                        if (!menuOrdem.travada) {
+                                                            ev.preventDefault();
+                                                        }
+                                                    }}
+                                                    onDrop={(ev) => soltarItem(chave, ev)}
                                                 >
-                                                    {Icon ? <Icon size={16} strokeWidth={1.7} /> : null}
-                                                    {item.nome}
-                                                    <em className="flyout-beta">BETA</em>
-                                                </NavLink>
+                                                    {!menuOrdem.travada ? (
+                                                        <button
+                                                            type="button"
+                                                            className="flyout-grip"
+                                                            draggable
+                                                            title="Arrastar"
+                                                            aria-label={`Mover ${item.nome}`}
+                                                            onDragStart={(ev) => iniciarArraste(chave, ev)}
+                                                            onDragEnd={() => {
+                                                                arrasteRef.current = "";
+                                                                setArraste("");
+                                                            }}
+                                                        >
+                                                            <GripVertical size={14} />
+                                                        </button>
+                                                    ) : null}
+                                                    <NavLink
+                                                        to={to}
+                                                        end
+                                                        className={({ isActive }) =>
+                                                            `flyout-link${linkAtivo(isActive, pathname, item.rota, hash) ? " is-active" : ""}`
+                                                        }
+                                                    >
+                                                        {Icon ? <Icon size={16} strokeWidth={1.7} /> : null}
+                                                        <span className="flyout-nome">{item.nome}</span>
+                                                        <em className="flyout-beta">BETA</em>
+                                                    </NavLink>
+                                                </div>
                                             );
                                         })}
                                     </div>

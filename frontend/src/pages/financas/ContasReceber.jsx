@@ -24,6 +24,7 @@ import {
     salvarContaReceber
 } from "../../services/contaReceber.service";
 import { listarCategoriasFinanceiras } from "../../services/balancete.service";
+import { lerContatos } from "../../constants/contatos";
 
 import "../../styles/layout/app-shell.css";
 import "../../styles/pages/indice.css";
@@ -86,12 +87,16 @@ export default function ContasReceber() {
     const [marcados, setMarcados] = useState([]);
     const [aviso, setAviso] = useState("");
     const [trabalhando, setTrabalhando] = useState(false);
-    const [form, setForm] = useState({ descricao: "", valor: "", vencimento: "", clienteId: "", categoria: "3.01" });
+    const [form, setForm] = useState({ descricao: "", valor: "", vencimento: "", clienteId: params.get("contato") || "", categoria: "3.01" });
     const [categorias, setCategorias] = useState([]);
     const [novoAberto, setNovoAberto] = useState(false);
     const [confirma, setConfirma] = useState(null);
     const [valorBaixa, setValorBaixa] = useState("");
     const [parcelarAberto, setParcelarAberto] = useState(false);
+    const contatoId = params.get("contato");
+    const nomeContato = contatoId
+        ? (lerContatos().find((item) => String(item.id) === String(contatoId))?.nome || "")
+        : "";
 
     async function carregar() {
         setLoading(true);
@@ -132,12 +137,19 @@ export default function ContasReceber() {
             if (aba === "agrupado" && status !== "AGRUPADO") {
                 return false;
             }
+            if (contatoId) {
+                const mesmoCliente = String(c.clienteId) === String(contatoId);
+                const naDescricao = nomeContato && String(c.descricao || "").toLowerCase().includes(nomeContato.toLowerCase());
+                if (!mesmoCliente && !naDescricao) {
+                    return false;
+                }
+            }
             if (!termo) {
                 return true;
             }
             return [c.id, c.clienteId, c.descricao, c.status, c.parcela, c.parcelas].join(" ").toLowerCase().includes(termo);
         });
-    }, [contas, busca, aba]);
+    }, [contas, busca, aba, contatoId, nomeContato]);
 
     const contagens = useMemo(() => ({
         todas: contas.length,
@@ -302,6 +314,7 @@ export default function ContasReceber() {
                     <p className="prd-sub">
                         Agrupe títulos do mesmo cliente e parcele o total (semanal, quinzenal ou mensal).
                         Depois de uma baixa parcial o boleto sai só com o saldo.
+                        {nomeContato ? ` Mostrando os títulos de ${nomeContato}.` : ""}
                         {" "}
                         <Link to="/configuracoes/juros-multa">alterar percentuais</Link>
                     </p>

@@ -103,9 +103,16 @@ export function produtoPorId(id) {
     return baseProdutos().find((p) => String(p.id) === String(id));
 }
 
+function semAcento(valor) {
+    return String(valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
 export function buscarProdutos(texto, refino = "nao", opcoes = {}) {
     const lista = opcoes.catalogo || baseProdutos();
-    const q = String(texto || "").trim().toLowerCase();
+    const q = semAcento(String(texto || "").trim());
     return lista.filter((p) => {
         if (opcoes.soEstoque && !temEstoqueDisponivel(p)) {
             return false;
@@ -113,10 +120,10 @@ export function buscarProdutos(texto, refino = "nao", opcoes = {}) {
         if (!q) {
             return true;
         }
-        const nome = String(p.nome || "").toLowerCase();
-        const sku = String(p.sku || "").toLowerCase();
-        const gtin = String(p.gtin || p.codigoBarras || "").toLowerCase();
-        const forn = String(p.fornecedor || "").toLowerCase();
+        const nome = semAcento([p.nome, p.descricao, p.grupo, p.categoria, p.marca].filter(Boolean).join(" "));
+        const sku = semAcento(p.sku);
+        const gtin = semAcento(p.gtin || p.codigoBarras);
+        const forn = semAcento([p.fornecedor, p.codigoFornecedor].filter(Boolean).join(" "));
         if (refino === "codigo") {
             return sku === q;
         }
@@ -184,6 +191,11 @@ export function resumoFormas(caixa, vendas) {
         }
         const nome = FORMAS.find((f) => f.id === v.forma)?.nome || v.formaNome || "Dinheiro";
         mapa[nome] = Number(((mapa[nome] || 0) + Number(v.total || 0)).toFixed(2));
+    }
+    for (const devolucao of caixa?.devolucoes || []) {
+        if (devolucao.reembolso === "DINHEIRO") {
+            mapa.Dinheiro = Number(((mapa.Dinheiro || 0) - Number(devolucao.valor || 0)).toFixed(2));
+        }
     }
     return Object.entries(mapa).map(([nome, valor]) => ({ nome, valor }));
 }

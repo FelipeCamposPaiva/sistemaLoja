@@ -1,7 +1,11 @@
+import TelaErro from "./TelaErro";
+
 export default function ModuloIndisponivel() {
-  return (
-    <div>
-      <h1>Conferência de Compra</h1>
-    </div>
-  );
+    return (
+        <TelaErro
+            aviso="alerta"
+            titulo="Módulo indisponível"
+            texto="Este módulo ainda não está liberado para a sua conta."
+        />
+    );
 }

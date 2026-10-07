@@ -4,7 +4,7 @@ export const ORIGENS_PEDIDO = ["Loja", "PDV", "Olist", "Shopee", "Mercado Livre"
 
 export const ABAS_PEDIDO = [
     { id: "todas", label: "todos", cor: "" },
-    { id: "em-aberto", label: "em aberto", cor: "#eab308" },
+    { id: "em-aberto", label: "em aberto", cor: "#facc15" },
     { id: "aprovado", label: "aprovado", cor: "#22c55e" },
     { id: "preparando", label: "preparando envio", cor: "#f59e0b" },
     { id: "faturado", label: "faturado", cor: "#ef4444" },
@@ -40,33 +40,76 @@ export const ABAS_EXPEDICAO = [
 ];
 
 export const COLUNAS_PEDIDO = [
-    { id: "foto", label: "Foto" },
-    { id: "numero", label: "Nº" },
-    { id: "data", label: "Data" },
+    { id: "foto", label: "Imagem" },
+    { id: "numero", label: "Nº da venda" },
+    { id: "ecommerce", label: "Nº pedido e-commerce" },
+    { id: "nf", label: "Nº nota fiscal" },
+    { id: "data", label: "Data e hora" },
     { id: "previsto", label: "Previsto" },
-    { id: "despacho", label: "Data limite de despacho" },
+    { id: "despacho", label: "Limite de despacho" },
     { id: "cliente", label: "Cliente" },
     { id: "fantasia", label: "Nome fantasia" },
     { id: "uf", label: "UF" },
     { id: "cidade", label: "Cidade" },
-    { id: "documento", label: "CNPJ / CPF" },
-    { id: "pagamento", label: "Status de pagamento" },
-    { id: "total", label: "Total" },
-    { id: "npedido", label: "Nº pedido" },
-    { id: "nf", label: "Nº nota fiscal" },
+    { id: "vendedor", label: "Vendedor" },
+    { id: "documento", label: "CNPJ/CPF" },
+    { id: "pagamento", label: "Status do pagamento" },
     { id: "envio", label: "Forma de envio" },
     { id: "rastreio", label: "Rastreamento" },
     { id: "marcadores", label: "Marcadores" },
-    { id: "integracoes", label: "Integrações" }
+    { id: "integracoes", label: "Integrações" },
+    { id: "andamento", label: "Andamento" }
 ];
 
-export const COLUNAS_PEDIDO_PADRAO = [
-    "foto", "numero", "data", "previsto", "despacho", "cliente", "fantasia", "uf", "cidade",
-    "documento", "pagamento", "total", "npedido", "nf", "envio", "rastreio", "marcadores", "integracoes"
-];
+export const COLUNAS_PEDIDO_PADRAO = COLUNAS_PEDIDO.map((coluna) => coluna.id);
+
+const ABAS_SITUACAO = new Set([
+    "em-aberto",
+    "aprovado",
+    "preparando",
+    "faturado",
+    "pronto",
+    "enviado",
+    "entregue",
+    "nao-entregue",
+    "cancelado"
+]);
+
+export function abaSituacaoPedido(pedido) {
+    const status = String(pedido?.status || "").toUpperCase();
+    const sep = pedido?.separacao || "PENDENTE";
+    const exp = pedido?.expedicao || "PENDENTE";
+    if (status === "CANCELADO") {
+        return "cancelado";
+    }
+    if (status.includes("DEVOLU")) {
+        return "devolvido";
+    }
+    if (status === "ENTREGUE") {
+        return "entregue";
+    }
+    if (status === "NAO_ENTREGUE") {
+        return "nao-entregue";
+    }
+    if (exp === "DESPACHADO") {
+        return "enviado";
+    }
+    if (status === "PRONTO") {
+        return "pronto";
+    }
+    if (status === "FATURADO") {
+        return "faturado";
+    }
+    if (status === "PRODUCAO" || sep === "SEPARANDO") {
+        return "preparando";
+    }
+    if (status === "APROVADO") {
+        return "aprovado";
+    }
+    return "em-aberto";
+}
 
 export function passaAbaPedido(pedido, aba) {
-    const status = String(pedido.status || "").toUpperCase();
     const sep = pedido.separacao || "PENDENTE";
     const exp = pedido.expedicao || "PENDENTE";
     if (!aba || aba === "todas") {
@@ -84,35 +127,11 @@ export function passaAbaPedido(pedido, aba) {
     if (aba === "contas-sim") {
         return Boolean(pedido.contasLancadas);
     }
-    if (aba === "em-aberto") {
-        return ["ORCAMENTO", "EM_ABERTO", "APROVADO", "PRODUCAO", "PRONTO"].includes(status);
-    }
-    if (aba === "aprovado") {
-        return status === "APROVADO";
-    }
-    if (aba === "preparando") {
-        return status === "PRODUCAO" || sep === "SEPARANDO";
-    }
-    if (aba === "faturado") {
-        return status === "FATURADO";
-    }
-    if (aba === "pronto") {
-        return status === "PRONTO" || sep === "SEPARADO";
-    }
-    if (aba === "enviado") {
-        return exp === "DESPACHADO" && status !== "ENTREGUE";
-    }
-    if (aba === "entregue") {
-        return status === "ENTREGUE";
-    }
-    if (aba === "nao-entregue") {
-        return status === "NAO_ENTREGUE" || (exp === "PENDENTE" && ["FATURADO", "PRONTO"].includes(status));
+    if (ABAS_SITUACAO.has(aba)) {
+        return abaSituacaoPedido(pedido) === aba;
     }
     if (aba === "dados-incompletos") {
         return pedido.dadosIncompletos === true;
-    }
-    if (aba === "cancelado") {
-        return status === "CANCELADO";
     }
     if (aba === "sep-pendente") {
         return sep === "PENDENTE";
@@ -140,6 +159,9 @@ export function corSituacaoPedido(pedido) {
     if (status === "CANCELADO") {
         return "#94a3b8";
     }
+    if (status.includes("DEVOLU")) {
+        return "#fb7185";
+    }
     if (status === "ENTREGUE") {
         return "#84cc16";
     }
@@ -163,15 +185,20 @@ export function corSituacaoPedido(pedido) {
 
 export const STATUS_PEDIDO_VENDA = [
     { id: "ORCAMENTO", label: "Orçamento" },
+    { id: "EM_ABERTO", label: "Em aberto" },
     { id: "APROVADO", label: "Aprovado" },
-    { id: "PRODUCAO", label: "Produção" },
+    { id: "PRODUCAO", label: "Preparando envio" },
     { id: "FATURADO", label: "Faturado" },
-    { id: "PRONTO", label: "Pronto" },
+    { id: "PRONTO", label: "Pronto para envio" },
     { id: "ENTREGUE", label: "Entregue" },
+    { id: "NAO_ENTREGUE", label: "Não entregue" },
     { id: "CANCELADO", label: "Cancelado" }
 ];
 
 export function rotuloStatusPedido(status) {
+    if (String(status || "").toUpperCase().includes("DEVOLU")) {
+        return "Devolvido";
+    }
     return STATUS_PEDIDO_VENDA.find((s) => s.id === status)?.label || status || "—";
 }
 
@@ -196,6 +223,8 @@ export function codigoStatusPedido(valor) {
         entregue: "ENTREGUE",
         naoentregue: "NAO_ENTREGUE",
         cancelado: "CANCELADO",
+        devolvido: "DEVOLVIDO",
+        devolucao: "DEVOLVIDO",
         dadosincompletos: "EM_ABERTO"
     };
     return mapa[bruto] || "APROVADO";
@@ -266,9 +295,16 @@ function extrasDetalhe(base = {}) {
         cidade: base.cidade || "",
         pagamento: base.pagamento || "",
         formaEnvio: base.formaEnvio || "",
+        volumes: base.volumes || "",
         notaFiscal: base.notaFiscal || "",
         fantasia: base.fantasia || "",
-        embalagem: base.embalagem || ""
+        embalagem: base.embalagem || "",
+        formaPagamento: base.formaPagamento || "",
+        documento: base.documento || "",
+        contatoOlistId: base.contatoOlistId || "",
+        olistId: base.olistId || "",
+        devolucao: base.devolucao || null,
+        devolucoes: Array.isArray(base.devolucoes) ? base.devolucoes : []
     };
 }
 
@@ -332,10 +368,75 @@ export function pedidoDaApi(raw) {
         uf: detalhes.uf,
         cidade: detalhes.cidade,
         pagamento: detalhes.pagamento,
+        formaPagamento: detalhes.formaPagamento,
         formaEnvio: detalhes.formaEnvio,
+        volumes: detalhes.volumes || "",
         notaFiscal: detalhes.notaFiscal,
-        fantasia: detalhes.fantasia
+        fantasia: detalhes.fantasia,
+        documento: detalhes.documento,
+        contatoOlistId: detalhes.contatoOlistId,
+        olistId: detalhes.olistId || raw?.olistId || "",
+        devolucao: detalhes.devolucao || null,
+        devolucoes: Array.isArray(detalhes.devolucoes) ? detalhes.devolucoes : []
     };
+}
+
+export function formaPagamentoPedido(pedido) {
+    const propria = String(pedido?.formaPagamento || "").trim();
+    if (propria && !/recebido|aguardando/i.test(propria)) {
+        return propria;
+    }
+    return "";
+}
+
+export function notaFiscalPedido(pedido) {
+    return String(pedido?.notaFiscal || "").trim();
+}
+
+export function tomStatusPedido(status) {
+    const codigo = String(status || "").toUpperCase();
+    if (codigo === "ENTREGUE") return "lima";
+    if (codigo === "FATURADO") return "vermelho";
+    if (codigo === "CANCELADO") return "cinza";
+    if (codigo === "PRODUCAO") return "azul";
+    if (codigo === "PRONTO") return "ciano";
+    if (codigo === "NAO_ENTREGUE") return "escuro";
+    if (codigo === "APROVADO") return "verde";
+    return "amarelo";
+}
+
+export function statusListaPedido(pedido) {
+    const status = String(pedido?.status || "").toUpperCase();
+    const sep = pedido?.separacao || "PENDENTE";
+    const exp = pedido?.expedicao || "PENDENTE";
+    if (status === "CANCELADO") {
+        return { label: "Cancelado", tom: "cinza" };
+    }
+    if (status.includes("DEVOLU")) {
+        return { label: "Devolvido", tom: "rosa" };
+    }
+    if (status === "ENTREGUE") {
+        return { label: "Entregue", tom: "lima" };
+    }
+    if (status === "NAO_ENTREGUE") {
+        return { label: "Não entregue", tom: "escuro" };
+    }
+    if (exp === "DESPACHADO") {
+        return { label: "Enviado", tom: "chumbo" };
+    }
+    if (status === "FATURADO") {
+        return { label: "Faturado", tom: "vermelho" };
+    }
+    if (status === "PRONTO" || sep === "SEPARADO") {
+        return { label: "Pronto para envio", tom: "ciano" };
+    }
+    if (status === "PRODUCAO" || sep === "SEPARANDO") {
+        return { label: "Preparando envio", tom: "azul" };
+    }
+    if (!pedido?.contasLancadas) {
+        return { label: "Aguardando recebimento", tom: "amarelo" };
+    }
+    return { label: "Recebido", tom: "verde" };
 }
 
 export function pedidoParaApi(pedido) {
@@ -370,32 +471,46 @@ export function pedidoParaApi(pedido) {
             uf: pedido.uf || "",
             cidade: pedido.cidade || "",
             pagamento: pedido.pagamento || "",
+            formaPagamento: pedido.formaPagamento || "",
             formaEnvio: pedido.formaEnvio || "",
+            volumes: pedido.volumes || "",
             notaFiscal: pedido.notaFiscal || "",
             fantasia: pedido.fantasia || "",
-            embalagem: pedido.embalagem || ""
+            documento: pedido.documento || "",
+            contatoOlistId: pedido.contatoOlistId || "",
+            olistId: pedido.olistId || "",
+            embalagem: pedido.embalagem || "",
+            devolucao: pedido.devolucao || null,
+            devolucoes: Array.isArray(pedido.devolucoes) ? pedido.devolucoes : []
         })
     };
 }
 
+function diaSemente(offset) {
+    const data = new Date();
+    data.setHours(12, 0, 0, 0);
+    data.setDate(data.getDate() - offset);
+    return data.toISOString();
+}
+
 export function pedidosSemente() {
-    const hoje = new Date().toISOString();
-    const extra = {
+    const base = {
         previsto: "",
         dataLimiteDespacho: "",
         rastreio: "",
-        marcadores: "1ª venda",
+        marcadores: "",
         uf: "RJ",
         cidade: "Volta Redonda",
         formaEnvio: ""
     };
     return [
         {
+            ...base,
             numero: "PV-8801",
             cliente: "Ana Marketplace",
             origem: "Shopee",
             vendedor: "Integração",
-            data: hoje,
+            data: diaSemente(0),
             valor: 89.9,
             status: "APROVADO",
             estoqueLancado: false,
@@ -403,48 +518,53 @@ export function pedidosSemente() {
             separacao: "PENDENTE",
             expedicao: "PENDENTE",
             pagamento: "aguardando recebimento",
-            ...extra,
+            formaPagamento: "Cartão de crédito",
             itens: [{ sku: "LAPIS-HB", descricao: "Lápis HB", gtin: "7890000001111", codigoFornecedor: "FOR-LAPIS", localizacao: "A-01-02", quantidade: 2, qtdSeparada: 0, valorUnitario: 4.5 }]
         },
         {
+            ...base,
             numero: "PV-8802",
             cliente: "Bruno ML",
             origem: "Mercado Livre",
             vendedor: "Integração",
-            data: hoje,
-            valor: 149.0,
-            status: "FATURADO",
+            data: diaSemente(0),
+            valor: 149,
+            status: "APROVADO",
             estoqueLancado: true,
             contasLancadas: true,
-            separacao: "SEPARADO",
-            expedicao: "DESPACHADO",
+            separacao: "PENDENTE",
+            expedicao: "PENDENTE",
             pagamento: "recebido",
-            ...extra,
+            formaPagamento: "PIX",
+            notaFiscal: "NF-001234",
             rastreio: "BR123456789",
             itens: [{ sku: "CANETA-AZUL", descricao: "Caneta azul", gtin: "7890000002502", codigoFornecedor: "BIC-AZ", localizacao: "A-01-01", quantidade: 3, qtdSeparada: 3, valorUnitario: 6 }]
         },
         {
+            ...base,
             numero: "PV-8803",
             cliente: "Carla Nuvemshop",
             origem: "Nuvemshop",
             vendedor: "Integração",
-            data: hoje,
+            data: diaSemente(0),
             valor: 210.5,
             status: "APROVADO",
             estoqueLancado: false,
             contasLancadas: true,
-            separacao: "SEPARANDO",
+            separacao: "PENDENTE",
             expedicao: "PENDENTE",
             pagamento: "recebido",
-            ...extra,
+            formaPagamento: "Boleto",
+            notaFiscal: "NF-001235",
             itens: [{ sku: "CADERNO-96", descricao: "Caderno 96 folhas", gtin: "7890000018903", codigoFornecedor: "TIL-96", localizacao: "A-02-04", quantidade: 1, qtdSeparada: 0, valorUnitario: 21 }]
         },
         {
+            ...base,
             numero: "PV-8804",
             cliente: "Diego Loja",
             origem: "Loja",
             vendedor: "Felipe",
-            data: hoje,
+            data: diaSemente(0),
             valor: 45,
             status: "APROVADO",
             estoqueLancado: false,
@@ -452,25 +572,82 @@ export function pedidosSemente() {
             separacao: "PENDENTE",
             expedicao: "PENDENTE",
             pagamento: "aguardando recebimento",
-            ...extra,
+            formaPagamento: "Cartão de crédito",
             itens: [{ sku: "BORRACHA", descricao: "Borracha branca", gtin: "7890000003008", codigoFornecedor: "FABER-BOR", localizacao: "B-01-02", quantidade: 4, qtdSeparada: 0, valorUnitario: 2.5 }]
         },
         {
+            ...base,
             numero: "PV-8805",
             cliente: "Elena PDV",
             origem: "PDV",
             vendedor: "Gabriela",
-            data: hoje,
+            data: diaSemente(0),
             valor: 32.9,
+            status: "APROVADO",
+            estoqueLancado: true,
+            contasLancadas: true,
+            separacao: "PENDENTE",
+            expedicao: "PENDENTE",
+            pagamento: "recebido",
+            formaPagamento: "PIX",
+            notaFiscal: "NF-001236",
+            itens: [{ sku: "COLA-BASTAO", descricao: "Cola bastão", gtin: "7890000035009", codigoFornecedor: "PRITT", localizacao: "B-02-01", quantidade: 1, qtdSeparada: 1, valorUnitario: 32.9 }]
+        },
+        {
+            ...base,
+            numero: "PV-8806",
+            cliente: "Fernando Oliveira",
+            origem: "Loja",
+            vendedor: "Felipe",
+            data: diaSemente(1),
+            valor: 320,
             status: "FATURADO",
             estoqueLancado: true,
             contasLancadas: true,
             separacao: "SEPARADO",
             expedicao: "PENDENTE",
             pagamento: "recebido",
-            ...extra,
-            itens: [{ sku: "COLA-BASTAO", descricao: "Cola bastão", gtin: "7890000035009", codigoFornecedor: "PRITT", localizacao: "B-02-01", quantidade: 1, qtdSeparada: 1, valorUnitario: 32.9 }],
-            embalagem: "AGUARDANDO"
+            formaPagamento: "Transferência",
+            notaFiscal: "NF-001237",
+            cidade: "Barra Mansa",
+            itens: [{ sku: "PAPEL-A4", descricao: "Papel A4", quantidade: 10, qtdSeparada: 10, valorUnitario: 32 }]
+        },
+        {
+            ...base,
+            numero: "PV-8807",
+            cliente: "Gabriela Santos",
+            origem: "Loja",
+            vendedor: "Gabriela",
+            data: diaSemente(1),
+            valor: 65,
+            status: "PRODUCAO",
+            estoqueLancado: false,
+            contasLancadas: true,
+            separacao: "SEPARANDO",
+            expedicao: "PENDENTE",
+            pagamento: "recebido",
+            formaPagamento: "Cartão de crédito",
+            cidade: "Resende",
+            itens: [{ sku: "MARCA-TEXTO", descricao: "Marca texto", quantidade: 5, qtdSeparada: 2, valorUnitario: 13 }]
+        },
+        {
+            ...base,
+            numero: "PV-8808",
+            cliente: "Hugo E-commerce",
+            origem: "Olist",
+            vendedor: "Integração",
+            data: diaSemente(0),
+            valor: 189.9,
+            status: "FATURADO",
+            estoqueLancado: true,
+            contasLancadas: true,
+            separacao: "SEPARADO",
+            expedicao: "DESPACHADO",
+            pagamento: "recebido",
+            formaPagamento: "PIX",
+            notaFiscal: "NF-001238",
+            rastreio: "BR987654321",
+            itens: [{ sku: "CADERNO-96", descricao: "Caderno 96 folhas", quantidade: 4, qtdSeparada: 4, valorUnitario: 21 }]
         }
     ];
 }

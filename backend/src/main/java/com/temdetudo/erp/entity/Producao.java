@@ -46,6 +46,15 @@ public class Producao {
     @Column(name = "local_id")
     private Long localId;
 
+    private String supervisor;
+
+    private String hora;
+
+    @Column(name = "agenda_evento_id")
+    private Long agendaEventoId;
+
+    private Integer numero;
+
     public Producao() {
     }
 
@@ -167,6 +176,38 @@ public class Producao {
 
     public void setLocalId(Long localId) {
         this.localId = localId;
+    }
+
+    public String getSupervisor() {
+        return supervisor;
+    }
+
+    public void setSupervisor(String supervisor) {
+        this.supervisor = supervisor;
+    }
+
+    public String getHora() {
+        return hora;
+    }
+
+    public void setHora(String hora) {
+        this.hora = hora;
+    }
+
+    public Long getAgendaEventoId() {
+        return agendaEventoId;
+    }
+
+    public void setAgendaEventoId(Long agendaEventoId) {
+        this.agendaEventoId = agendaEventoId;
+    }
+
+    public Integer getNumero() {
+        return numero;
+    }
+
+    public void setNumero(Integer numero) {
+        this.numero = numero;
     }
 
 }

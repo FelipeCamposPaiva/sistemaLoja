@@ -8,6 +8,7 @@ import {
     MessageCircle,
     Search,
     ShoppingBag,
+    Truck,
     UserRound,
     X
 } from "lucide-react";
@@ -15,20 +16,29 @@ import { FaFacebook, FaInstagram, FaPinterest, FaWhatsapp, FaYoutube } from "rea
 import { FaTiktok, FaXTwitter } from "react-icons/fa6";
 
 import { garantirCatalogoLoja } from "../../constants/catalogoLoja";
+import { ouvirPrecos } from "../../constants/precoPromocional";
 import {
     clienteLojaAtual,
+    brl,
     foneWa,
     gruposLoja,
     hrefRede,
     lerCarrinho,
     lerDesejos,
     lerLoja,
-    qtdCarrinho
+    qtdCarrinho,
+    totalCarrinho
 } from "../../constants/loja";
 import useAuth from "../../hooks/useAuth.jsx";
 import LogoMarca from "./LogoMarca";
 
 import "../../styles/pages/loja.css";
+
+function rotuloGrupo(nome) {
+    return String(nome || "")
+        .toLocaleLowerCase("pt-BR")
+        .replace(/(^|[\s/-])(\p{L})/gu, (tudo, sep, letra) => `${sep}${letra.toLocaleUpperCase("pt-BR")}`);
+}
 
 export default function LojaLayout() {
     const navigate = useNavigate();
@@ -36,6 +46,7 @@ export default function LojaLayout() {
     const { autenticado } = useAuth();
     const [cfg, setCfg] = useState(lerLoja);
     const [qtd, setQtd] = useState(() => qtdCarrinho());
+    const [total, setTotal] = useState(() => totalCarrinho());
     const [desejos, setDesejos] = useState(() => lerDesejos().length);
     const [cliente, setCliente] = useState(clienteLojaAtual);
     const [busca, setBusca] = useState("");
@@ -43,6 +54,7 @@ export default function LojaLayout() {
     const [catsAberto, setCatsAberto] = useState(false);
     const [suporteAberto, setSuporteAberto] = useState(false);
     const [pronto, setPronto] = useState(false);
+    const [revisao, setRevisao] = useState(0);
 
     useEffect(() => {
         document.body.classList.add("is-loja-publica");
@@ -52,7 +64,9 @@ export default function LojaLayout() {
             setCfg(lerLoja());
         }
         function syncCart() {
-            setQtd(qtdCarrinho(lerCarrinho()));
+            const itens = lerCarrinho();
+            setQtd(qtdCarrinho(itens));
+            setTotal(totalCarrinho(itens));
         }
         function syncCli() {
             setCliente(clienteLojaAtual());
@@ -65,6 +79,7 @@ export default function LojaLayout() {
         window.addEventListener("erp-loja-cliente", syncCli);
         window.addEventListener("erp-loja-desejos", syncDesejos);
         window.addEventListener("storage", syncCfg);
+        const pararPrecos = ouvirPrecos(() => setRevisao((n) => n + 1));
         return () => {
             document.body.classList.remove("is-loja-publica");
             document.title = "ERP Tem de Tudo";
@@ -73,6 +88,7 @@ export default function LojaLayout() {
             window.removeEventListener("erp-loja-cliente", syncCli);
             window.removeEventListener("erp-loja-desejos", syncDesejos);
             window.removeEventListener("storage", syncCfg);
+            pararPrecos();
         };
     }, [cfg.gerais.tituloSite]);
 
@@ -131,7 +147,8 @@ export default function LojaLayout() {
                 </div>
             ) : null}
 
-            <header className="lj-top is-sticky">
+            <div className="lj-head is-sticky">
+            <header className="lj-top">
                 <div className="lj-top-inner">
                     <Link to="/" className="lj-brand" aria-label={cfg.dados.nome}>
                         <LogoMarca url={cfg.logo.url} nome={cfg.dados.nome} />
@@ -143,7 +160,7 @@ export default function LojaLayout() {
                         <input
                             value={busca}
                             onChange={(e) => setBusca(e.target.value)}
-                            placeholder="Digite o que você procura"
+                            placeholder="Digite o que você procura..."
                             aria-label="Buscar produtos"
                         />
                         <button type="submit" aria-label="Buscar">
@@ -159,22 +176,31 @@ export default function LojaLayout() {
                             </span>
                         </button>
                         <Link to="/desejos" className="lj-atende">
-                            <Heart size={22} />
+                            <span className="lj-atende-ico">
+                                <Heart size={22} />
+                                {desejos ? <em>{desejos > 99 ? "99+" : desejos}</em> : null}
+                            </span>
                             <span>
-                                <strong>{t.desejos || "Desejos"}</strong>
-                                {desejos ? `${desejos} item(ns)` : "Lista"}
+                                <strong>Lista de</strong>
+                                Desejos
                             </span>
                         </Link>
-                        <Link to="/conta" className="lj-atende">
+                        <Link to="/conta" className="lj-atende is-conta">
                             <UserRound size={22} />
                             <span>
-                                <strong>Bem-vindo(a)</strong>
-                                {cliente ? cliente.nome.split(" ")[0] : "Entrar ou Cadastrar"}
+                                <strong>{cliente ? "Olá" : "Entrar"}</strong>
+                                {cliente ? cliente.nome.split(" ")[0] : "ou Cadastrar"}
                             </span>
                         </Link>
                         <Link to="/carrinho" className="lj-bag" aria-label={qtd ? `Carrinho com ${qtd} item(ns)` : "Carrinho"}>
-                            <ShoppingBag size={22} />
-                            {qtd ? <em>{qtd > 99 ? "99+" : qtd}</em> : null}
+                            <span className="lj-atende-ico">
+                                <ShoppingBag size={22} />
+                                {qtd ? <em>{qtd > 99 ? "99+" : qtd}</em> : null}
+                            </span>
+                            <span className="lj-bag-txt">
+                                <strong>Meu Carrinho</strong>
+                                {brl(total)}
+                            </span>
                         </Link>
                     </div>
                 </div>
@@ -183,48 +209,62 @@ export default function LojaLayout() {
             <nav className="lj-nav" aria-label="Categorias">
                 <div className="lj-nav-inner">
                     <div className="lj-cats">
-                        <button type="button" onClick={() => setCatsAberto((v) => !v)}>
+                        <button type="button" className="lj-cats-btn" onClick={() => setCatsAberto((v) => !v)}>
                             {t.todasCategorias || "Todas as categorias"} <ChevronDown size={14} />
                         </button>
                         {catsAberto ? (
                             <div className="lj-mega">
                                 {grupos.map((g) => (
                                     <Link key={g.id || g.nome} to={`/c/${encodeURIComponent(g.nome)}`}>
-                                        {g.nome}
+                                        {rotuloGrupo(g.nome)}
                                     </Link>
                                 ))}
                             </div>
                         ) : null}
                     </div>
-                    <NavLink to="/p/quem-somos">Institucional</NavLink>
-                    <NavLink to="/busca?q=marca">Marcas</NavLink>
-                    {grupos.slice(0, 6).map((g) => (
-                        <NavLink key={g.id || g.nome} to={`/c/${encodeURIComponent(g.nome)}`}>
-                            {g.nome}
-                        </NavLink>
-                    ))}
+                    <div className="lj-nav-links">
+                        <NavLink to="/p/quem-somos" className="is-soft">Institucional</NavLink>
+                        <NavLink to="/busca?q=marca" className="is-soft">Marcas</NavLink>
+                        {grupos.slice(0, 6).map((g) => (
+                            <NavLink key={g.id || g.nome} to={`/c/${encodeURIComponent(g.nome)}`}>
+                                {rotuloGrupo(g.nome)}
+                            </NavLink>
+                        ))}
+                    </div>
+                    <Link to="/conta" className="lj-nav-pedido">
+                        <Truck size={16} /> Acompanhe seu pedido
+                    </Link>
                 </div>
             </nav>
+            </div>
 
             {menuAberto ? (
-                <div className="lj-drawer">
-                    <button type="button" className="lj-drawer-close" onClick={() => setMenuAberto(false)}>
-                        <X size={20} />
-                    </button>
-                    <Link to="/conta">Entrar ou cadastrar</Link>
-                    <Link to="/desejos">{t.desejos || "Desejos"}</Link>
-                    <Link to="/carrinho">Carrinho</Link>
-                    {grupos.map((g) => (
-                        <Link key={g.id || g.nome} to={`/c/${encodeURIComponent(g.nome)}`}>
-                            {g.nome}
-                        </Link>
-                    ))}
-                    <Link to="/login">Área do colaborador</Link>
+                <div className="lj-drawer-fundo">
+                    <button type="button" className="lj-drawer-velo" aria-label="Fechar menu" onClick={() => setMenuAberto(false)} />
+                    <div className="lj-drawer">
+                        <button type="button" className="lj-drawer-close" onClick={() => setMenuAberto(false)} aria-label="Fechar">
+                            <X size={20} />
+                        </button>
+                        <p className="lj-drawer-titulo">Menu</p>
+                        <Link to="/conta">{cliente ? `Olá, ${cliente.nome.split(" ")[0]}` : "Entrar ou cadastrar"}</Link>
+                        <Link to="/desejos">{t.desejos || "Desejos"}{desejos ? ` · ${desejos}` : ""}</Link>
+                        <Link to="/carrinho">Carrinho · {brl(total)}</Link>
+                        <Link to="/conta">Acompanhe seu pedido</Link>
+                        <p className="lj-drawer-sec">Sistema</p>
+                        <Link to="/conta#colaborador">Área do colaborador</Link>
+                        {autenticado ? <Link to="/index">Abrir o ERP</Link> : null}
+                        <p className="lj-drawer-sec">Categorias</p>
+                        {grupos.map((g) => (
+                            <Link key={g.id || g.nome} to={`/c/${encodeURIComponent(g.nome)}`}>
+                                {rotuloGrupo(g.nome)}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             ) : null}
 
             <main className="lj-main">
-                <Outlet context={{ cfg, pronto }} />
+                <Outlet context={{ cfg, pronto, revisao }} />
             </main>
 
             <footer className="lj-foot">
@@ -277,7 +317,8 @@ export default function LojaLayout() {
                                 );
                             })}
                         </div>
-                        <Link to="/login">Área do colaborador (ERP)</Link>
+                        <Link to="/conta#colaborador">Área do colaborador</Link>
+                        {autenticado ? <Link to="/index">Abrir o ERP</Link> : null}
                     </div>
                 </div>
                 <div className="lj-foot-bar">

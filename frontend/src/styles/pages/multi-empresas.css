@@ -1,0 +1,348 @@
+.me-page h2 {
+    margin: 8px 0 8px;
+    font-size: 20px;
+}
+
+.me-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.me-head p,
+.me-intro,
+.me-add p,
+.me-linha > p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.me-head .emp-salvar,
+.me-add .emp-salvar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.me-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.me-cards article {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    width: 230px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+}
+
+.me-cards article > i,
+.me-resumo i,
+.me-bloco li i {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    font-style: normal;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.me-cards strong,
+.me-resumo strong {
+    display: block;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.me-cards small,
+.me-bloco small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.me-mais {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.me-estrela {
+    position: absolute;
+    top: 36px;
+    right: 10px;
+    color: #eab308;
+}
+
+.me-menu {
+    position: absolute;
+    top: 32px;
+    right: 8px;
+    z-index: 3;
+    min-width: 180px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+}
+
+.me-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+}
+
+.me-add {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 28px;
+    margin-top: 12px;
+}
+
+.me-add label,
+.me-edit label.me-check,
+.me-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.me-add input,
+.me-senha input {
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 0 36px 0 10px;
+    font: inherit;
+    font-weight: 500;
+}
+
+.me-senha {
+    position: relative;
+    display: block;
+}
+
+.me-senha button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.me-orbita {
+    width: 180px;
+    height: 180px;
+    margin: 28px auto;
+    border: 1px dashed var(--line);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+}
+
+.me-orbita span {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: #f5c518;
+    color: #3d2a34;
+    font-weight: 800;
+}
+
+.me-resumo {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr auto;
+    gap: 16px;
+    margin: 16px 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+}
+
+.me-resumo small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.me-resumo strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    max-width: none;
+}
+
+.me-bloco {
+    margin-top: 22px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+}
+
+.me-bloco h3 {
+    margin: 12px 0;
+    font-size: 16px;
+}
+
+.me-bloco header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.me-bloco ul {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+}
+
+.me-bloco li label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.me-bloco li i {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+}
+
+.me-linha {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 18px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+}
+
+.me-linha p,
+.me-linha small {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.me-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.me-switch span {
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: #d7c3cd;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.me-switch span::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.me-switch span.is-on {
+    background: #3b82f6;
+}
+
+.me-switch span.is-on::after {
+    transform: translateX(16px);
+}
+
+.me-radio,
+.me-check {
+    flex-direction: row !important;
+    align-items: center;
+    font-weight: 500 !important;
+}
+
+.me-radio input {
+    accent-color: #3b82f6;
+}
+
+.me-edit .emp-acoes {
+    position: sticky;
+    bottom: 0;
+    margin-top: 20px;
+    padding: 12px 0;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+}
+
+.me-lista {
+    margin-top: 8px !important;
+}
+
+.me-lista li {
+    font-size: 13px;
+    padding: 2px 0;
+}
+
+@media (max-width: 800px) {
+    .me-add,
+    .me-linha,
+    .me-resumo,
+    .me-head,
+    .me-bloco header {
+        display: block;
+    }
+}

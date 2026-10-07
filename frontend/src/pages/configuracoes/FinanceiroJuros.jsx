@@ -47,7 +47,7 @@ export default function FinanceiroJuros() {
             <nav className="dash-crumb">
                 <Link to={ROTAS.INDICE}>início</Link>
                 <span>›</span>
-                <Link to={ROTAS.CONFIGURACOES}>configurações</span>
+                <Link to={ROTAS.CONFIGURACOES}>configurações</Link>
                 <span>›</span>
                 <span>juros e multa</span>
             </nav>

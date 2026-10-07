@@ -13,9 +13,41 @@ const SESSAO_EXPLICITA_KEY = "erp-sessao-ok";
 
 const AuthContext = createContext(null);
 
+function lerCookie(nome) {
+    const prefixo = `${nome}=`;
+    const cookies = document.cookie ? document.cookie.split("; ") : [];
+    for (const item of cookies) {
+        if (item.startsWith(prefixo)) {
+            return decodeURIComponent(item.slice(prefixo.length));
+        }
+    }
+    return "";
+}
+
+function gravarCookieSessao() {
+    document.cookie = `${SESSAO_EXPLICITA_KEY}=1; Path=/; SameSite=Lax`;
+}
+
+function apagarCookieSessao() {
+    document.cookie = `${SESSAO_EXPLICITA_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
 function sessaoExplicita() {
     try {
-        return sessionStorage.getItem(SESSAO_EXPLICITA_KEY) === "1";
+        const nestaAba = sessionStorage.getItem(SESSAO_EXPLICITA_KEY) === "1";
+        const noNavegador = lerCookie(SESSAO_EXPLICITA_KEY) === "1";
+        const token = localStorage.getItem("token");
+
+        if (token && nestaAba && !noNavegador) {
+            gravarCookieSessao();
+        }
+
+        if (token && noNavegador && !nestaAba) {
+            sessionStorage.setItem(SESSAO_EXPLICITA_KEY, "1");
+            return true;
+        }
+
+        return nestaAba || noNavegador;
     } catch {
         return false;
     }
@@ -24,6 +56,7 @@ function sessaoExplicita() {
 function marcarSessaoExplicita() {
     try {
         sessionStorage.setItem(SESSAO_EXPLICITA_KEY, "1");
+        gravarCookieSessao();
     } catch {
         /* ignore */
     }
@@ -32,6 +65,7 @@ function marcarSessaoExplicita() {
 function limparSessaoExplicita() {
     try {
         sessionStorage.removeItem(SESSAO_EXPLICITA_KEY);
+        apagarCookieSessao();
     } catch {
         /* ignore */
     }
@@ -67,14 +101,26 @@ function lerSessao() {
 }
 
 function mensagemErro(error) {
+    const data = error.response?.data;
+    const status = error.response?.status;
+    if (data && typeof data === "object") {
+        if (data.mensagem) {
+            return data.mensagem;
+        }
+        if (data.message && data.message !== "No message available") {
+            return data.message;
+        }
+    }
     if (!error.response) {
         return "Erro ao conectar com o servidor.";
     }
-    return (
-        error.response.data?.mensagem ||
-        error.response.data?.message ||
-        "Usuário ou senha inválidos."
-    );
+    if (status >= 500) {
+        return "O servidor encontrou um erro. Tente de novo em instantes.";
+    }
+    if (status === 401 || status === 403) {
+        return "Usuário ou senha inválidos.";
+    }
+    return "Não foi possível entrar. Tente de novo.";
 }
 
 export function AuthProvider({ children }) {

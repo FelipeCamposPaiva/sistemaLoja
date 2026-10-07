@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
     ChevronDown,
     ChevronLeft,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import ROTAS from "../../constants/rotas";
+import { lerContatos } from "../../constants/contatos";
 import {
     corAvatar,
     excluirVendedorCadastro,
@@ -62,8 +63,16 @@ function visivelNaAba(vendedor, aba) {
 }
 
 export default function Vendedores() {
+    const [params] = useSearchParams();
+    const contatoInicial = (() => {
+        const id = params.get("contato");
+        if (!id) {
+            return null;
+        }
+        return lerContatos().find((item) => String(item.id) === String(id)) || null;
+    })();
     const [lista, setLista] = useState(() => listarVendedoresCadastro());
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(contatoInicial?.nome || "");
     const [aba, setAba] = useState("todos");
     const [cidade, setCidade] = useState("");
     const [uf, setUf] = useState("");
@@ -73,8 +82,15 @@ export default function Vendedores() {
     const [porPagina, setPorPagina] = useState(10);
     const [marcados, setMarcados] = useState([]);
     const [menuId, setMenuId] = useState("");
-    const [modal, setModal] = useState(null);
-    const [form, setForm] = useState(FORM_VAZIO);
+    const [modal, setModal] = useState(contatoInicial ? { modo: "editar" } : null);
+    const [form, setForm] = useState(contatoInicial ? {
+        ...FORM_VAZIO,
+        nome: contatoInicial.nome || "",
+        email: contatoInicial.email || "",
+        telefone: contatoInicial.celular || contatoInicial.telefone || "",
+        cidade: contatoInicial.cidade || FORM_VAZIO.cidade,
+        uf: contatoInicial.uf || FORM_VAZIO.uf
+    } : FORM_VAZIO);
     const [aviso, setAviso] = useState("");
 
     function recarregar() {

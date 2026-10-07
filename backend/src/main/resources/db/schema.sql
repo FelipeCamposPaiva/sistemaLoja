@@ -129,6 +129,17 @@ CREATE TABLE IF NOT EXISTS clientes (
   tipo_pessoa VARCHAR(20) DEFAULT NULL,
   contribuinte VARCHAR(2) DEFAULT '9',
   ie VARCHAR(30) DEFAULT NULL,
+  inscricao_municipal VARCHAR(30) DEFAULT NULL,
+  inscricao_suframa VARCHAR(20) DEFAULT NULL,
+  vendedor VARCHAR(150) DEFAULT NULL,
+  vendedor_id BIGINT DEFAULT NULL,
+  condicao_pagamento VARCHAR(80) DEFAULT NULL,
+  dia_pagamento INT DEFAULT NULL,
+  lista_preco VARCHAR(80) DEFAULT NULL,
+  fundacao VARCHAR(10) DEFAULT NULL,
+  foto MEDIUMTEXT,
+  anexos MEDIUMTEXT,
+  dados_pessoais TEXT,
   consumidor_final TINYINT(1) DEFAULT 1,
   finalidade VARCHAR(20) DEFAULT 'CONSUMO',
   regime_tributario VARCHAR(30) DEFAULT NULL,
@@ -458,6 +469,10 @@ CREATE TABLE IF NOT EXISTS producao (
   observacao TEXT,
   criado_em DATETIME DEFAULT NULL,
   local_id INT DEFAULT NULL,
+  supervisor VARCHAR(150) DEFAULT NULL,
+  hora VARCHAR(5) DEFAULT NULL,
+  agenda_evento_id BIGINT DEFAULT NULL,
+  numero INT DEFAULT NULL,
   PRIMARY KEY (id),
   KEY idx_producao_status (status),
   KEY idx_producao_os (os_id),
@@ -488,10 +503,14 @@ CREATE TABLE IF NOT EXISTS orcamentos (
   id INT NOT NULL AUTO_INCREMENT,
   numero VARCHAR(20) DEFAULT NULL,
   cliente_id INT DEFAULT NULL,
+  cliente_nome VARCHAR(255) DEFAULT NULL,
+  nome_fantasia VARCHAR(255) DEFAULT NULL,
   valor DECIMAL(10,2) DEFAULT NULL,
   observacoes TEXT,
   status VARCHAR(30) DEFAULT NULL,
   data_orcamento DATETIME DEFAULT NULL,
+  vendedor VARCHAR(180) DEFAULT NULL,
+  email_enviado TINYINT(1) DEFAULT 0,
   PRIMARY KEY (id),
   KEY cliente_id (cliente_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -584,6 +603,105 @@ CREATE TABLE IF NOT EXISTS produto_anuncio (
   PRIMARY KEY (id),
   KEY produto_id (produto_id),
   KEY canal (canal)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquinas (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(180) NOT NULL,
+  detalhe VARCHAR(500) DEFAULT NULL,
+  tipo VARCHAR(80) DEFAULT NULL,
+  modelo VARCHAR(120) DEFAULT NULL,
+  marca VARCHAR(120) DEFAULT NULL,
+  localizacao VARCHAR(120) DEFAULT NULL,
+  status VARCHAR(20) DEFAULT 'operacao',
+  prox_manutencao DATE DEFAULT NULL,
+  horas_uso INT DEFAULT 0,
+  bem_id BIGINT DEFAULT NULL,
+  numero_serie VARCHAR(80) DEFAULT NULL,
+  valor_compra DECIMAL(12,2) DEFAULT 0,
+  data_compra DATE DEFAULT NULL,
+  fornecedor VARCHAR(180) DEFAULT NULL,
+  fornecedor_id BIGINT DEFAULT NULL,
+  nota_entrada_id BIGINT DEFAULT NULL,
+  nota_fiscal VARCHAR(40) DEFAULT NULL,
+  garantia_ate DATE DEFAULT NULL,
+  previsao_retorno DATE DEFAULT NULL,
+  ultima_utilizacao DATETIME DEFAULT NULL,
+  energia_kwh DECIMAL(10,2) DEFAULT 0,
+  energia_valor DECIMAL(12,2) DEFAULT 0,
+  material_media DECIMAL(10,3) DEFAULT 0,
+  material_unidade VARCHAR(10) DEFAULT NULL,
+  material_valor DECIMAL(12,2) DEFAULT 0,
+  observacao TEXT,
+  codigo_publico VARCHAR(40) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_fotos (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  maquina_id BIGINT NOT NULL,
+  arquivo VARCHAR(500) DEFAULT NULL,
+  legenda VARCHAR(180) DEFAULT NULL,
+  ordem INT DEFAULT 0,
+  PRIMARY KEY (id),
+  KEY maquina_id (maquina_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_consumiveis (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  maquina_id BIGINT NOT NULL,
+  nome VARCHAR(120) DEFAULT NULL,
+  atual DECIMAL(12,3) DEFAULT 0,
+  capacidade DECIMAL(12,3) DEFAULT 0,
+  unidade VARCHAR(10) DEFAULT NULL,
+  cor VARCHAR(20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY maquina_id (maquina_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_manutencoes (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  maquina_id BIGINT NOT NULL,
+  data DATE DEFAULT NULL,
+  tipo VARCHAR(40) DEFAULT NULL,
+  descricao TEXT,
+  responsavel VARCHAR(120) DEFAULT NULL,
+  custo DECIMAL(12,2) DEFAULT 0,
+  status VARCHAR(30) DEFAULT NULL,
+  previsao_retorno DATE DEFAULT NULL,
+  peca VARCHAR(180) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY maquina_id (maquina_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_manutencao_fotos (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  manutencao_id BIGINT NOT NULL,
+  arquivo VARCHAR(500) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY manutencao_id (manutencao_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_documentos (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  maquina_id BIGINT NOT NULL,
+  nome VARCHAR(180) DEFAULT NULL,
+  arquivo VARCHAR(500) DEFAULT NULL,
+  tipo VARCHAR(40) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY maquina_id (maquina_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS maquina_checklist (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  maquina_id BIGINT NOT NULL,
+  titulo VARCHAR(180) NOT NULL,
+  periodicidade VARCHAR(20) NOT NULL,
+  ordem INT DEFAULT 0,
+  ultima_execucao DATE DEFAULT NULL,
+  responsavel VARCHAR(120) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY maquina_id (maquina_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS bens_patrimoniais (

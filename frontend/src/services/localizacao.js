@@ -1,5 +1,6 @@
 const LOC_KEY = "erp-produto-loc-v1";
 export const SEM_PRATELEIRA = "SEM-PRATELEIRA";
+export const SEM_LOCAL_ROTULO = "Sem localização";
 
 const PREFIXO_GRUPO = [
     ["PAPELARIA", "PT"],
@@ -56,10 +57,10 @@ export function localizacaoDe(produto) {
         return manual;
     }
     const cadastrada = String(produto?.localizacao || "").trim();
-    if (cadastrada === SEM_PRATELEIRA) {
+    if (!cadastrada || cadastrada === SEM_PRATELEIRA) {
         return "";
     }
-    return cadastrada || sugerirLocalizacao(produto);
+    return cadastrada;
 }
 
 export function situacaoEstoque(produto) {
@@ -90,6 +91,9 @@ export function produtoNaLocalizacao(produto, termo) {
         return true;
     }
     const bruto = localizacaoDe(produto);
+    if (q === SEM_LOCAL_ROTULO.toLowerCase() || q === "sem-prateleira" || q === "sem prateleira") {
+        return !bruto;
+    }
     if (!bruto) {
         return false;
     }
@@ -128,6 +132,123 @@ export function filtrarPorLocalizacao(produtos, termo, filtroEstoque = "todos") 
         }
         return produtoNaLocalizacao(p, termo);
     });
+}
+
+export function ocupacaoDos(itens) {
+    if (!itens?.length) {
+        return 0;
+    }
+    let soma = 0;
+    for (const produto of itens) {
+        const est = quantidadeEstoque(produto);
+        const max = Number(produto?.estoqueMaximo || 0);
+        const min = Number(produto?.estoqueMinimo || 0);
+        if (est < 0) {
+            soma += 0;
+        } else if (max > 0) {
+            soma += Math.min(100, (est / max) * 100);
+        } else if (min > 0) {
+            soma += Math.min(100, (est / (min * 4)) * 100);
+        } else {
+            soma += est > 0 ? 100 : 0;
+        }
+    }
+    return Math.round(soma / itens.length);
+}
+
+export function situacaoDoLocal(itens, ocupacao) {
+    const lista = itens || [];
+    if (!lista.length) {
+        return { id: "sem", nome: "Sem estoque" };
+    }
+    if (lista.some((p) => quantidadeEstoque(p) < 0)) {
+        return { id: "neg", nome: "Estoque negativo" };
+    }
+    if (lista.every((p) => quantidadeEstoque(p) <= 0)) {
+        return { id: "sem", nome: "Sem estoque" };
+    }
+    const criticos = lista.filter((p) => {
+        const qtd = quantidadeEstoque(p);
+        const min = Number(p.estoqueMinimo || 0);
+        if (qtd <= 0) {
+            return true;
+        }
+        return min > 0 && qtd <= min;
+    }).length;
+    if (ocupacao < 30 || criticos / lista.length >= 0.5) {
+        return { id: "baixo", nome: "Estoque baixo" };
+    }
+    return { id: "ok", nome: "Com estoque" };
+}
+
+export function resumirLocalizacoes(produtos, filtroEstoque = "todos") {
+    const mapa = new Map();
+    for (const produto of produtos || []) {
+        if (!passaFiltroEstoque(produto, filtroEstoque)) {
+            continue;
+        }
+        const bruto = localizacaoDe(produto);
+        const partes = bruto ? partesLocalizacao(bruto) : [SEM_LOCAL_ROTULO];
+        for (const parte of (partes.length ? partes : [SEM_LOCAL_ROTULO])) {
+            const chave = parte.toLowerCase();
+            let atual = mapa.get(chave);
+            if (!atual) {
+                atual = { localizacao: parte, itens: [], qtd: 0, estoque: 0 };
+                mapa.set(chave, atual);
+            }
+            atual.itens.push(produto);
+            atual.qtd += 1;
+            atual.estoque += quantidadeEstoque(produto);
+        }
+    }
+    return [...mapa.values()].map((grupo) => {
+        const ocupacao = ocupacaoDos(grupo.itens);
+        return {
+            ...grupo,
+            ocupacao,
+            status: situacaoDoLocal(grupo.itens, ocupacao)
+        };
+    });
+}
+
+export function metricasCatalogo(produtos) {
+    let estoque = 0;
+    let comPrateleira = 0;
+    let sem = 0;
+    const locais = new Set();
+    const locaisComEstoque = new Set();
+    for (const produto of produtos || []) {
+        const qtd = quantidadeEstoque(produto);
+        estoque += qtd;
+        const bruto = localizacaoDe(produto);
+        if (!bruto) {
+            sem += 1;
+            continue;
+        }
+        comPrateleira += 1;
+        for (const parte of partesLocalizacao(bruto)) {
+            const chave = parte.toLowerCase();
+            locais.add(chave);
+            if (qtd > 0) {
+                locaisComEstoque.add(chave);
+            }
+        }
+    }
+    return {
+        total: locais.size,
+        comEstoque: locaisComEstoque.size,
+        produtos: comPrateleira,
+        sem,
+        estoque
+    };
+}
+
+export function setorDaLocalizacao(codigo) {
+    if (!codigo || codigo === SEM_LOCAL_ROTULO) {
+        return "Sem prateleira";
+    }
+    const pedaco = String(codigo).split(/[-\s/]/)[0].trim().toUpperCase();
+    return pedaco || "Outros";
 }
 
 export function catalogoLocalizacoes(produtos) {

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { FileText } from "lucide-react";
 
 import { atualizarOS, listarOS } from "../../../services/os.service";
 import { moeda, nomesTecnicos } from "../../../constants/ordensServico";
 import ROTAS from "../../../constants/rotas";
+import { lerContatos } from "../../../constants/contatos";
 
 import "../../../styles/layout/app-shell.css";
 import "../../../styles/pages/indice.css";
@@ -12,16 +13,31 @@ import "../../../styles/pages/ferramentas.css";
 import "../../../styles/pages/os.css";
 
 export default function NfsOs() {
+    const [params] = useSearchParams();
     const [lista, setLista] = useState([]);
     const [aviso, setAviso] = useState("");
+    const contatoId = params.get("contato");
+    const nomeContato = contatoId
+        ? (lerContatos().find((item) => String(item.id) === String(contatoId))?.nome || "")
+        : "";
 
     useEffect(() => {
         listarOS().then(setLista).catch(() => setLista([]));
     }, []);
 
     const prontas = useMemo(
-        () => lista.filter((os) => ["PRONTO", "ENTREGUE", "FINALIZADA", "SERVICO_CONCLUIDO"].includes(String(os.status || "").toUpperCase()) || os.nfsEmitida),
-        [lista]
+        () => lista.filter((os) => {
+            const pronta = ["PRONTO", "ENTREGUE", "FINALIZADA", "SERVICO_CONCLUIDO"].includes(String(os.status || "").toUpperCase()) || os.nfsEmitida;
+            if (!pronta) {
+                return false;
+            }
+            if (!contatoId) {
+                return true;
+            }
+            return String(os.clienteId) === String(contatoId)
+                || (nomeContato && String(os.cliente || "").toLowerCase() === nomeContato.toLowerCase());
+        }),
+        [lista, contatoId, nomeContato]
     );
 
     async function emitir(os) {
@@ -47,10 +63,12 @@ export default function NfsOs() {
             <div className="fer-head">
                 <div>
                     <h2>Nota fiscal de serviço</h2>
-                    <p className="idx-sub">OS prontas para faturar, integradas ao caixa e ao dashboard.</p>
+                    <p className="idx-sub">
+                        {nomeContato ? `Notas do contato ${nomeContato}.` : "OS prontas para faturar, integradas ao caixa e ao dashboard."}
+                    </p>
                     {aviso ? <p className="prd-aviso">{aviso}</p> : null}
                 </div>
-                <Link className="prd-btn prd-btn-primary" to={`${ROTAS.ORDEM_SERVICO}#add`}>nova OS</Link>
+                <Link className="prd-btn prd-btn-primary" to={contatoId ? `${ROTAS.ORDEM_SERVICO}?contato=${contatoId}#add` : `${ROTAS.ORDEM_SERVICO}#add`}>nova OS</Link>
             </div>
             <div className="os-scroll">
                 <table className="fer-table os-table">

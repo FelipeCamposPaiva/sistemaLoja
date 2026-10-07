@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
+    Camera,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -10,12 +11,14 @@ import {
     PenLine,
     Plus,
     Printer,
+    ScanLine,
     Search,
     X
 } from "lucide-react";
 
 import { agregarItensNfe, parseXmlNota } from "../../constants/notasEntrada";
-import { alinharPrecos, emPromocao, rotuloOff } from "../../constants/precoPromocional";
+import { alinharPrecos, emPromocao, ouvirPrecos, rotuloOff } from "../../constants/precoPromocional";
+import { atalhosCatalogo, ligacoesProduto } from "../../constants/produtoLigacoes";
 import ROTAS from "../../constants/rotas";
 import {
     atualizarProduto,
@@ -35,9 +38,11 @@ import {
     urlMidia
 } from "../../services/produtoMidia.service";
 import { listarMarcas } from "../../services/marca.service";
+import { acharPorCodigo } from "../../services/reconhecerProduto";
 import { imprimirProdutosLocalizacao, passaFiltroEstoque, produtoNaLocalizacao } from "../../services/localizacao";
 import { imprimirEtiquetasGondola } from "../../services/etiquetaGondola";
 import BuscaLocalizacao from "../../components/BuscaLocalizacao";
+import LeitorProduto from "../../components/LeitorProduto";
 import HistoricoAuditoria from "../../components/HistoricoAuditoria";
 import MidiaProduto from "../../components/MidiaProduto";
 import "../../styles/pages/auditoria.css";
@@ -218,6 +223,23 @@ function qtd(valor) {
     return n.toLocaleString("pt-BR", { maximumFractionDigits: 3 });
 }
 
+function urlFotoProduto(produto) {
+    const capa = produto?.imagem || produto?.fotos?.[0]?.url;
+    return capa ? urlMidia(capa) : "";
+}
+
+function situacaoEstoque(produto) {
+    const estoque = Number(produto?.estoque || 0);
+    const minimo = Number(produto?.estoqueMinimo || 0);
+    if (estoque <= 0) {
+        return "zero";
+    }
+    if (minimo > 0 && estoque <= minimo) {
+        return "baixo";
+    }
+    return "ok";
+}
+
 function visualProduto(produto) {
     const capa = produto.imagem || produto.fotos?.[0]?.url || produto.logoMarca;
     if (capa) {
@@ -382,7 +404,7 @@ export default function Produtos() {
     const raiz = useRef(null);
     const [produtos, setProdutos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [busca, setBusca] = useState("");
+    const [busca, setBusca] = useState(params.get("q") || "");
     const [tipo, setTipo] = useState("todos");
     const [soAtivos, setSoAtivos] = useState(true);
     const [ordem, setOrdem] = useState("nome");
@@ -415,6 +437,16 @@ export default function Produtos() {
     const kitsRef = useRef(null);
     const [importando, setImportando] = useState(false);
     const [importadorMassa, setImportadorMassa] = useState(false);
+    const [leitor, setLeitor] = useState(null);
+    const [destaqueId, setDestaqueId] = useState(null);
+    const [candidatos, setCandidatos] = useState([]);
+
+    useEffect(() => {
+        const q = params.get("q");
+        if (q) {
+            setBusca(q);
+        }
+    }, [params]);
 
     async function carregarProdutos() {
         setLoading(true);
@@ -582,6 +614,9 @@ export default function Produtos() {
 
     useEffect(() => {
         carregarProdutos();
+        return ouvirPrecos(() => {
+            carregarProdutos();
+        });
     }, []);
 
     useEffect(() => {
@@ -744,7 +779,69 @@ export default function Produtos() {
         setRascunho({ marca: "", grupo: "", localizacao: "" });
         setOrdem("nome");
         setDir("asc");
+        setDestaqueId(null);
+        setCandidatos([]);
     }
+
+    function focarProdutos(lista, texto) {
+        setLeitor(null);
+        setCandidatos(lista.map((produto) => ({ produto, score: 1 })));
+        if (lista.length === 1) {
+            const item = lista[0];
+            setBusca(item.sku || item.gtin || item.nome || texto);
+            setDestaqueId(item.id);
+            setAviso(`Produto encontrado: ${item.nome || texto}.`);
+            return;
+        }
+        setBusca(texto);
+        setDestaqueId(null);
+        setAviso(`${lista.length} produtos usam o código ${texto}. Escolha o cadastro.`);
+    }
+
+    function aplicarCodigo(codigo) {
+        const texto = String(codigo || "").trim();
+        if (!texto) {
+            return;
+        }
+        const achados = acharPorCodigo(produtos, texto);
+        if (!achados.length) {
+            setLeitor(null);
+            setCandidatos([]);
+            setDestaqueId(null);
+            setBusca(texto);
+            setAviso(`Nenhum produto com o código ${texto}. A busca ficou com esse valor para incluir o cadastro.`);
+            return;
+        }
+        focarProdutos(achados, texto);
+    }
+
+    function aplicarFoto({ ranking, totalFotos }) {
+        setLeitor(null);
+        if (!ranking?.length) {
+            setCandidatos([]);
+            setAviso(totalFotos
+                ? "Não reconheci o produto entre as fotos do cadastro. Tente o código de barras ou uma foto mais parecida com a cadastrada."
+                : "Nenhum produto tem foto no cadastro. O reconhecimento visual compara com essas imagens. Cadastre uma foto ou leia o código de barras.");
+            return;
+        }
+        const [primeiro, segundo] = ranking;
+        setCandidatos(ranking);
+        if (primeiro.score >= 0.84 && (!segundo || primeiro.score - segundo.score >= 0.06)) {
+            setBusca(primeiro.produto.sku || primeiro.produto.nome || "");
+            setDestaqueId(primeiro.produto.id);
+            setAviso(`Parece ${primeiro.produto.nome} (${Math.round(primeiro.score * 100)}% de semelhança). Confira na lista.`);
+            return;
+        }
+        setDestaqueId(null);
+        setAviso("Encontrei produtos parecidos com a foto. Escolha o cadastro certo.");
+    }
+
+    const atalhos = atalhosCatalogo({
+        busca,
+        marca: filtros.marca,
+        grupo: filtros.grupo,
+        localizacao: filtros.localizacao
+    });
 
     async function persistir(dados, editando) {
         const payload = {
@@ -858,7 +955,7 @@ export default function Produtos() {
             <div className="fer-head">
                 <div>
                     <h2>Produtos</h2>
-                    <p className="prd-sub">Gerencie seus produtos, estoques e informações comerciais.</p>
+                    <p className="prd-sub">Catálogo ligado a estoque, vendas, compras, localização e loja. Leia o código pela câmera ou reconheça o item pela foto.</p>
                     {aviso ? <p className="prd-aviso">{aviso}</p> : null}
                 </div>
                 <div className="ctt-acoes">
@@ -907,7 +1004,17 @@ export default function Produtos() {
                                     imprimir etiquetas de gôndola
                                 </button>
                                 <button type="button" onClick={() => { navigate(ROTAS.PROMOCOES); setAberto(null); }}>
-                                    promoções e reajuste
+                                    promoções
+                                </button>
+                                <button type="button" onClick={() => { navigate(ROTAS.REAJUSTE_PRECOS); setAberto(null); }}>
+                                    reajuste de preços
+                                </button>
+                                <button type="button" onClick={() => {
+                                    const loc = filtros.localizacao.trim();
+                                    navigate(loc ? `${ROTAS.LOCALIZACOES}?localizacao=${encodeURIComponent(loc)}` : ROTAS.LOCALIZACOES);
+                                    setAberto(null);
+                                }}>
+                                    mapa de localizações
                                 </button>
                                 <button type="button" disabled={!marcados.length} onClick={excluirLote}>
                                     excluir selecionados
@@ -945,12 +1052,35 @@ export default function Produtos() {
                     <input
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        placeholder="SKU, nome, GTIN ou localização (ex.: PT-150)"
+                        onKeyDown={(e) => {
+                            if (e.key !== "Enter") {
+                                return;
+                            }
+                            const texto = busca.trim();
+                            const achados = acharPorCodigo(produtos, texto);
+                            const digitos = texto.replace(/\D/g, "");
+                            if (achados.length || digitos.length >= 8) {
+                                e.preventDefault();
+                                aplicarCodigo(texto);
+                            }
+                        }}
+                        placeholder="SKU, nome, GTIN, localização ou leitor USB"
+                        inputMode="search"
                     />
                     <button type="button" className="prd-limpar" onClick={() => setBusca("")} aria-label="Limpar busca">
                         <X size={14} />
                     </button>
                 </label>
+                <div className="prd-scan-acoes">
+                    <button type="button" className="prd-btn" onClick={() => setLeitor("codigo")}>
+                        <ScanLine size={16} />
+                        Ler código
+                    </button>
+                    <button type="button" className="prd-btn" onClick={() => setLeitor("foto")}>
+                        <Camera size={16} />
+                        Reconhecer foto
+                    </button>
+                </div>
 
                 <div className="ctt-drop">
                     <button
@@ -1074,6 +1204,51 @@ export default function Produtos() {
                 </button>
             </div>
 
+            <nav className="prd-atalhos" aria-label="Ligações do cadastro">
+                {atalhos.map((atalho) => (
+                    <Link key={atalho.id} to={atalho.to}>{atalho.label}</Link>
+                ))}
+            </nav>
+
+            {candidatos.length ? (
+                <div className="prd-candidatos">
+                    <div>
+                        <strong>Produtos reconhecidos</strong>
+                        <button type="button" onClick={() => setCandidatos([])} aria-label="Fechar sugestões">
+                            <X size={14} />
+                        </button>
+                    </div>
+                    <ul>
+                        {candidatos.map(({ produto, score }) => {
+                            const foto = visualProduto(produto);
+                            return (
+                                <li key={produto.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setModal(produto);
+                                            setDestaqueId(produto.id);
+                                            setBusca(produto.sku || produto.gtin || produto.nome || "");
+                                        }}
+                                    >
+                                        <span className="prd-foto" style={{ background: foto.bg }}>
+                                            {foto.img ? <img src={foto.img} alt="" /> : foto.emoji}
+                                        </span>
+                                        <span>
+                                            <strong>{produto.nome || "Sem nome"}</strong>
+                                            <small>
+                                                {[produto.sku, produto.gtin].filter(Boolean).join(" · ") || "sem código"}
+                                                {score < 1 ? ` · ${Math.round(score * 100)}%` : ""}
+                                            </small>
+                                        </span>
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            ) : null}
+
             <BuscaLocalizacao
                 produtos={produtos}
                 localizacao={filtros.localizacao}
@@ -1108,6 +1283,9 @@ export default function Produtos() {
                     </button>
                     <Link className="prd-btn" to={`${ROTAS.INVENTARIO}?localizacao=${encodeURIComponent(filtros.localizacao.trim())}`}>
                         contar no inventário
+                    </Link>
+                    <Link className="prd-btn" to={`${ROTAS.LOCALIZACOES}?localizacao=${encodeURIComponent(filtros.localizacao.trim())}`}>
+                        ver no mapa de prateleiras
                     </Link>
                 </div>
             ) : null}
@@ -1177,7 +1355,7 @@ export default function Produtos() {
                         ) : fatia.map((produto) => {
                             const foto = visualProduto(produto);
                             return (
-                                <tr key={produto.id} className={marcados.includes(produto.id) ? "is-sel" : ""}>
+                                <tr key={produto.id} className={`${marcados.includes(produto.id) ? "is-sel" : ""} ${String(destaqueId) === String(produto.id) ? "is-hit" : ""}`.trim()}>
                                     <td className="ctt-check">
                                         <input
                                             type="checkbox"
@@ -1218,10 +1396,36 @@ export default function Produtos() {
                                     {visivel("precoPromocional") ? <td className="is-num">{emPromocao(produto) ? moeda(produto.precoPromocional) : "—"}</td> : null}
                                     {visivel("desconto") ? <td className="is-num">{emPromocao(produto) ? `${produto.descontoPercentual}%` : "—"}</td> : null}
                                     {visivel("custo") ? <td className="is-num">{moeda(produto.custo)}</td> : null}
-                                    {visivel("marca") ? <td>{dash(produto.marca)}</td> : null}
-                                    {visivel("localizacao") ? <td>{dash(produto.localizacao)}</td> : null}
-                                    {visivel("estoqueFisico") ? <td className="is-num">{qtd(produto.estoque)}</td> : null}
-                                    {visivel("estoqueDisponivel") ? <td className="is-num">{qtd(produto.estoqueDisponivel)}</td> : null}
+                                    {visivel("marca") ? (
+                                        <td>
+                                            {produto.marca ? (
+                                                <Link className="prd-link" to={`/marcas?q=${encodeURIComponent(produto.marca)}#list`}>{produto.marca}</Link>
+                                            ) : "-"}
+                                        </td>
+                                    ) : null}
+                                    {visivel("localizacao") ? (
+                                        <td>
+                                            {produto.localizacao ? (
+                                                <Link className="prd-link" to={`${ROTAS.LOCALIZACOES}?localizacao=${encodeURIComponent(String(produto.localizacao).split(",")[0].trim())}`}>
+                                                    {produto.localizacao}
+                                                </Link>
+                                            ) : "-"}
+                                        </td>
+                                    ) : null}
+                                    {visivel("estoqueFisico") ? (
+                                        <td className="is-num">
+                                            <Link className={`prd-est is-${situacaoEstoque(produto)}`} to={`${ROTAS.ESTOQUE}?q=${encodeURIComponent(produto.sku || produto.gtin || produto.nome || "")}`}>
+                                                {qtd(produto.estoque)}
+                                            </Link>
+                                        </td>
+                                    ) : null}
+                                    {visivel("estoqueDisponivel") ? (
+                                        <td className="is-num">
+                                            <Link className={`prd-est is-${situacaoEstoque(produto)}`} to={`${ROTAS.ESTOQUE}?q=${encodeURIComponent(produto.sku || produto.gtin || produto.nome || "")}`}>
+                                                {qtd(produto.estoqueDisponivel)}
+                                            </Link>
+                                        </td>
+                                    ) : null}
                                     {visivel("situacao") ? (
                                         <td>
                                             <span className={`prd-sit${produto.ativo === false ? " is-off" : ""}`}>
@@ -1256,6 +1460,20 @@ export default function Produtos() {
                                                         }}>
                                                             etiqueta de gôndola
                                                         </button>
+                                                        {produto.grupo ? (
+                                                            <button type="button" onClick={() => {
+                                                                setFiltros((atual) => ({ ...atual, grupo: produto.grupo }));
+                                                                setMenuLinha(null);
+                                                            }}>
+                                                                filtrar categoria
+                                                            </button>
+                                                        ) : null}
+                                                        <strong>No sistema</strong>
+                                                        {ligacoesProduto(produto).map((ligacao) => (
+                                                            <button key={ligacao.id} type="button" onClick={() => { navigate(ligacao.to); setMenuLinha(null); }}>
+                                                                {ligacao.label}
+                                                            </button>
+                                                        ))}
                                                         <button type="button" onClick={() => remover(produto)}>
                                                             excluir
                                                         </button>
@@ -1332,6 +1550,17 @@ export default function Produtos() {
                     await carregarProdutos();
                 }}
             />
+
+            {leitor ? (
+                <LeitorProduto
+                    modoInicial={leitor}
+                    produtos={produtos}
+                    urlFoto={urlFotoProduto}
+                    onFechar={() => setLeitor(null)}
+                    onCodigo={aplicarCodigo}
+                    onFoto={aplicarFoto}
+                />
+            ) : null}
         </div>
     );
 }
@@ -1436,6 +1665,13 @@ function ModalProdutoInterno({ produto, catalogo = [], abrirProduto, fechar, sal
                     </button>
                 </div>
                 <div className="produto-modal-body">
+                    {produto?.id ? (
+                        <nav className="prd-atalhos prd-atalhos-modal" aria-label="Ligações deste produto">
+                            {ligacoesProduto({ ...produto, ...form, grupo: form.categoria, localizacao: form.localizacao }).map((ligacao) => (
+                                <Link key={ligacao.id} to={ligacao.to} onClick={fechar}>{ligacao.label}</Link>
+                            ))}
+                        </nav>
+                    ) : null}
                     <div className="campo-grande">
                         <label>Nome / descrição *</label>
                         <input

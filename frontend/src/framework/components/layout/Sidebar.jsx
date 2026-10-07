@@ -364,7 +364,7 @@ export default function Sidebar() {
 
                 <NavLink
 
-                    to="/producao"
+                    to="/ordens_producao"
 
                     className="menu-item"
 
@@ -378,7 +378,7 @@ export default function Sidebar() {
 
                             <span>
 
-                                Produção
+                                Ordens de produção
 
                             </span>
 
@@ -468,7 +468,7 @@ export default function Sidebar() {
 
                 <NavLink
 
-                    to="/configuracoes"
+                    to="/preferencias_geral"
 
                     className="menu-item"
 

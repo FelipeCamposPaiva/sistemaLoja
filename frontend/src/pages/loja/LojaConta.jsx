@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import {
     Eye,
     EyeOff,
@@ -46,7 +46,9 @@ export default function LojaConta() {
     const { cfg } = useOutletContext();
     const { login, autenticado } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const cliente = clienteLojaAtual();
+    const [aba, setAba] = useState(() => (window.location.hash === "#colaborador" ? "colab" : "cliente"));
     const [modoCliente, setModoCliente] = useState("entrar");
     const [cli, setCli] = useState({ nome: "", email: "", senha: "", telefone: "" });
     const [colab, setColab] = useState({ usuario: "", senha: "" });
@@ -55,6 +57,16 @@ export default function LojaConta() {
     const [erroCli, setErroCli] = useState("");
     const [erroColab, setErroColab] = useState("");
     const [carregando, setCarregando] = useState(false);
+
+    useEffect(() => {
+        setAba(location.hash === "#colaborador" ? "colab" : "cliente");
+    }, [location.hash]);
+
+    function escolherAba(proxima) {
+        setAba(proxima);
+        const hash = proxima === "colab" ? "#colaborador" : "";
+        window.history.replaceState(null, "", `${location.pathname}${location.search}${hash}`);
+    }
 
     async function enviarCliente(e) {
         e.preventDefault();
@@ -93,7 +105,7 @@ export default function LojaConta() {
     }
 
     return (
-        <div className="lj-portais">
+        <div className={`lj-portais ${aba === "colab" ? "is-aba-colab" : "is-aba-cliente"}`}>
             <div className="lj-portais-hero">
                 <p className="lj-portais-kicker">Bem-vindo(a)</p>
                 <h1>Escolha o seu portal</h1>
@@ -104,6 +116,14 @@ export default function LojaConta() {
                 <p className="lj-portais-script is-right">Mais que produtos, fazemos parte das suas conquistas!</p>
             </div>
 
+            <div className="lj-portal-abas" role="tablist">
+                <button type="button" className={aba === "cliente" ? "is-on" : ""} onClick={() => escolherAba("cliente")}>
+                    Portal do cliente
+                </button>
+                <button type="button" className={aba === "colab" ? "is-on" : ""} onClick={() => escolherAba("colab")}>
+                    Área do colaborador
+                </button>
+            </div>
             <div className="lj-portais-cards">
                 <article className="lj-portal is-cliente">
                     <span className="lj-portal-badge" aria-hidden>
@@ -176,7 +196,7 @@ export default function LojaConta() {
                     </ul>
                 </article>
 
-                <article className="lj-portal is-colab">
+                <article className="lj-portal is-colab" id="colaborador">
                     <span className="lj-portal-badge" aria-hidden>
                         <UserRound size={22} />
                     </span>

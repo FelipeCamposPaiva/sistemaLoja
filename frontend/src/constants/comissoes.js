@@ -183,12 +183,13 @@ export function extratoVendedor(funcId, competencia, extras, periodo = null) {
     const extrasMes = extras.lancamentos.filter((x) => String(x.funcId) === String(v.funcId) && noPeriodo(x, competencia, periodo));
     const creditosExtra = somaCampo(extrasMes.filter((x) => x.tipo === "credito"), "valor");
     const debitosExtra = somaCampo(extrasMes.filter((x) => x.tipo === "debito"), "valor");
+    const devolucoes = somaCampo(extrasMes.filter((x) => x.tipo === "devolucao"), "valor");
     const pagamentos = extras.pagamentos.filter((x) => String(x.funcId) === String(v.funcId) && noPeriodo(x, competencia, periodo));
     const pago = somaCampo(pagamentos, "valor");
     const mes = Number((mesBase + creditosExtra).toFixed(2));
     const pendentes = pendentesDe(v.funcId, extras);
     const pend = somaCampo(pendentes, "valor");
-    const saldo = Number((v.ant + mes - debitosExtra - pago).toFixed(2));
+    const saldo = Number((v.ant + mes - debitosExtra - devolucoes - pago).toFixed(2));
     return {
         ...v,
         competencia,
@@ -200,7 +201,7 @@ export function extratoVendedor(funcId, competencia, extras, periodo = null) {
         ant: v.ant,
         mes,
         vencidas: 0,
-        devolucoes: 0,
+        devolucoes,
         creditosExtra,
         debitos: debitosExtra,
         pago,
@@ -224,11 +225,11 @@ export function linhasDoMes(competencia, extras, periodo = null) {
             ant: e.ant,
             mes: e.mes,
             vencidas: 0,
-            devolucoes: 0,
+            devolucoes: e.devolucoes,
             creditos: e.creditosExtra,
             debitos: e.debitos,
             pagamentos: e.pago,
-            pend: Number((e.ant + e.mes - e.debitos).toFixed(2)),
+            pend: Number((e.ant + e.mes - e.debitos - e.devolucoes).toFixed(2)),
             saldo: e.saldo
         };
     }).sort((a, b) => String(a.nome).localeCompare(b.nome, "pt-BR"));

@@ -104,11 +104,11 @@ export default function Login() {
             }
 
             if (resultado.sucesso) {
-                const destino = location.state?.from?.pathname;
-                navigate(
-                    destino && destino !== "/login" ? destino : "/index",
-                    { replace: true }
-                );
+                const origem = location.state?.from;
+                const destino = origem?.pathname && origem.pathname !== "/login"
+                    ? `${origem.pathname}${origem.search || ""}${origem.hash || ""}`
+                    : "/index";
+                navigate(destino, { replace: true });
                 return;
             }
 
@@ -131,11 +131,11 @@ export default function Login() {
             setLoading(true);
             const resultado = await confirmar2fa(usuario.trim(), codigo.trim());
             if (resultado.sucesso) {
-                const destino = location.state?.from?.pathname;
-                navigate(
-                    destino && destino !== "/login" ? destino : "/index",
-                    { replace: true }
-                );
+                const origem = location.state?.from;
+                const destino = origem?.pathname && origem.pathname !== "/login"
+                    ? `${origem.pathname}${origem.search || ""}${origem.hash || ""}`
+                    : "/index";
+                navigate(destino, { replace: true });
                 return;
             }
             setErro(resultado.mensagem || "Código inválido.");

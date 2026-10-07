@@ -23,6 +23,28 @@ function gravarMapa(mapa) {
     localStorage.setItem(KEY, JSON.stringify(mapa));
 }
 
+export function lerCacheSaldos() {
+    return lerMapa();
+}
+
+export function saldoNoDeposito(produto, deposito, depositos, cache) {
+    const total = Number(produto?.estoque || 0);
+    const gravado = cache?.[String(produto?.id ?? "")];
+    if (!deposito) {
+        if (gravado) {
+            return Object.values(gravado).reduce((soma, valor) => soma + Number(valor || 0), 0);
+        }
+        return total;
+    }
+    if (gravado && gravado[deposito.codigo] != null) {
+        return Number(gravado[deposito.codigo] || 0);
+    }
+    const preferido = depositos.find((item) => item.codigo === "EST")
+        || depositos.find((item) => item.tipo === "DEPOSITO")
+        || depositos[0];
+    return deposito.codigo === preferido?.codigo ? total : 0;
+}
+
 function codigoDe(local) {
     return String(local?.sigla || local?.codigo || "").toUpperCase();
 }
@@ -77,13 +99,17 @@ export async function saldosProduto(produto) {
         if (id) {
             const { data } = await api.get(`/estoque/saldos/${id}`);
             if (Array.isArray(data) && data.length) {
-                return data.map((local) => ({
+                const linhas = data.map((local) => ({
                     id: Number(local.id),
                     codigo: codigoDe(local),
                     nome: local.nome,
                     tipo: local.tipo || "DEPOSITO",
                     quantidade: Number(local.quantidade || 0)
                 }));
+                const mapa = lerMapa();
+                mapa[String(id)] = Object.fromEntries(linhas.map((item) => [item.codigo, item.quantidade]));
+                gravarMapa(mapa);
+                return linhas;
             }
         }
     } catch {
@@ -114,13 +140,17 @@ export async function transferirEntreLocais(produto, origemId, destinoId, quanti
             observacao
         });
         if (Array.isArray(data) && data.length) {
-            return data.map((local) => ({
+            const linhas = data.map((local) => ({
                 id: Number(local.id),
                 codigo: codigoDe(local),
                 nome: local.nome,
                 tipo: local.tipo || "DEPOSITO",
                 quantidade: Number(local.quantidade || 0)
             }));
+            const mapa = lerMapa();
+            mapa[String(produto.id)] = Object.fromEntries(linhas.map((l) => [l.codigo, l.quantidade]));
+            gravarMapa(mapa);
+            return linhas;
         }
     } catch (erro) {
         const status = erro?.response?.status;

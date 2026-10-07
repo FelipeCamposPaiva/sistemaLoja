@@ -54,13 +54,13 @@ export const LOJA_PADRAO = {
         dominio: "www.temdetudovr.com.br"
     },
     visual: {
-        corPrimaria: "#f394bd",
+        corPrimaria: "#ff2f92",
         corFundo: "#ffffff",
         corTexto: "#201f1f",
         corPreco: "#9e6d9a",
-        corMenu: "#ecd6fc",
-        corMenuTxt: "#8632c1",
-        corIcone: "#8632c1",
+        corMenu: "#ffffff",
+        corMenuTxt: "#4a4453",
+        corIcone: "#7c3aed",
         corWhatsapp: "#5ed979",
         fonte: "Anek Latin"
     },
@@ -100,7 +100,7 @@ export const LOJA_PADRAO = {
         {
             id: "laser",
             titulo: "Personalização a LASER",
-            subtitulo: "Canetas, copos e chaveiros com a sua marca",
+            subtitulo: "Canetas, copos e chaveiros personalizados do seu jeito!",
             estilo: "laser",
             link: "/c/PERSONALIZADO",
             ativo: true
@@ -130,7 +130,8 @@ export const LOJA_PADRAO = {
     selos: [
         { id: "frete", titulo: "Frete Econômico", texto: "para todo o Brasil", icone: "truck" },
         { id: "parcela", titulo: "Parcelamentos em", texto: "até 12x no cartão", icone: "card" },
-        { id: "seguro", titulo: "Compra Garantida", texto: "loja 100% Segura", icone: "lock" }
+        { id: "seguro", titulo: "Compra Garantida", texto: "loja 100% Segura", icone: "lock" },
+        { id: "personalizado", titulo: "Produtos Personalizados", texto: "com a sua marca", icone: "gift" }
     ],
     textos: {
         todasCategorias: "Todas as categorias",
@@ -219,6 +220,41 @@ export const LOJA_PADRAO = {
     marcasDestaque: ["ACP", "Alfacell", "TEM DE TUDO", "JOCAR OFFICE", "LETRON"]
 };
 
+const VISUAL_ANTIGO = {
+    corPrimaria: "#f394bd",
+    corMenu: "#ecd6fc",
+    corMenuTxt: "#8632c1",
+    corIcone: "#8632c1"
+};
+
+function visualLoja(bruto) {
+    const salvo = bruto?.visual || {};
+    const visual = { ...LOJA_PADRAO.visual, ...salvo };
+    Object.keys(VISUAL_ANTIGO).forEach((chave) => {
+        if (salvo[chave] === VISUAL_ANTIGO[chave]) {
+            visual[chave] = LOJA_PADRAO.visual[chave];
+        }
+    });
+    return visual;
+}
+
+function selosLoja(bruto) {
+    const lista = Array.isArray(bruto?.selos) ? bruto.selos : LOJA_PADRAO.selos;
+    const ids = new Set(lista.map((selo) => selo.id));
+    return [...lista, ...LOJA_PADRAO.selos.filter((selo) => !ids.has(selo.id))];
+}
+
+function bannersLoja(bruto) {
+    const lista = Array.isArray(bruto?.banners) ? bruto.banners : LOJA_PADRAO.banners;
+    return lista.map((banner) => {
+        if (banner.id === "laser" && banner.subtitulo === "Canetas, copos e chaveiros com a sua marca") {
+            const padrao = LOJA_PADRAO.banners.find((item) => item.id === "laser");
+            return { ...banner, subtitulo: padrao.subtitulo };
+        }
+        return banner;
+    });
+}
+
 export function lerLoja() {
     try {
         const bruto = JSON.parse(localStorage.getItem(LOJA_CFG_KEY) || "null");
@@ -229,7 +265,7 @@ export function lerLoja() {
             ...structuredClone(LOJA_PADRAO),
             ...bruto,
             dados: { ...LOJA_PADRAO.dados, ...(bruto.dados || {}) },
-            visual: { ...LOJA_PADRAO.visual, ...(bruto.visual || {}) },
+            visual: visualLoja(bruto),
             logo: { ...LOJA_PADRAO.logo, ...(bruto.logo || {}) },
             gerais: { ...LOJA_PADRAO.gerais, ...(bruto.gerais || {}) },
             redes: { ...LOJA_PADRAO.redes, ...(bruto.redes || {}) },
@@ -240,10 +276,10 @@ export function lerLoja() {
             pix: { ...LOJA_PADRAO.pix, ...(bruto.pix || {}) },
             personalizador: { ...LOJA_PADRAO.personalizador, ...(bruto.personalizador || {}) },
             calculadoraM2: { ...LOJA_PADRAO.calculadoraM2, ...(bruto.calculadoraM2 || {}) },
-            banners: Array.isArray(bruto.banners) ? bruto.banners : LOJA_PADRAO.banners,
+            banners: bannersLoja(bruto),
             vitrines: Array.isArray(bruto.vitrines) ? bruto.vitrines : LOJA_PADRAO.vitrines,
             categoriasDestaque: Array.isArray(bruto.categoriasDestaque) ? bruto.categoriasDestaque : LOJA_PADRAO.categoriasDestaque,
-            selos: Array.isArray(bruto.selos) ? bruto.selos : LOJA_PADRAO.selos,
+            selos: selosLoja(bruto),
             paginas: Array.isArray(bruto.paginas) ? bruto.paginas : LOJA_PADRAO.paginas,
             pagamentos: Array.isArray(bruto.pagamentos) ? bruto.pagamentos : LOJA_PADRAO.pagamentos,
             envios: Array.isArray(bruto.envios) ? bruto.envios : LOJA_PADRAO.envios,
@@ -356,13 +392,21 @@ export function visualProdutoLoja(produto) {
     return { bg: "#f3e8ff", emoji: "🛍️" };
 }
 
+export function grupoCombina(produto, grupo) {
+    const pedido = String(grupo || "").trim().toUpperCase();
+    if (!pedido) {
+        return true;
+    }
+    const atual = String(produto?.grupo || produto?.categoria || "").trim().toUpperCase();
+    return atual === pedido || atual.startsWith(`${pedido} >`) || atual.startsWith(`${pedido}>`);
+}
+
 export function filtrarVitrine(vitrine, lista) {
     const base = lista || catalogoVitrine();
     const busca = String(vitrine.busca || "").trim();
     let itens = base;
     if (vitrine.grupo) {
-        const g = vitrine.grupo.toUpperCase();
-        itens = itens.filter((p) => String(p.grupo || p.categoria || "").toUpperCase() === g);
+        itens = itens.filter((p) => grupoCombina(p, vitrine.grupo));
     }
     if (busca) {
         const rx = new RegExp(busca, "i");
@@ -378,9 +422,8 @@ export function filtrarVitrine(vitrine, lista) {
 
 export function buscarProdutosLoja(q, grupo) {
     const texto = String(q || "").trim().toLowerCase();
-    const g = String(grupo || "").trim().toUpperCase();
     return catalogoVitrine().filter((p) => {
-        if (g && String(p.grupo || p.categoria || "").toUpperCase() !== g) {
+        if (grupo && !grupoCombina(p, grupo)) {
             return false;
         }
         if (!texto) {
